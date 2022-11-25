@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>279</width>
+    <width>327</width>
     <height>463</height>
    </rect>
   </property>
@@ -65,7 +65,7 @@
       <item row="2" column="1">
        <widget class="QCheckBox" name="fastCheckBox">
         <property name="text">
-         <string> </string>
+         <string/>
         </property>
        </widget>
       </item>
@@ -78,46 +78,59 @@
       <string>Outputs</string>
      </property>
      <layout class="QFormLayout" name="formLayout_4">
-      <item row="0" column="0">
+      <item row="1" column="1">
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <widget class="qMRMLNodeComboBox" name="outputSegmentationSelector">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="toolTip">
+           <string>If a segmentation is selected here then the brain mask will be saved into it.</string>
+          </property>
+          <property name="nodeTypes">
+           <stringlist>
+            <string>vtkMRMLSegmentationNode</string>
+           </stringlist>
+          </property>
+          <property name="showChildNodeTypes">
+           <bool>false</bool>
+          </property>
+          <property name="baseName">
+           <string>Brain</string>
+          </property>
+          <property name="noneEnabled">
+           <bool>true</bool>
+          </property>
+          <property name="addEnabled">
+           <bool>true</bool>
+          </property>
+          <property name="removeEnabled">
+           <bool>true</bool>
+          </property>
+          <property name="editEnabled">
+           <bool>true</bool>
+          </property>
+          <property name="renameEnabled">
+           <bool>true</bool>
+          </property>
+          <property name="noneDisplay">
+           <string>Create new segmentation</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="qMRMLSegmentationShow3DButton" name="segmentationShow3DButton"/>
+        </item>
+       </layout>
+      </item>
+      <item row="1" column="0">
        <widget class="QLabel" name="label_5">
         <property name="text">
          <string>Segmentation:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="qMRMLNodeComboBox" name="outputSegmentationSelector">
-        <property name="toolTip">
-         <string>If a segmentation is selected here then the brain mask will be saved into it.</string>
-        </property>
-        <property name="nodeTypes">
-         <stringlist>
-          <string>vtkMRMLSegmentationNode</string>
-         </stringlist>
-        </property>
-        <property name="showChildNodeTypes">
-         <bool>false</bool>
-        </property>
-        <property name="baseName">
-         <string>Brain</string>
-        </property>
-        <property name="noneEnabled">
-         <bool>true</bool>
-        </property>
-        <property name="addEnabled">
-         <bool>true</bool>
-        </property>
-        <property name="removeEnabled">
-         <bool>true</bool>
-        </property>
-        <property name="editEnabled">
-         <bool>true</bool>
-        </property>
-        <property name="renameEnabled">
-         <bool>true</bool>
-        </property>
-        <property name="noneDisplay">
-         <string>Create new segmentation</string>
         </property>
        </widget>
       </item>
@@ -173,6 +186,11 @@
    <container>1</container>
   </customwidget>
   <customwidget>
+   <class>ctkMenuButton</class>
+   <extends>QPushButton</extends>
+   <header>ctkMenuButton.h</header>
+  </customwidget>
+  <customwidget>
    <class>qMRMLNodeComboBox</class>
    <extends>QWidget</extends>
    <header>qMRMLNodeComboBox.h</header>
@@ -182,6 +200,11 @@
    <extends>QWidget</extends>
    <header>qMRMLWidget.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>qMRMLSegmentationShow3DButton</class>
+   <extends>ctkMenuButton</extends>
+   <header>qMRMLSegmentationShow3DButton.h</header>
   </customwidget>
  </customwidgets>
  <resources/>
@@ -214,7 +237,7 @@
     </hint>
     <hint type="destinationlabel">
      <x>260</x>
-     <y>180</y>
+     <y>175</y>
     </hint>
    </hints>
   </connection>

@@ -21,7 +21,7 @@ If you use the TotalSegmentator nn-Unet function from this software in your rese
 - Click `Apply`
   - When this module is used the first time, it needs to download and install PyTorch and TotalSegmentator Python packages and weights for the AI models. This can take 5-10 minutes and several GB disk space.
   - If a GPU is available then results are computed within about 20 seconds in fast mode, and 1-2 minutes in normal mode. If computation is done on CPU then it may take up to 5-15 minutes in fast mode.
-- To display the segmentation in 3D: go to Data module and drag-and-drop the segmented into the 3D view.
+- To display the segmentation in 3D click the `Show 3D` button
 
 ## User interface
 
@@ -31,6 +31,7 @@ If you use the TotalSegmentator nn-Unet function from this software in your rese
   - Fast: performs segmentation faster, but with less accuracy
 - Outputs
   - Segmentation: it will contain a brain segment, which specifies the brain region
+  - Show 3D: show/hide segments in 3D views
 
 ## Contact
 

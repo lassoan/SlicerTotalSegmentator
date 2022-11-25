@@ -90,7 +90,7 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         self.ui.inputVolumeSelector.connect("currentNodeChanged(vtkMRMLNode*)", self.updateParameterNodeFromGUI)
         self.ui.fastCheckBox.connect('toggled(bool)', self.updateParameterNodeFromGUI)
         self.ui.taskComboBox.currentTextChanged.connect(self.updateParameterNodeFromGUI)
-        self.ui.outputSegmentationSelector.connect("currentNodeChanged(vtkMRMLNode*)", self.updateParameterNodeFromGUI)
+        self.ui.outputSegmentationSelector.connect("currentNodeChanged(vtkMRMLNode*)", self.ui.segmentationShow3DButton.setSegmentationNode)
 
         # Buttons
         self.ui.applyButton.connect('clicked(bool)', self.onApplyButton)
