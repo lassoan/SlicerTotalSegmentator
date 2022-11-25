@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>327</width>
-    <height>520</height>
+    <height>533</height>
    </rect>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
@@ -27,7 +27,7 @@
       <item row="0" column="1">
        <widget class="qMRMLNodeComboBox" name="inputVolumeSelector">
         <property name="toolTip">
-         <string>Input brain MRI volume</string>
+         <string>Input abdominal, chest, or whole body CT.</string>
         </property>
         <property name="nodeTypes">
          <stringlist>
@@ -60,10 +60,17 @@
        </widget>
       </item>
       <item row="1" column="1">
-       <widget class="QComboBox" name="taskComboBox"/>
+       <widget class="QComboBox" name="taskComboBox">
+        <property name="toolTip">
+         <string>Choose &quot;total&quot; for segmenting all structures, or any of the more specialized segmentation tasks (that segment only a handful of specific structures in a certain region).</string>
+        </property>
+       </widget>
       </item>
       <item row="2" column="1">
        <widget class="QCheckBox" name="fastCheckBox">
+        <property name="toolTip">
+         <string>Enable fast option to get less accurate results, faster.</string>
+        </property>
         <property name="text">
          <string/>
         </property>
@@ -86,53 +93,43 @@
        </widget>
       </item>
       <item row="0" column="1">
-       <layout class="QHBoxLayout" name="horizontalLayout">
-        <item>
-         <widget class="qMRMLNodeComboBox" name="outputSegmentationSelector">
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>26</height>
-           </size>
-          </property>
-          <property name="toolTip">
-           <string>If a segmentation is selected here then the brain mask will be saved into it.</string>
-          </property>
-          <property name="nodeTypes">
-           <stringlist>
-            <string>vtkMRMLSegmentationNode</string>
-           </stringlist>
-          </property>
-          <property name="showChildNodeTypes">
-           <bool>false</bool>
-          </property>
-          <property name="baseName">
-           <string>Brain</string>
-          </property>
-          <property name="noneEnabled">
-           <bool>true</bool>
-          </property>
-          <property name="addEnabled">
-           <bool>true</bool>
-          </property>
-          <property name="removeEnabled">
-           <bool>true</bool>
-          </property>
-          <property name="editEnabled">
-           <bool>true</bool>
-          </property>
-          <property name="renameEnabled">
-           <bool>true</bool>
-          </property>
-          <property name="noneDisplay">
-           <string>Create new segmentation</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="qMRMLSegmentationShow3DButton" name="segmentationShow3DButton"/>
-        </item>
-       </layout>
+       <widget class="qMRMLNodeComboBox" name="outputSegmentationSelector">
+        <property name="toolTip">
+         <string>This will store the segmentation result.</string>
+        </property>
+        <property name="nodeTypes">
+         <stringlist>
+          <string>vtkMRMLSegmentationNode</string>
+         </stringlist>
+        </property>
+        <property name="showChildNodeTypes">
+         <bool>false</bool>
+        </property>
+        <property name="baseName">
+         <string>Brain</string>
+        </property>
+        <property name="noneEnabled">
+         <bool>true</bool>
+        </property>
+        <property name="addEnabled">
+         <bool>true</bool>
+        </property>
+        <property name="removeEnabled">
+         <bool>true</bool>
+        </property>
+        <property name="editEnabled">
+         <bool>true</bool>
+        </property>
+        <property name="renameEnabled">
+         <bool>true</bool>
+        </property>
+        <property name="noneDisplay">
+         <string>Create new segmentation on Apply</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="qMRMLSegmentationShow3DButton" name="segmentationShow3DButton"/>
       </item>
      </layout>
     </widget>
@@ -143,7 +140,7 @@
       <bool>false</bool>
      </property>
      <property name="toolTip">
-      <string>Run the algorithm.</string>
+      <string>Start segmentation.</string>
      </property>
      <property name="text">
       <string>Apply</string>
