@@ -19,8 +19,8 @@ If you use the TotalSegmentator nn-Unet function from this software in your rese
 - Select `Input volume` -> `Panoramix-cropped`
 - Select `Segmentation` -> `Create new segmentation`
 - Click `Apply`
-  - If you are prompted to install any additional packages then accept that and wait for 1-2 minutes. IMPORTANT: You may need up to 20GB free disk space to intall all required Python packages. If installation fails due to running out of disk space then it may leave Python pacakges in the Slicer installation in an inconsistent state and fixing it may only be possible by removing the entire Slicer install folder and reinstall the application.
-  - If a GPU is available then results are computed within about 20 seconds. If computation is done on CPU then it may take 10-20 minutes in fast mode!
+  - When this module is used the first time, it needs to download and install PyTorch and TotalSegmentator Python packages and weights for the AI models. This can take 5-10 minutes and several GB disk space.
+  - If a GPU is available then results are computed within about 20 seconds in fast mode, and 1-2 minutes in normal mode. If computation is done on CPU then it may take up to 5-15 minutes in fast mode.
 - To display the segmentation in 3D: go to Data module and drag-and-drop the segmented into the 3D view.
 
 ## User interface

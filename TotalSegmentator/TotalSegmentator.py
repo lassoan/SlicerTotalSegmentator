@@ -290,7 +290,7 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
 
         torchLogic = PyTorchUtils.PyTorchUtilsLogic()
         if not torchLogic.torchInstalled():
-            self.log('PyTorch module not found')
+            self.log('PyTorch package not found. Installing may take several minutes...')
             torch = torchLogic.installTorch(askConfirmation=True)
             if torch is None:
                 raise ValueError('PyTorch extension needs to be installed to use this module.')
@@ -302,6 +302,7 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         except ModuleNotFoundError as e:
             needToInstallMatplotlib = True
         if needToInstallMatplotlib:
+            self.log('Matplotlib package not found. Installing...')
             slicer.util.pip_install("matplotlib")
 
         # Install AI segmenter
@@ -311,6 +312,7 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         except ModuleNotFoundError as e:
             needToInstallSegmenter = True
         if needToInstallSegmenter:
+            self.log('TotalSegmentator Python package not found. Installing may take several minutes...')
             slicer.util.pip_install("git+https://github.com/wasserth/TotalSegmentator.git")
         elif upgrade:
             slicer.util.pip_install("--upgrade git+https://github.com/wasserth/TotalSegmentator.git")
