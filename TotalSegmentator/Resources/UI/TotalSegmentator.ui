@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>HDBrainExtractionTool</class>
- <widget class="qMRMLWidget" name="HDBrainExtractionTool">
+ <class>TotalSegmentator</class>
+ <widget class="qMRMLWidget" name="TotalSegmentator">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -116,6 +116,9 @@
         <property name="renameEnabled">
          <bool>true</bool>
         </property>
+        <property name="noneDisplay">
+         <string>Create new segmentation</string>
+        </property>
        </widget>
       </item>
       <item row="1" column="0">
@@ -215,6 +218,19 @@
     </widget>
    </item>
    <item>
+    <widget class="QPlainTextEdit" name="statusLabel">
+     <property name="lineWrapMode">
+      <enum>QPlainTextEdit::NoWrap</enum>
+     </property>
+     <property name="readOnly">
+      <bool>true</bool>
+     </property>
+     <property name="textInteractionFlags">
+      <set>Qt::TextSelectableByMouse</set>
+     </property>
+    </widget>
+   </item>
+   <item>
     <spacer name="verticalSpacer">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
@@ -251,7 +267,7 @@
  <resources/>
  <connections>
   <connection>
-   <sender>HDBrainExtractionTool</sender>
+   <sender>TotalSegmentator</sender>
    <signal>mrmlSceneChanged(vtkMRMLScene*)</signal>
    <receiver>inputVolumeSelector</receiver>
    <slot>setMRMLScene(vtkMRMLScene*)</slot>
@@ -267,7 +283,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>HDBrainExtractionTool</sender>
+   <sender>TotalSegmentator</sender>
    <signal>mrmlSceneChanged(vtkMRMLScene*)</signal>
    <receiver>outputSegmentationSelector</receiver>
    <slot>setMRMLScene(vtkMRMLScene*)</slot>
@@ -283,7 +299,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>HDBrainExtractionTool</sender>
+   <sender>TotalSegmentator</sender>
    <signal>mrmlSceneChanged(vtkMRMLScene*)</signal>
    <receiver>outputStatisticsSelector</receiver>
    <slot>setMRMLScene(vtkMRMLScene*)</slot>
@@ -299,7 +315,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>HDBrainExtractionTool</sender>
+   <sender>TotalSegmentator</sender>
    <signal>mrmlSceneChanged(vtkMRMLScene*)</signal>
    <receiver>outputRadiomicsSelector</receiver>
    <slot>setMRMLScene(vtkMRMLScene*)</slot>

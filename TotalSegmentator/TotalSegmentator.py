@@ -22,18 +22,18 @@ class TotalSegmentator(ScriptedLoadableModule):
         self.parent.title = "Total Segmentator"
         self.parent.categories = ["Segmentation"]
         self.parent.dependencies = []
-        self.parent.contributors = ["Andras Lasso (PerkLab, Queen's University)", "Rudolf Bumm (KSGR)"]
+        self.parent.contributors = ["Andras Lasso (PerkLab, Queen's University)"]
         self.parent.helpText = """
-Strip skull from brain MRI images using HD-BET tool.
-See more information in <a href="https://github.com/lassoan/SlicerHDBrainExtraction">module documentation</a>.
+3D Slicer extension for fully automatic whole body CT segmentation using "TotalSegmentator" AI model.
+See more information in the <a href="https://github.com/lassoan/SlicerTotalSegmentator">extension documentation</a>.
 """
         self.parent.acknowledgementText = """
 This file was originally developed by Andras Lasso (PerkLab, Queen's University).
-The module uses <a href="https://github.com/MIC-DKFZ/HD-BET">HD-BET brain extraction toolkit</a>.
-If you are using HD-BET, please cite the following publication: Isensee F, Schell M, Tursunova I, Brugnara G,
-Bonekamp D, Neuberger U, Wick A, Schlemmer HP, Heiland S, Wick W, Bendszus M, Maier-Hein KH, Kickingereder P.
-Automated brain extraction of multi-sequence MRI using artificial neural networks. Hum Brain Mapp. 2019; 1–13.
-https://doi.org/10.1002/hbm.24750
+The module uses <a href="https://github.com/wasserth/TotalSegmentator">TotalSegmentator</a>.
+If you use the TotalSegmentator nn-Unet function from this software in your research, please cite:
+Wasserthal J., Meyer M., , Hanns-Christian Breit H.C., Cyriac J., Shan Y., Segeroth, M.:
+TotalSegmentator: robust segmentation of 104 anatomical structures in CT images.
+https://arxiv.org/abs/2208.05868
 """
 
 #
@@ -75,6 +75,7 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         # Create logic class. Logic implements all computations that should be possible to run
         # in batch mode, without a graphical user interface.
         self.logic = TotalSegmentatorLogic()
+        self.logic.logCallback = self.addLog
 
         self.ui.taskComboBox.addItems(self.logic.tasks)
 
@@ -192,11 +193,11 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 
         # Update buttons states and tooltips
         inputVolume = self._parameterNode.GetNodeReference("InputVolume")
-        if inputVolume and self._parameterNode.GetNodeReference("OutputSegmentation"):
+        if inputVolume:
             self.ui.applyButton.toolTip = "Start segmentation"
             self.ui.applyButton.enabled = True
         else:
-            self.ui.applyButton.toolTip = "Select input volume and output segmentation"
+            self.ui.applyButton.toolTip = "Select input volume"
             self.ui.applyButton.enabled = False
 
         if inputVolume:
@@ -227,19 +228,31 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 
         self._parameterNode.EndModify(wasModified)
 
+    def addLog(self, text):
+        """Append text to log window
+        """
+        self.ui.statusLabel.appendPlainText(text)
+        slicer.app.processEvents()  # force update
+
     def onApplyButton(self):
         """
         Run processing when user clicks "Apply" button.
         """
         with slicer.util.tryWithErrorDisplay("Failed to compute results.", waitCursor=True):
 
+            self.ui.statusLabel.plainText = ''
             self.logic.setupPythonRequirements()
+
+            # Create new segmentation node, if not selected yet
+            if not self.ui.outputSegmentationSelector.currentNode():
+                self.ui.outputSegmentationSelector.addNode()
 
             # Compute output
             self.logic.process(self.ui.inputVolumeSelector.currentNode(), self.ui.outputSegmentationSelector.currentNode(),
                 self.ui.fastCheckBox.checked, self.ui.taskComboBox.currentText,
                 self.ui.outputStatisticsSelector.currentNode(), self.ui.outputRadiomicsSelector.currentNode())
 
+        self.ui.statusLabel.appendPlainText("\nProcessing finished.")
 #
 # TotalSegmentatorLogic
 #
@@ -260,6 +273,9 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         """
         ScriptedLoadableModuleLogic.__init__(self)
 
+        self.logCallback = None
+        self.clearOutputFolder = True
+
         self.tasks = [
             "total",
             "lung_vessels",
@@ -268,31 +284,10 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
             "coronary_arteries"
         ]
 
-        self.rightLungColor = (0.5, 0.68, 0.5)
-        self.leftLungColor = (0.95, 0.84, 0.57)
-
-        self.rightUpperLobeColor = (177./255., 122./255., 101./255. )
-        self.rightMiddleLobeColor = (111./255., 184./255., 210./255.)
-        self.rightLowerLobeColor = (216./255., 101./255., 79./255.)
-        self.leftUpperLobeColor = (128./255., 174./255., 128./255.)
-        self.leftLowerLobeColor = (241./255., 214./255., 145./255.)
-
-        self.ribColor = (0.95, 0.84, 0.57)
-        self.vesselMaskColor = (0.85, 0.40, 0.31)
-        self.pulmonaryArteryColor = (0., 0.59, 0.81)
-        self.pulmonaryVeinColor = (0.85, 0.40, 0.31)
-        self.tracheaColor = (0.71, 0.89, 1.0)
-        self.vesselmaskColor = (216./255., 160./255., 160./255.)
-        self.PAColor = (0., 151./255., 206./255.)
-        self.PVColor = (216./255., 101./255., 79./255.)
-        self.tumorColor = (253./255., 135./255., 192./255.)
-        self.thoracicCavityColor = (177./255., 122./255., 101./255.)
-        self.unknownColor = (0.39, 0.39, 0.5)
-
-
-    def log(self, msg):
-      slicer.util.showStatusMessage(msg)
-      slicer.app.processEvents()
+    def log(self, text):
+        logging.info(text)
+        if self.logCallback:
+            self.logCallback(text)
 
     def setupPythonRequirements(self, upgrade=False):
 
@@ -304,7 +299,7 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
 
         torchLogic = PyTorchUtils.PyTorchUtilsLogic()
         if not torchLogic.torchInstalled():
-            logging.info('PyTorch module not found')
+            self.log('PyTorch module not found')
             torch = torchLogic.installTorch(askConfirmation=True)
             if torch is None:
                 raise ValueError('PyTorch extension needs to be installed to use this module.')
@@ -333,10 +328,25 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         """
         Initialize parameter node with default settings.
         """
-        if not parameterNode.GetParameter("Device"):
-            parameterNode.SetParameter("Device", "auto")
+        if not parameterNode.GetParameter("Fast"):
+            parameterNode.SetParameter("Fast", "True")
+        if not parameterNode.GetParameter("Task"):
+            parameterNode.SetParameter("Task", "total")
 
-    def process(self, inputVolume, outputSegmentation, fast=True, task=None, outputStatistics=None, outputRadiomics=None, segments=None):
+    def logProcessOutput(self, proc):
+        # Wait for the process to end and forward output to the log
+        from subprocess import CalledProcessError
+        while True:
+            line = proc.stdout.readline()
+            if not line:
+                break
+            self.log(line.rstrip())
+        proc.wait()
+        retcode = proc.returncode
+        if retcode != 0:
+            raise CalledProcessError(retcode, proc.args, output=proc.stdout, stderr=proc.stderr)
+
+    def process(self, inputVolume, outputSegmentation, fast=True, task=None, outputStatistics=None, outputRadiomics=None):
 
         """
         Run the processing algorithm.
@@ -345,7 +355,6 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         :param outputVolume: thresholding result
         :param fast: faster and less accurate output
         :param task: one of self.tasks, default is "total"
-        :param segments: list of segment names, if none then all will be retrieved
         """
 
         if not inputVolume:
@@ -353,28 +362,28 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
 
         import time
         startTime = time.time()
-        logging.info('Processing started')
+        self.log('Processing started')
 
         # Create new empty folder
         tempFolder = slicer.util.tempDirectory()
 
-        input_file = tempFolder+"/total-segmentator-input.nii"
-        output_segmentation_file = tempFolder+"/total-segmentator-output.nii"
-        output_segmentation_dir = tempFolder+"/segmentation"
-        output_statistics_file = output_segmentation_dir+"/statistics.json"
-        output_radiomics_file = output_segmentation_dir+"/statistics_radiomics.json"
+        inputFile = tempFolder+"/total-segmentator-input.nii"
+        outputSegmentationFolder = tempFolder + "/segmentation"
+        outputSegmentationFile = tempFolder + "/segmentation.nii"
+        outputStatisticsFile = outputSegmentationFolder + "/statistics.json"
+        outputRadiomicsFile = outputSegmentationFolder + "/statistics_radiomics.json"
 
-        # to reduce computation time when no GPU is available (can still take 5-10 minutes).
-        if not fast and device == 'cpu':
-            if slicer.util.confirmYesNoDisplay("No GPU is detected. Enable 'fast' mode?"):
-                fast = True
-
+        # Recommend the user to switch to fast mode if no GPU or not enough memory is available
         import torch
-        if not fast and torch.cuda.get_device_properties(device).total_memory < 7000000000:
-            if slicer.util.confirmYesNoDisplay("You have less than 7 GB of GPU memory available. Enable the 'fast' mode?"):
+        if not fast and not torch.has_cuda:
+            if slicer.util.confirmYesNoDisplay("No GPU is detected. Enable 'fast' mode to get results in a few ten minutes instead of hours?"):
+                fast = True
+        if not fast and torch.cuda.get_device_properties(0).total_memory < 7000000000:
+            if slicer.util.confirmYesNoDisplay("You have less than 7 GB of GPU memory available. Enable 'fast' mode to ensure segmentation can be completed successfully?"):
                 fast = True
 
-        # Get TotalSegmentator launch script path
+        # Get TotalSegmentator launcher command
+        # TotalSegmentator (.py file, without extension) is installed in Python Scripts folder
         import sysconfig
         totalSegmentatorPath = os.path.join(sysconfig.get_path('scripts'), "TotalSegmentator")
         # Get Python executable path
@@ -382,121 +391,68 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         pythonSlicerExecutablePath = shutil.which('PythonSlicer')
         if not pythonSlicerExecutablePath:
             raise RuntimeError("Python was not found")
-        # Create launcher command
         totalSegmentatorCommand = [ pythonSlicerExecutablePath, totalSegmentatorPath]
 
-        options = []
-        if fast:
-            options.append("--fast")
+        # Get options
+        options = ["-i", inputFile, "-o", outputSegmentationFolder]
+        createSegmentationSubfolder = False
         if outputStatistics:
             options.append("--statistics")
+            createSegmentationSubfolder = True
         if outputRadiomics:
             options.append("--radiomics")
-        if task:
-            options.extend(["--task", task])
+            createSegmentationSubfolder = True
+
+        if createSegmentationSubfolder:
+            os.mkdir(outputSegmentationFolder)
 
         # Write input volume to file
         # TotalSegmentator requires NIFTI
-        self.log(f"Writing input file to {input_file}")
+        self.log(f"Writing input file to {inputFile}")
         volumeStorageNode = slicer.mrmlScene.CreateNodeByClass("vtkMRMLVolumeArchetypeStorageNode")
-        volumeStorageNode.SetFileName(input_file)
+        volumeStorageNode.SetFileName(inputFile)
         volumeStorageNode.UseCompressionOff()
         volumeStorageNode.WriteData(inputVolume)
         volumeStorageNode.UnRegister(None)
-        logging.info(f"Input volume written to {input_file}")
 
-        # Create multi-file segmentation
-        self.log('Creating segmentations with TotalSegmentator AI... (multi-file)')
-        paths = ["-i", input_file, "-o", output_segmentation_dir]
-        logging.info(f"Total segmentator arguments: {options+paths}")
-        proc = slicer.util.launchConsoleProcess(totalSegmentatorCommand + options + paths)
-        slicer.util.logProcessOutput(proc)
-        # Load result
-        self.log('Importing segmentation results... (multi-file)')
-        self.loadSegmentationFolder(outputSegmentation, output_segmentation_dir, task)
+        # Launch in fast mode to get initial segmentation
+        if task != "total":
+            preOptions = options + ["--fast"]
+            self.log('Creating segmentations with TotalSegmentator AI (pre-run)...')
+            self.log(f"Total Segmentator arguments: {preOptions}")
+            proc = slicer.util.launchConsoleProcess(totalSegmentatorCommand + preOptions)
+            self.logProcessOutput(proc)
 
-        # Create single-file segmentation
-        self.log('Creating segmentations with TotalSegmentator AI... (single-file)')
-        paths = ["-i", input_file, "-o", output_segmentation_file]
-        logging.info(f"Total segmentator arguments: {options+paths}")
-        proc = slicer.util.launchConsoleProcess(totalSegmentatorCommand + options + paths + ["--ml"])
-        slicer.util.logProcessOutput(proc)
+        # Launch TotalSegmentator
+        options.append("--ml")  # multi-label = all labels in a single file
+        if task:
+            options.extend(["--task", task])
+        if fast:
+            options.append("--fast")
+        self.log('Creating segmentations with TotalSegmentator AI...')
+        self.log(f"Total Segmentator arguments: {options}")
+        proc = slicer.util.launchConsoleProcess(totalSegmentatorCommand + options)
+        self.logProcessOutput(proc)
+
         # Load result
-        self.log('Importing segmentation results... (single-file)')
-        self.loadSegmentation(outputSegmentation, output_segmentation_file, task)
+        self.log('Importing segmentation results...')
+        self.readSegmentation(outputSegmentation, outputSegmentationFile, task)
 
         if outputStatistics:
-            self.readStatisticsFile(outputStatistics, output_statistics_file)
+            self.readStatisticsFile(outputStatistics, outputStatisticsFile)
         if outputRadiomics:
-            self.readStatisticsFile(outputRadiomics, output_radiomics_file)
+            self.readStatisticsFile(outputRadiomics, outputRadiomicsFile)
 
-        # # restore to previous directory state
-        # os.chdir(beforeDir)
-        logging.info("Segmentation done.")
-
-
-        # # Read results from output files
-
-        # if outputSegmentation:
-        #     segmentationStorageNode = slicer.mrmlScene.CreateNodeByClass("vtkMRMLSegmentationStorageNode")
-        #     segmentationStorageNode.SetFileName(output_segmentation_file)
-        #     segmentationStorageNode.ReadData(outputSegmentation)
-        #     segmentationStorageNode.UnRegister(None)
-
-        #     # Set segment terminology
-        #     segmentId = outputSegmentation.GetSegmentation().GetNthSegmentID(0)
-        #     segment = outputSegmentation.GetSegmentation().GetSegment(segmentId)
-        #     segment.SetTag(segment.GetTerminologyEntryTagName(),
-        #       "Segmentation category and type - 3D Slicer General Anatomy list"
-        #       "~SCT^123037004^Anatomical Structure"
-        #       "~SCT^12738006^Brain"
-        #       "~^^"
-        #       "~Anatomic codes - DICOM master list"
-        #       "~^^"
-        #       "~^^")
-        #     segment.SetName("brain")
-        #     segment.SetColor(0.9803921568627451, 0.9803921568627451, 0.8823529411764706)
+        if self.clearOutputFolder:
+            self.log("Cleaning up temporary folder...")
+            if os.path.isdir(tempFolder):
+                shutil.rmtree(tempFolder)
 
         stopTime = time.time()
-        logging.info(f'Processing completed in {stopTime-startTime:.2f} seconds')
+        self.log(f'Processing completed in {stopTime-startTime:.2f} seconds')
 
-    def loadSegmentationFolder(self, outputSegmentation, output_segmentation_dir, task):
-        """This is just for test.
-        The method is very slow, so most likely this method will be removed
-        """
 
-        from os.path import exists
-
-        outputSegmentation.GetSegmentation().RemoveAllSegments()
-
-        # Get label descriptions
-        from totalsegmentator.map_to_binary import class_map
-        labelValueToSegmentName = class_map[task]
-
-        # Get color node with random colors
-        randomColorsNode = slicer.mrmlScene.GetNodeByID('vtkMRMLColorTableNodeRandom')
-        rgba = [0, 0, 0, 0]
-
-        # Read each candidate file
-        for labelValue in labelValueToSegmentName:
-            segmentName = labelValueToSegmentName[labelValue]
-            self.log(f"Importing {segmentName}")
-            labelVolumePath = f"{output_segmentation_dir}/{segmentName}.nii.gz"
-            if not exists(labelVolumePath):
-                continue
-
-            labelmapVolumeNode = slicer.util.loadLabelVolume(labelVolumePath, {"name": segmentName})
-            slicer.modules.segmentations.logic().ImportLabelmapToSegmentationNode(labelmapVolumeNode, outputSegmentation)
-
-            # sourceSegmentId = outputSegmentation.GetSegmentation().GetSegmentIdBySegmentName(segmentName)
-            # if sourceSegmentId:
-            #     randomColorsNode.GetColor(labelValue,rgba)
-            #     outputSegmentation.GetSegmentation().GetSegment(sourceSegmentId).SetColor(rgba[0], rgba[1], rgba[2])
-            #     self.setTerminology(outputSegmentation, segmentName, sourceSegmentId)
-
-            slicer.mrmlScene.RemoveNode(labelmapVolumeNode)
-
-    def loadSegmentation(self, outputSegmentation, output_segmentation_file, task):
+    def readSegmentation(self, outputSegmentation, outputSegmentationFile, task):
 
         # Get label descriptions
         from totalsegmentator.map_to_binary import class_map
@@ -515,17 +471,22 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         colorTableNode.SetNumberOfColors(maxLabelValue+1)
         colorTableNode.SetName(task)
         for labelValue in labelValueToSegmentName:
-            colorTableNode.SetColorName(labelValue, labelValueToSegmentName[labelValue])
             randomColorsNode.GetColor(labelValue,rgba)
             colorTableNode.SetColor(labelValue, rgba[0], rgba[1], rgba[2], rgba[3])
+            colorTableNode.SetColorName(labelValue, labelValueToSegmentName[labelValue])
         slicer.mrmlScene.AddNode(colorTableNode)
 
         # Load the segmentation
-        segmentationNode = slicer.util.loadSegmentation(output_segmentation_file, {"colorNodeID": colorTableNode.GetID()})
-        return segmentationNode
+        outputSegmentation.SetLabelmapConversionColorTableNodeID(colorTableNode.GetID())
+        outputSegmentation.AddDefaultStorageNode()
+        storageNode = outputSegmentation.GetStorageNode()
+        storageNode.SetFileName(outputSegmentationFile)
+        storageNode.ReadData(outputSegmentation)
+
+        slicer.mrmlScene.RemoveNode(colorTableNode)
 
     def readStatisticsFile(self, node, filepath):
-        node.SetForceCreateStorageNode()
+        node.SetForceCreateStorageNode(True)
         node.AddDefaultStorageNode()
         storageNode = node.GetStorageNode()
         storageNode.SetFileName(filepath)
@@ -648,10 +609,9 @@ class TotalSegmentatorTest(ScriptedLoadableModuleTest):
         # Get/create input data
 
         import SampleData
-        inputVolume = SampleData.downloadSample('MRBrainTumor1')
+        inputVolume = SampleData.downloadSample('CTACardio')
         self.delayDisplay('Loaded test data set')
 
-        outputVolume = slicer.mrmlScene.AddNewNodeByClass('vtkMRMLScalarVolumeNode')
         outputSegmentation = slicer.mrmlScene.AddNewNodeByClass('vtkMRMLSegmentationNode')
 
         # Test the module logic
@@ -667,9 +627,7 @@ class TotalSegmentatorTest(ScriptedLoadableModuleTest):
             logic.setupPythonRequirements()
 
             self.delayDisplay('Compute output')
-            logic.process(inputVolume, outputVolume, outputSegmentation)
-
-            slicer.util.setSliceViewerLayers(background=outputVolume)
+            logic.process(inputVolume, outputSegmentation)
 
         else:
             logging.warning("test_TotalSegmentator1 logic testing was skipped")

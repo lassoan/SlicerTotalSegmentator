@@ -1,6 +1,6 @@
 # TotalSegmentator
 
-3D Slicer extension for fully automatic total body segmentation Slicer using "TotalSegmentator" AI model.
+3D Slicer extension for fully automatic whole body CT segmentation using "TotalSegmentator" AI model.
 
 ![](Screenshot01.jpg)
 
@@ -14,9 +14,9 @@ If you use the TotalSegmentator nn-Unet function from this software in your rese
 - Install latest Slicer Preview Release of [3D Slicer](https://slicer.readthedocs.io/en/latest/user_guide/getting_started.html#installing-3d-slicer)
 - [Install `TotalSegmentator` extension](https://slicer.readthedocs.io/en/latest/user_guide/extensions_manager.html#install-extensions)
 - Start 3D Slicer
-- Go to `Sample Data` module and load `CTACardio` data set
+- Go to `Sample Data` module and load `CTA Abdomen (Panoramix)` data set
 - Go to `TotalSegmentator` module
-- Select `Input volume` -> `CTACardio`
+- Select `Input volume` -> `Panoramix-cropped`
 - Select `Segmentation` -> `Create new segmentation`
 - Click `Apply`
   - If you are prompted to install any additional packages then accept that and wait for a couple of minutes. IMPORTANT: You may need up to 20GB free disk space to intall all required Python packages. If installation fails due to running out of disk space then it may leave Python pacakges in the Slicer installation in an inconsistent state and fixing it may only be possible by removing the entire Slicer install folder and reinstall the application.
