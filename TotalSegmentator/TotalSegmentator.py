@@ -91,8 +91,6 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         self.ui.fastCheckBox.connect('toggled(bool)', self.updateParameterNodeFromGUI)
         self.ui.taskComboBox.currentTextChanged.connect(self.updateParameterNodeFromGUI)
         self.ui.outputSegmentationSelector.connect("currentNodeChanged(vtkMRMLNode*)", self.updateParameterNodeFromGUI)
-        self.ui.outputStatisticsSelector.connect("currentNodeChanged(vtkMRMLNode*)", self.updateParameterNodeFromGUI)
-        self.ui.outputRadiomicsSelector.connect("currentNodeChanged(vtkMRMLNode*)", self.updateParameterNodeFromGUI)
 
         # Buttons
         self.ui.applyButton.connect('clicked(bool)', self.onApplyButton)
@@ -188,8 +186,6 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         self.ui.taskComboBox.setCurrentText(self._parameterNode.GetParameter("Task"))
         self.ui.fastCheckBox.checked = self._parameterNode.GetParameter("Fast") == "true"
         self.ui.outputSegmentationSelector.setCurrentNode(self._parameterNode.GetNodeReference("OutputSegmentation"))
-        self.ui.outputStatisticsSelector.setCurrentNode(self._parameterNode.GetNodeReference("OutputStatistics"))
-        self.ui.outputRadiomicsSelector.setCurrentNode(self._parameterNode.GetNodeReference("OutputRadiomics"))
 
         # Update buttons states and tooltips
         inputVolume = self._parameterNode.GetNodeReference("InputVolume")
@@ -202,8 +198,6 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 
         if inputVolume:
             self.ui.outputSegmentationSelector.baseName = inputVolume.GetName() + " segmentation"
-            self.ui.outputStatisticsSelector.baseName = inputVolume.GetName() + " statistics"
-            self.ui.outputRadiomicsSelector.baseName = inputVolume.GetName() + " radiomics"
 
         # All the GUI updates are done
         self._updatingGUIFromParameterNode = False
@@ -223,8 +217,6 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         self._parameterNode.SetParameter("Task", self.ui.taskComboBox.currentText)
         self._parameterNode.SetParameter("Fast", "true" if self.ui.fastCheckBox.checked else "false")
         self._parameterNode.SetNodeReferenceID("OutputSegmentation", self.ui.outputSegmentationSelector.currentNodeID)
-        self._parameterNode.SetNodeReferenceID("OutputStatistics", self.ui.outputStatisticsSelector.currentNodeID)
-        self._parameterNode.SetNodeReferenceID("OutputRadiomics", self.ui.outputRadiomicsSelector.currentNodeID)
 
         self._parameterNode.EndModify(wasModified)
 
@@ -249,8 +241,7 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 
             # Compute output
             self.logic.process(self.ui.inputVolumeSelector.currentNode(), self.ui.outputSegmentationSelector.currentNode(),
-                self.ui.fastCheckBox.checked, self.ui.taskComboBox.currentText,
-                self.ui.outputStatisticsSelector.currentNode(), self.ui.outputRadiomicsSelector.currentNode())
+                self.ui.fastCheckBox.checked, self.ui.taskComboBox.currentText)
 
         self.ui.statusLabel.appendPlainText("\nProcessing finished.")
 #
@@ -346,7 +337,7 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         if retcode != 0:
             raise CalledProcessError(retcode, proc.args, output=proc.stdout, stderr=proc.stderr)
 
-    def process(self, inputVolume, outputSegmentation, fast=True, task=None, outputStatistics=None, outputRadiomics=None):
+    def process(self, inputVolume, outputSegmentation, fast=True, task=None):
 
         """
         Run the processing algorithm.
@@ -370,8 +361,6 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         inputFile = tempFolder+"/total-segmentator-input.nii"
         outputSegmentationFolder = tempFolder + "/segmentation"
         outputSegmentationFile = tempFolder + "/segmentation.nii"
-        outputStatisticsFile = outputSegmentationFolder + "/statistics.json"
-        outputRadiomicsFile = outputSegmentationFolder + "/statistics_radiomics.json"
 
         # Recommend the user to switch to fast mode if no GPU or not enough memory is available
         import torch
@@ -393,19 +382,6 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
             raise RuntimeError("Python was not found")
         totalSegmentatorCommand = [ pythonSlicerExecutablePath, totalSegmentatorPath]
 
-        # Get options
-        options = ["-i", inputFile, "-o", outputSegmentationFolder]
-        createSegmentationSubfolder = False
-        if outputStatistics:
-            options.append("--statistics")
-            createSegmentationSubfolder = True
-        if outputRadiomics:
-            options.append("--radiomics")
-            createSegmentationSubfolder = True
-
-        if createSegmentationSubfolder:
-            os.mkdir(outputSegmentationFolder)
-
         # Write input volume to file
         # TotalSegmentator requires NIFTI
         self.log(f"Writing input file to {inputFile}")
@@ -415,7 +391,11 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         volumeStorageNode.WriteData(inputVolume)
         volumeStorageNode.UnRegister(None)
 
-        # Launch in fast mode to get initial segmentation
+        # Get options
+        options = ["-i", inputFile, "-o", outputSegmentationFolder]
+
+        # Launch TotalSegmentator in fast mode to get initial segmentation, if needed
+
         if task != "total":
             preOptions = options + ["--fast"]
             self.log('Creating segmentations with TotalSegmentator AI (pre-run)...')
@@ -424,7 +404,18 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
             self.logProcessOutput(proc)
 
         # Launch TotalSegmentator
-        options.append("--ml")  # multi-label = all labels in a single file
+
+        # When there are many segments then reading each segment from a separate file would be too slow,
+        # but we need to do it for some specialized models.
+        multilabel = True
+
+         # lung_vessels task does not support multilabel output or fast mode
+        if task == "lung_vessels":
+            multilabel = False
+            fast = False
+
+        if multilabel:
+            options.append("--ml")
         if task:
             options.extend(["--task", task])
         if fast:
@@ -436,12 +427,10 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
 
         # Load result
         self.log('Importing segmentation results...')
-        self.readSegmentation(outputSegmentation, outputSegmentationFile, task)
-
-        if outputStatistics:
-            self.readStatisticsFile(outputStatistics, outputStatisticsFile)
-        if outputRadiomics:
-            self.readStatisticsFile(outputRadiomics, outputRadiomicsFile)
+        if multilabel:
+            self.readSegmentation(outputSegmentation, outputSegmentationFile, task)
+        else:
+            self.readSegmentationFolder(outputSegmentation, outputSegmentationFolder, task)
 
         if self.clearOutputFolder:
             self.log("Cleaning up temporary folder...")
@@ -451,6 +440,40 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         stopTime = time.time()
         self.log(f'Processing completed in {stopTime-startTime:.2f} seconds')
 
+    def readSegmentationFolder(self, outputSegmentation, output_segmentation_dir, task):
+        """The method is very slow, but this is the only option for some specialized tasks.
+        """
+
+        from os.path import exists
+
+        outputSegmentation.GetSegmentation().RemoveAllSegments()
+
+        # Get label descriptions
+        from totalsegmentator.map_to_binary import class_map
+        labelValueToSegmentName = class_map[task]
+
+        # Get color node with random colors
+        randomColorsNode = slicer.mrmlScene.GetNodeByID('vtkMRMLColorTableNodeRandom')
+        rgba = [0, 0, 0, 0]
+
+        # Read each candidate file
+        for labelValue in labelValueToSegmentName:
+            segmentName = labelValueToSegmentName[labelValue]
+            self.log(f"Importing {segmentName}")
+            labelVolumePath = f"{output_segmentation_dir}/{segmentName}.nii.gz"
+            if not exists(labelVolumePath):
+                continue
+
+            labelmapVolumeNode = slicer.util.loadLabelVolume(labelVolumePath, {"name": segmentName})
+
+            randomColorsNode.GetColor(labelValue,rgba)
+            segmentId = outputSegmentation.GetSegmentation().AddEmptySegment(segmentName, segmentName, rgba[0:3])
+            updatedSegmentIds = vtk.vtkStringArray()
+            updatedSegmentIds.InsertNextValue(segmentId)
+            slicer.modules.segmentations.logic().ImportLabelmapToSegmentationNode(labelmapVolumeNode, outputSegmentation, updatedSegmentIds)
+            self.setTerminology(outputSegmentation, segmentName, segmentId)
+
+            slicer.mrmlScene.RemoveNode(labelmapVolumeNode)
 
     def readSegmentation(self, outputSegmentation, outputSegmentationFile, task):
 
@@ -484,13 +507,6 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         storageNode.ReadData(outputSegmentation)
 
         slicer.mrmlScene.RemoveNode(colorTableNode)
-
-    def readStatisticsFile(self, node, filepath):
-        node.SetForceCreateStorageNode(True)
-        node.AddDefaultStorageNode()
-        storageNode = node.GetStorageNode()
-        storageNode.SetFileName(filepath)
-        storageNode.ReadData(node)
 
     def setTerminology(self, _outputsegmentation, _name, _segID):
         segment = _outputsegmentation.GetSegmentation().GetSegment(_segID)
