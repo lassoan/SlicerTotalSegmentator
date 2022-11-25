@@ -1,6 +1,6 @@
 # TotalSegmentator
 
-3D Slicer extension for fully automatic whole body CT segmentation using ["TotalSegmentator" AI model](https://github.com/wasserth/TotalSegmentator).
+3D Slicer extension for fully automatic whole body CT segmentation using ["TotalSegmentator" AI model](https://github.com/wasserth/TotalSegmentator). Computation time using a CUDA-capable GPU takes 1-2 minutes.
 
 ![](Screenshot01.jpg)
 
@@ -19,7 +19,7 @@ If you use the TotalSegmentator nn-Unet function from this software in your rese
 - Select `Input volume` -> `Panoramix-cropped`
 - Select `Segmentation` -> `Create new segmentation`
 - Click `Apply`
-  - If you are prompted to install any additional packages then accept that and wait for a couple of minutes. IMPORTANT: You may need up to 20GB free disk space to intall all required Python packages. If installation fails due to running out of disk space then it may leave Python pacakges in the Slicer installation in an inconsistent state and fixing it may only be possible by removing the entire Slicer install folder and reinstall the application.
+  - If you are prompted to install any additional packages then accept that and wait for 1-2 minutes. IMPORTANT: You may need up to 20GB free disk space to intall all required Python packages. If installation fails due to running out of disk space then it may leave Python pacakges in the Slicer installation in an inconsistent state and fixing it may only be possible by removing the entire Slicer install folder and reinstall the application.
   - If a GPU is available then results are computed within about 20 seconds. If computation is done on CPU then it may take 10-20 minutes in fast mode!
 - To display the segmentation in 3D: go to Data module and drag-and-drop the segmented into the 3D view.
 
@@ -27,6 +27,7 @@ If you use the TotalSegmentator nn-Unet function from this software in your rese
 
 - Inputs
   - Input volume: input CT image
+  - Segmentation task: instead of the default "total" segmentation, a more specialized segmentation model can be chosen
   - Fast: performs segmentation faster, but with less accuracy
 - Outputs
   - Segmentation: it will contain a brain segment, which specifies the brain region
