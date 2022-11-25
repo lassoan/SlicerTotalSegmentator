@@ -1,6 +1,6 @@
 # TotalSegmentator
 
-3D Slicer extension for fully automatic whole body CT segmentation using "TotalSegmentator" AI model.
+3D Slicer extension for fully automatic whole body CT segmentation using ["TotalSegmentator" AI model](https://github.com/wasserth/TotalSegmentator).
 
 ![](Screenshot01.jpg)
 
