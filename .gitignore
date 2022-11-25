@@ -1,3 +1,6 @@
+# HD-BET may be installed in the source tree during testing, exclude those files from revision control
+HDBrainExtractionTool/HD_BET/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
