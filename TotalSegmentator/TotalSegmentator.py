@@ -93,6 +93,8 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         self.ui.outputSegmentationSelector.connect("currentNodeChanged(vtkMRMLNode*)", self.ui.segmentationShow3DButton.setSegmentationNode)
 
         # Buttons
+        self.ui.packageInfoUpdateButton.connect('clicked(bool)', self.onPackageInfoUpdate)
+        self.ui.packageUpgradeButton.connect('clicked(bool)', self.onPackageUpgrade)
         self.ui.applyButton.connect('clicked(bool)', self.onApplyButton)
 
         # Make sure parameter node is initialized (needed for module reload)
@@ -244,6 +246,17 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
                 self.ui.fastCheckBox.checked, self.ui.taskComboBox.currentText)
 
         self.ui.statusLabel.appendPlainText("\nProcessing finished.")
+
+    def onPackageInfoUpdate(self):
+        self.ui.packageInfoTextBrowser.plainText = ''
+        with slicer.util.tryWithErrorDisplay("Failed to get TotalSegmenter package version information", waitCursor=True):
+            self.ui.packageInfoTextBrowser.plainText = self.logic.totalSegmentatorPythonPackageInfo().rstrip()
+
+    def onPackageUpgrade(self):
+        with slicer.util.tryWithErrorDisplay("Failed to upgrade TotalSegmenter", waitCursor=True):
+            self.logic.setupPythonRequirements(upgrade=True)
+        self.onPackageInfoUpdate()
+
 #
 # TotalSegmentatorLogic
 #
@@ -279,6 +292,12 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         logging.info(text)
         if self.logCallback:
             self.logCallback(text)
+
+    def totalSegmentatorPythonPackageInfo(self):
+        import shutil
+        import subprocess
+        processOutput = subprocess.check_output([shutil.which('PythonSlicer'), "-m", "pip", "show", "TotalSegmentator"])
+        return processOutput.decode()
 
     def setupPythonRequirements(self, upgrade=False):
 

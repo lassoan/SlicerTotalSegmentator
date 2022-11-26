@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>327</width>
-    <height>533</height>
+    <width>272</width>
+    <height>502</height>
    </rect>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
@@ -135,6 +135,51 @@
     </widget>
    </item>
    <item>
+    <widget class="ctkCollapsibleButton" name="advancedCollapsibleButton">
+     <property name="text">
+      <string>Advanced</string>
+     </property>
+     <property name="collapsed">
+      <bool>true</bool>
+     </property>
+     <layout class="QFormLayout" name="formLayout_3">
+      <item row="0" column="0" colspan="2">
+       <widget class="QPushButton" name="packageInfoUpdateButton">
+        <property name="toolTip">
+         <string>Update to latest version of TotalSegmentator Python package from GitHub</string>
+        </property>
+        <property name="text">
+         <string>Get TotalSegmentator Python package information</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0" colspan="2">
+       <widget class="QPushButton" name="packageUpgradeButton">
+        <property name="toolTip">
+         <string>Update to latest version of TotalSegmentator Python package from GitHub</string>
+        </property>
+        <property name="text">
+         <string>Upgrade TotalSegmentator Python package</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0" colspan="2">
+       <widget class="ctkFittedTextBrowser" name="packageInfoTextBrowser">
+        <property name="collapsed">
+         <bool>false</bool>
+        </property>
+        <property name="showDetailsText">
+         <string/>
+        </property>
+        <property name="hideDetailsText">
+         <string/>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
     <widget class="QPushButton" name="applyButton">
      <property name="enabled">
       <bool>false</bool>
@@ -181,6 +226,11 @@
    <extends>QWidget</extends>
    <header>ctkCollapsibleButton.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ctkFittedTextBrowser</class>
+   <extends>QTextBrowser</extends>
+   <header>ctkFittedTextBrowser.h</header>
   </customwidget>
   <customwidget>
    <class>ctkMenuButton</class>
