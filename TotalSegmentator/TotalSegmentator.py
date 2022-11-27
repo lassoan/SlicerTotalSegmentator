@@ -371,6 +371,9 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
 
         if not inputVolume:
             raise ValueError("Input or output volume is invalid")
+            
+        if task == None: 
+            task = "total"
 
         import time
         startTime = time.time()
