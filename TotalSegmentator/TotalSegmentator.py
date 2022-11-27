@@ -371,6 +371,9 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
 
         if not inputVolume:
             raise ValueError("Input or output volume is invalid")
+            
+        if task == None: 
+            task = "total"
 
         import time
         startTime = time.time()
@@ -655,7 +658,7 @@ class TotalSegmentatorTest(ScriptedLoadableModuleTest):
 
         # Logic testing is disabled by default to not overload automatic build machines (pytorch is a huge package and computation
         # on CPU takes 5-10 minutes). Set testLogic to True to enable testing.
-        testLogic = False
+        testLogic = True
 
         if testLogic:
             logic = TotalSegmentatorLogic()
