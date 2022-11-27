@@ -658,7 +658,7 @@ class TotalSegmentatorTest(ScriptedLoadableModuleTest):
 
         # Logic testing is disabled by default to not overload automatic build machines (pytorch is a huge package and computation
         # on CPU takes 5-10 minutes). Set testLogic to True to enable testing.
-        testLogic = True
+        testLogic = False
 
         if testLogic:
             logic = TotalSegmentatorLogic()
