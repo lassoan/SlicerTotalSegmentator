@@ -296,8 +296,29 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
     def totalSegmentatorPythonPackageInfo(self):
         import shutil
         import subprocess
-        processOutput = subprocess.check_output([shutil.which('PythonSlicer'), "-m", "pip", "show", "TotalSegmentator"])
-        return processOutput.decode()
+        versionInfo = subprocess.check_output([shutil.which('PythonSlicer'), "-m", "pip", "show", "TotalSegmentator"]).decode()
+        return versionInfo
+
+    def simpleITKPythonPackageVersion(self):
+        """Utility function to get version of currently installed SimpleITK.
+        Currently not used, but it can be useful for diagnostic purposes.
+        """
+
+        import shutil
+        import subprocess
+        versionInfo = subprocess.check_output([shutil.which('PythonSlicer'), "-m", "pip", "show", "SimpleITK"]).decode()
+
+        # versionInfo looks something like this:
+        #
+        #   Name: SimpleITK
+        #   Version: 2.2.0rc2.dev368
+        #   Summary: SimpleITK is a simplified interface to the Insight Toolkit (ITK) for image registration and segmentation
+        #   ...
+        #
+
+        # Get version string (second half of the second line):
+        version = versionInfo.split('\n')[1].split(' ')[1].strip()
+        return version
 
     def setupPythonRequirements(self, upgrade=False):
 
@@ -330,11 +351,34 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
             import totalsegmentator
         except ModuleNotFoundError as e:
             needToInstallSegmenter = True
-        if needToInstallSegmenter:
-            self.log('TotalSegmentator Python package not found. Installing may take several minutes...')
-            slicer.util.pip_install("git+https://github.com/wasserth/TotalSegmentator.git")
-        elif upgrade:
-            slicer.util.pip_install("--upgrade git+https://github.com/wasserth/TotalSegmentator.git")
+        if needToInstallSegmenter or upgrade:
+            self.log('Installing TotalSegmentator. This may take several minutes...')
+
+            # TotalSegmentator requires an exact SimpleITK version (2.0.2).
+            # Simply installing TotalSegmentator would uninstall Slicer's SimpleITK, which would break
+            # image IO plugins (in particular, the in-memory image transfer IO plugin).
+
+            # To prevent this, the SimpleITK version requirement should be relaxed in TotalSegmentator.
+
+            # As an immediate workaround, we install TotalSegmentator without its dependencies,
+            # then query its dependencies, and install each manually, except SimpleITK.
+
+            # Install TotalSegmentator without dependencies
+            installCommand = "git+https://github.com/wasserth/TotalSegmentator.git --no-deps"
+            if upgrade:
+                installCommand += " --upgrade"
+            slicer.util.pip_install(installCommand)
+
+            # Install all dependencies but SimpleITK
+            import importlib.metadata
+            requirements = importlib.metadata.requires('TotalSegmentator')
+            for requirement in requirements:
+                if requirement.startswith('SimpleITK'):
+                    continue
+                # requirement looks like this: nibabel (>=2.3.0), we need to remove space and parentheses
+                requirement = requirement.replace(' ','').replace('(','').replace(')','')
+                self.log(f'Installing {requirement}...')
+                slicer.util.pip_install(requirement)
 
     def setDefaultParameters(self, parameterNode):
         """
