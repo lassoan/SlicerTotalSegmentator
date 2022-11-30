@@ -330,7 +330,7 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
 
         torchLogic = PyTorchUtils.PyTorchUtilsLogic()
         if not torchLogic.torchInstalled():
-            self.log('PyTorch package not found. Installing may take several minutes...')
+            self.log('PyTorch Python package is required. Installing... (it may take several minutes)')
             torch = torchLogic.installTorch(askConfirmation=True)
             if torch is None:
                 raise ValueError('PyTorch extension needs to be installed to use this module.')
@@ -342,43 +342,57 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         except ModuleNotFoundError as e:
             needToInstallMatplotlib = True
         if needToInstallMatplotlib:
-            self.log('Matplotlib package not found. Installing...')
+            self.log('Matplotlib Python package is required. Installing...')
             slicer.util.pip_install("matplotlib")
 
-        # Install AI segmenter
+        # Install TotalSegmentator segmenter
+
         needToInstallSegmenter = False
         try:
             import totalsegmentator
         except ModuleNotFoundError as e:
             needToInstallSegmenter = True
+
         if needToInstallSegmenter or upgrade:
-            self.log('Installing TotalSegmentator. This may take several minutes...')
+            self.log('TotalSegmentator Python package is required. Installing... (it may take several minutes)')
 
             # TotalSegmentator requires an exact SimpleITK version (2.0.2).
             # Simply installing TotalSegmentator would uninstall Slicer's SimpleITK, which would break
             # image IO plugins (in particular, the in-memory image transfer IO plugin).
 
-            # To prevent this, the SimpleITK version requirement should be relaxed in TotalSegmentator.
+            # As a workaround, TotalSegmentator installed without dependencies, then
+            # SimpleITK is removed from dependencies (from METADATA file)
+            # and then install TotalSegmentator with dependencies.
 
-            # As an immediate workaround, we install TotalSegmentator without its dependencies,
-            # then query its dependencies, and install each manually, except SimpleITK.
+            totalSegmentatorPackage = "git+https://github.com/wasserth/TotalSegmentator.git" 
 
             # Install TotalSegmentator without dependencies
-            installCommand = "git+https://github.com/wasserth/TotalSegmentator.git --no-deps"
-            if upgrade:
-                installCommand += " --upgrade"
-            slicer.util.pip_install(installCommand)
+            # (because we need to remove SimpleITK requirement before installing dependencies,
+            # as it would replace Slicer's SimpleITK)
+            slicer.util.pip_install(totalSegmentatorPackage + " --no-deps" + (" --upgrade" if upgrade else ""))
 
-            # Install all dependencies but SimpleITK
+            # Get path to site-packages\TotalSegmentator-1.4.0.dist-info\METADATA
             import importlib.metadata
-            requirements = importlib.metadata.requires('TotalSegmentator')
-            for requirement in requirements:
-                if requirement.startswith('SimpleITK'):
-                    continue
-                # requirement looks like this: nibabel (>=2.3.0), we need to remove space and parentheses
-                requirement = requirement.replace(' ','').replace('(','').replace(')','')
-                self.log(f'Installing {requirement}...')
-                slicer.util.pip_install(requirement)
+            metadataPath = [p for p in importlib.metadata.files('TotalSegmentator') if 'METADATA' in str(p)][0]
+            metadataPath.locate()
+
+            # Remove line: `Requires-Dist: SimpleITK (==2.0.2)`
+            filteredMetadata = ""
+            with open(metadataPath.locate(), "r+") as file:
+                for line in file:
+                    if line.startswith('Requires-Dist') and 'SimpleITK' in line:
+                        # skip SimpleITK requirement
+                        continue
+                    filteredMetadata += line
+                # Update file content with filtered result
+                file.seek(0)  
+                file.write(filteredMetadata)
+                file.truncate()
+
+            # Install with dependencies
+            slicer.util.pip_install(totalSegmentatorPackage)
+
+            self.log('TotalSegmentator installation is completed successfully.')
 
     def setDefaultParameters(self, parameterNode):
         """
