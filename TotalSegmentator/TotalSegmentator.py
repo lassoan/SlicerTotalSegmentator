@@ -389,8 +389,16 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
                 file.write(filteredMetadata)
                 file.truncate()
 
-            # Install with dependencies
-            slicer.util.pip_install(totalSegmentatorPackage)
+            # Install all dependencies but SimpleITK (simply installing TotalSegmentator would still replace SimpleITK)
+            import importlib.metadata
+            requirements = importlib.metadata.requires('TotalSegmentator')
+            for requirement in requirements:
+                if requirement.startswith('SimpleITK'):
+                    continue
+                # requirement looks like this: nibabel (>=2.3.0), we need to remove space and parentheses
+                requirement = requirement.replace(' ','').replace('(','').replace(')','')
+                self.log(f'Installing {requirement}...')
+                slicer.util.pip_install(requirement)
 
             self.log('TotalSegmentator installation is completed successfully.')
 
