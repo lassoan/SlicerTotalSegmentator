@@ -33,8 +33,9 @@ If you use the TotalSegmentator nn-Unet function from this software in your rese
   - Segmentation: it will contain a brain segment, which specifies the brain region
   - Show 3D: show/hide segments in 3D views
 - Advanced:
-  - Get TotalSegmentator Python package information: retrieve installed version of the AI engine, TotalSegmentator Python package.
-  - Upgrade TotalSegmentator Python package: upgrade the AI engine, TotalSegmentator Python package, to the very latest version from GitHub.
+  - Use standard segment names: use names defined in standard terminology files from [DCMQI](https://github.com/QIICR/dcmqi) (enabled by default). If disabled then TotalSegmentator identifiers will be used as segment names.
+  - Upgrade: upgrade the AI engine - TotalSegmentator Python package - to the very latest version from GitHub.
+  - Get TotalSegmentator package information: retrieve installed version of the AI engine - TotalSegmentator Python package.
 
 ## Contact
 

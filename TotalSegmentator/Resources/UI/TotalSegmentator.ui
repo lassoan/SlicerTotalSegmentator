@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>272</width>
-    <height>502</height>
+    <width>288</width>
+    <height>525</height>
    </rect>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
@@ -143,27 +143,7 @@
       <bool>true</bool>
      </property>
      <layout class="QFormLayout" name="formLayout_3">
-      <item row="0" column="0" colspan="2">
-       <widget class="QPushButton" name="packageInfoUpdateButton">
-        <property name="toolTip">
-         <string>Update to latest version of TotalSegmentator Python package from GitHub</string>
-        </property>
-        <property name="text">
-         <string>Get TotalSegmentator Python package information</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0" colspan="2">
-       <widget class="QPushButton" name="packageUpgradeButton">
-        <property name="toolTip">
-         <string>Update to latest version of TotalSegmentator Python package from GitHub</string>
-        </property>
-        <property name="text">
-         <string>Upgrade TotalSegmentator Python package</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0" colspan="2">
+      <item row="3" column="0" colspan="2">
        <widget class="ctkFittedTextBrowser" name="packageInfoTextBrowser">
         <property name="collapsed">
          <bool>false</bool>
@@ -173,6 +153,53 @@
         </property>
         <property name="hideDetailsText">
          <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="label_7">
+        <property name="text">
+         <string>Use standard segment names:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QCheckBox" name="useStandardSegmentNamesCheckBox">
+        <property name="toolTip">
+         <string>If enabled (default) then segment names are obtained from Slicer standard terminology files. If disabled then TotalSegmentator identifiers are used as segment names.</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="label_8">
+        <property name="text">
+         <string>TotalSegmentator Python package:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QPushButton" name="packageUpgradeButton">
+        <property name="toolTip">
+         <string>Update to latest version of TotalSegmentator Python package from GitHub</string>
+        </property>
+        <property name="text">
+         <string>Upgrade</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0" colspan="2">
+       <widget class="QPushButton" name="packageInfoUpdateButton">
+        <property name="toolTip">
+         <string>Update to latest version of TotalSegmentator Python package from GitHub</string>
+        </property>
+        <property name="text">
+         <string>Get TotalSegmenter package information</string>
         </property>
        </widget>
       </item>
