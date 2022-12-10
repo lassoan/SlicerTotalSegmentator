@@ -1,6 +1,6 @@
 # TotalSegmentator
 
-3D Slicer extension for fully automatic whole body CT segmentation using ["TotalSegmentator" AI model](https://github.com/wasserth/TotalSegmentator). Computation time using a CUDA-capable GPU takes 1-2 minutes.
+3D Slicer extension for fully automatic whole body CT segmentation using ["TotalSegmentator" AI model](https://github.com/wasserth/TotalSegmentator). Computation time is less than one minute.
 
 ![](Screenshot01.jpg)
 
