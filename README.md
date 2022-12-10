@@ -10,7 +10,7 @@ If you use the TotalSegmentator nn-Unet function from this software in your rese
 
 ## Tutorial
 
-- If you have a CUDA-capable GPU then make sure CUDA is installed to enable faster segmentation (1-2 minutes instead of tens of minutes). You can download CUDA from [here](https://developer.nvidia.com/cuda-downloads).
+- If you have a CUDA-capable GPU then make sure CUDA is installed to enable faster segmentation (1-2 minutes instead of tens of 40-50 minutes for full-resolution image). You can download CUDA from [here](https://developer.nvidia.com/cuda-downloads). If GPU is not available then low-resolution "fast" segmentation is recommended, which takes less than one minute to compute.
 - Install latest Slicer Preview Release of [3D Slicer](https://slicer.readthedocs.io/en/latest/user_guide/getting_started.html#installing-3d-slicer)
 - [Install `TotalSegmentator` extension](https://slicer.readthedocs.io/en/latest/user_guide/extensions_manager.html#install-extensions)
 - Start 3D Slicer
@@ -20,15 +20,17 @@ If you use the TotalSegmentator nn-Unet function from this software in your rese
 - Select `Segmentation` -> `Create new segmentation`
 - Click `Apply`
   - When this module is used the first time, it needs to download and install PyTorch and TotalSegmentator Python packages and weights for the AI models. This can take 5-10 minutes and several GB disk space.
-  - If a GPU is available then results are computed within about 20 seconds in fast mode, and 1-2 minutes in normal mode. If computation is done on CPU then it may take up to 5-15 minutes in fast mode.
-- To display the segmentation in 3D click the `Show 3D` button
+  - Expected computation time:
+    - With CUDA-capable GPU: 20-30 seconds in fast mode, 40-50 seconds in full-resolution mode.
+    - Without GPU: 1 minute in fast mode, 40-50 minutes in full-resolution mode.
+- To display the segmentation in 3D: click the `Show 3D` button
 
 ## User interface
 
 - Inputs
   - Input volume: input CT image
   - Segmentation task: instead of the default "total" segmentation, a more specialized segmentation model can be chosen
-  - Fast: performs segmentation faster, but with less accuracy
+  - Fast: performs segmentation faster, but at lower resolution
 - Outputs
   - Segmentation: it will contain a brain segment, which specifies the brain region
   - Show 3D: show/hide segments in 3D views

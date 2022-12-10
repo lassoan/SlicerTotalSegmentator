@@ -623,9 +623,9 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         # Recommend the user to switch to fast mode if no GPU or not enough memory is available
         import torch
         if not fast and not torch.has_cuda:
-            if slicer.util.confirmYesNoDisplay("No GPU is detected. Enable 'fast' mode to get results in a few ten minutes instead of hours?"):
+            if slicer.util.confirmYesNoDisplay("No GPU is detected. Enable 'fast' mode to get low-resolution result in about 1 minute (instead of full-resolution in 1 hour)?"):
                 fast = True
-        if not fast and torch.cuda.get_device_properties(0).total_memory < 7000000000:
+        if not fast and torch.has_cuda and torch.cuda.get_device_properties(0).total_memory < 7e9:
             if slicer.util.confirmYesNoDisplay("You have less than 7 GB of GPU memory available. Enable 'fast' mode to ensure segmentation can be completed successfully?"):
                 fast = True
 
