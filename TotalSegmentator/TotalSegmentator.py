@@ -250,6 +250,7 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
             # Create new segmentation node, if not selected yet
             if not self.ui.outputSegmentationSelector.currentNode():
                 self.ui.outputSegmentationSelector.addNode()
+                self._parameterNode.SetNodeReferenceID("OutputSegmentation", self.ui.outputSegmentationSelector.currentNodeID)
 
             self.logic.useStandardSegmentNames = self.ui.useStandardSegmentNamesCheckBox.checked
 
@@ -582,7 +583,7 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
                 # Code page conversion happens because `universal_newlines=True` sets process output to text mode,
                 # and it fails because probably system locale is not UTF8. We just ignore the error and discard the string,
                 # as we only guarantee correct behavior if an UTF8 locale is used.
-                pass 
+                pass
             line = proc.stdout.readline()
             if not line:
                 break
