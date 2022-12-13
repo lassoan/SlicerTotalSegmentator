@@ -11,7 +11,7 @@ If you use the TotalSegmentator nn-Unet function from this software in your rese
 ## Tutorial
 
 - If you have a CUDA-capable GPU then make sure CUDA is installed to enable faster segmentation (1-2 minutes instead of tens of 40-50 minutes for full-resolution image). You can download CUDA from [here](https://developer.nvidia.com/cuda-downloads). If GPU is not available then low-resolution "fast" segmentation is recommended, which takes less than one minute to compute.
-- On Windows: make sure `git` (revision control tool) is installed, as it is required for downloading of the TotalSegmentator Python package. [Download git from here](https://git-scm.com/download/win).
+- On Windows: make sure `git` (revision control tool) is installed, as it is required for downloading of the TotalSegmentator Python package. [Download git from here](https://git-scm.com/download/win). If you don't have `git` installed then the `Command ... 'git+https://github.com/wasserth/TotalSegmentator.git', '--no-deps', '--upgrade']' returned non-zero exit status 1.` error will be displayed when you start segmentation. The problem can be fixed by installing `git` then.
 - Install latest Slicer Preview Release of [3D Slicer](https://slicer.readthedocs.io/en/latest/user_guide/getting_started.html#installing-3d-slicer)
 - [Install `TotalSegmentator` extension](https://slicer.readthedocs.io/en/latest/user_guide/extensions_manager.html#install-extensions)
 - Start 3D Slicer
