@@ -516,6 +516,37 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         if needToInstallSegmenter or upgrade:
             self.log('TotalSegmentator Python package is required. Installing... (it may take several minutes)')
 
+            # Install from git+https requires presence of git
+            try:
+                import git
+                gitFound = True
+            except:
+                gitFound = False
+
+            # Automatic install of git is implemented for Windows only
+            # (on other operating system git is commonly available)
+            if not gitFound and os.name == 'nt':
+                if slicer.util.confirmOkCancelDisplay('This module requires "git" revision control tool. Click OK to install it now. Click Cancel and install it manually from <a href="https://git-scm.com/download/win">https://git-scm.com/download/win</a>'):
+                    result = os.system("winget install --id Git.Git -e --source winget")
+                    if result == 0:
+                        import winreg
+                        try:
+                            key = winreg.OpenKeyEx(winreg.HKEY_LOCAL_MACHINE, r"SOFTWARE\GitForWindows")
+                            value = winreg.QueryValueEx(key, "InstallPath")
+                            if key:
+                                winreg.CloseKey(key)
+                            gitInstallLocation = value[0]
+                            gitBinFolder = os.path.join(gitInstallLocation, "bin")
+                            if os.path.isfile(os.path.join(gitBinFolder, "git.exe")):
+                                # git is found, use it
+                                slicer.app.setEnvironmentVariable('path', slicer.app.environment().value('path')+";"+gitBinFolder)
+                                gitFound = True
+                        except Exception as e:
+                            logging.error(str(e))
+
+            if not gitFound:
+                raise ValueError('"git" is required to install TotalSegmentator.')
+
             # TotalSegmentator requires an exact SimpleITK version (2.0.2).
             # Simply installing TotalSegmentator would uninstall Slicer's SimpleITK, which would break
             # image IO plugins (in particular, the in-memory image transfer IO plugin).
