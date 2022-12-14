@@ -10,7 +10,7 @@ If you use the TotalSegmentator nn-Unet function from this software in your rese
 
 ## Tutorial
 
-- If you have a CUDA-capable GPU then make sure CUDA is installed to enable faster segmentation (1-2 minutes instead of tens of 40-50 minutes for full-resolution image). You can download CUDA from [here](https://developer.nvidia.com/cuda-downloads). If GPU is not available then low-resolution "fast" segmentation is recommended, which takes less than one minute to compute.
+- If you have a CUDA-capable GPU then make sure CUDA is installed to enable faster segmentation (1-2 minutes instead of tens of 40-50 minutes for full-resolution image). You can download CUDA from [here](https://developer.nvidia.com/cuda-downloads). Use the [CUDA version listed on pytorch website as "Compute platform" for your system](https://pytorch.org/get-started/locally/). Currently, CUDA is not available on macOS. If CUDA-capable GPU is not available then low-resolution "fast" segmentation is recommended, which usually takes less than one minute to complete.
 - Downloading of TotalSegmentator requires `git` revision control tool. It is often installed already on many computer. If it is not found then module will report this during the setup phase. The tool can be downloaded from https://git-scm.com/download.
 - Install latest Slicer Preview Release of [3D Slicer](https://slicer.readthedocs.io/en/latest/user_guide/getting_started.html#installing-3d-slicer)
 - [Install `TotalSegmentator` extension](https://slicer.readthedocs.io/en/latest/user_guide/extensions_manager.html#install-extensions)
