@@ -615,7 +615,6 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
                 # and it fails because probably system locale is not UTF8. We just ignore the error and discard the string,
                 # as we only guarantee correct behavior if an UTF8 locale is used.
                 pass
-            line = proc.stdout.readline()
             if not line:
                 break
             self.log(line.rstrip())
