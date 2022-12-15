@@ -10,7 +10,7 @@ If you use the TotalSegmentator nn-Unet function from this software in your rese
 
 ## Tutorial
 
-- If you have a CUDA-capable GPU then make sure CUDA is installed to enable faster segmentation (1-2 minutes instead of tens of 40-50 minutes for full-resolution image). You can download CUDA from [here](https://developer.nvidia.com/cuda-downloads). Use the [CUDA version listed on pytorch website as "Compute platform" for your system](https://pytorch.org/get-started/locally/). Currently, CUDA is not available on macOS. If CUDA-capable GPU is not available then low-resolution "fast" segmentation is recommended, which usually takes less than one minute to complete.
+- If you have a CUDA-capable GPU with 7GB or more RAM then make sure CUDA is installed to enable faster segmentation (1-2 minutes instead of tens of 40-50 minutes for full-resolution image). You can download CUDA from [here](https://developer.nvidia.com/cuda-downloads). Use the [CUDA version listed on pytorch website as "Compute platform" for your system](https://pytorch.org/get-started/locally/). Currently, CUDA is not available on macOS. If CUDA-capable GPU is not available then low-resolution "fast" segmentation is recommended, which usually takes less than one minute to complete.
 - Downloading of TotalSegmentator requires `git` revision control tool. It is often installed already on many computer. If it is not found then module will report this during the setup phase. The tool can be downloaded from https://git-scm.com/download.
 - Install latest Slicer Preview Release of [3D Slicer](https://slicer.readthedocs.io/en/latest/user_guide/getting_started.html#installing-3d-slicer)
 - [Install `TotalSegmentator` extension](https://slicer.readthedocs.io/en/latest/user_guide/extensions_manager.html#install-extensions)
@@ -39,6 +39,20 @@ If you use the TotalSegmentator nn-Unet function from this software in your rese
   - Use standard segment names: use names defined in standard terminology files from [DCMQI](https://github.com/QIICR/dcmqi) (enabled by default). If disabled then TotalSegmentator identifiers will be used as segment names.
   - Upgrade: upgrade the AI engine - TotalSegmentator Python package - to the very latest version from GitHub.
   - Get TotalSegmentator package information: retrieve installed version of the AI engine - TotalSegmentator Python package.
+
+## Troubleshooting
+
+# Segmentation fails while predicting
+
+If segmentation fails while predicting and the `RuntimeError: CUDA out of memory.` message is found in the message log (textbox under the Apply button) then it means that a CUDA-capable GPU is available, but it is not powerful enough to be used by TotalSegmentator.
+
+In this case, it is recommended to switch to use the CPU. The easiest is to install the CPU version of pytorch by exiting Slicer and typing this into the terminal (replace `%localappdata%\NA-MIC\Slicer 5.2.1\bin` by the actual path of `PythonSlicer.exe` if not using Windows or not Slicer 5.2.1):
+
+```txt
+"%localappdata%\NA-MIC\Slicer 5.2.1\bin\PythonSlicer.exe" -m pip install torch torchvision torchaudio --force-reinstall
+```
+
+We have been discussing in the TotalSegmentator issue tracker how we could avoid this workaround to make switching to CPU easier in case the computer has a GPU but not powerful enough: https://github.com/wasserth/TotalSegmentator/issues/37. Hopefully a more convenient solution will be available soon.
 
 ## Contact
 
