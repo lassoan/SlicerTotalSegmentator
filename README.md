@@ -72,6 +72,10 @@ We have been discussing in the TotalSegmentator issue tracker how we could avoid
 "%localappdata%\NA-MIC\Slicer 5.2.1\bin\PythonSlicer.exe" -m pip uninstall torch torchvision torchaudio
 ```
 
+### Face segment is inaccurate
+
+There is a big segment called `face` at the front of the head. This segment is not designed to match the shape of an anatomical feature, but it designates the general area of the face. It can be used to remove features (for example by masking or blurring the image or clipping models) that might otherwise identify the individual subject. Removing these features makes it easier to share 3D data.
+
 ## Contact
 
 Please post any questions to the [Slicer Forum](https://discourse.slicer.org).
