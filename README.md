@@ -15,7 +15,7 @@ If you use the TotalSegmentator nn-Unet function from this software in your rese
 If you have a powerful NVIDIA GPU then a full-quality segmentation can be computed in a few minutes (instead of 40-50 minutes on the CPU). Therefore, it is recommended to set up the correct graphics driver and CUDA version if such GPU is available. Currently, CUDA is not available on macOS.
 
 - If a CUDA-capable GPU with 7GB or more memory is available: Make sure CUDA is installed. [CUDA version must be one of those listed on pytorch website as "Compute platform" for your system](https://pytorch.org/get-started/locally/). You can download CUDA from [here](https://developer.nvidia.com/cuda-downloads).
-- If a CUDA-capable GPU is available but it has less than 7GB memory: TotalSegmentator can fail due to running out of memory. To use the CPU for segmentation (and thus allow segmentation to complete slowly, but successfully), you can force usage of the CPU by installing a CPU-only version of pytorch in Slicer. Run this in the Windows terminal: `"%localappdata%\NA-MIC\Slicer 5.2.1\bin\PythonSlicer.exe" -m pip install torch torchvision torchaudio --force-reinstall` . The same command works on linux, as well, just use the correct `PythonSlicer` executable location.
+- If a CUDA-capable GPU is available but it has less than 7GB memory: TotalSegmentator can fail due to running out of memory. To use the CPU for segmentation (and thus allow segmentation to complete slowly, but successfully), you can force usage of the CPU by installing a CPU-only version of pytorch in Slicer. To do this, go to `PyTorch Utils` module, set `Computation backend` to `cpu`, and click `Install PyTorch` (if PyTorch is already installed then uninstall PyTorch and restart the application before installing).
 - If CUDA-capable GPU is not available then the everything still works, just takes more time.
 
 2. Install latest version of [3D Slicer](https://slicer.readthedocs.io/en/latest/user_guide/getting_started.html#installing-3d-slicer)
@@ -54,23 +54,19 @@ If you have a powerful NVIDIA GPU then a full-quality segmentation can be comput
 
 ### Segmentation fails while predicting
 
-If segmentation fails while predicting and the `RuntimeError: CUDA out of memory.` message is found in the message log (textbox under the Apply button) then it means that a CUDA-capable GPU is available, but it is not powerful enough to be used by TotalSegmentator.
+If segmentation fails while predicting and the `RuntimeError: CUDA out of memory.` message is found in the message log (textbox under the Apply button) then it means that a CUDA-capable GPU is available, but it is not powerful enough to be used by TotalSegmentator. In this case, it is recommended to switch to use the CPU by the following steps:
+- Go to `PyTorch Util` module, click `Uninstall PyTorch`. An error may be reported at the end of this step, as some PyTorch files are in use. Click `Restart the application` button to unload all PyTorch files.
+- Go to `PyTorch Util` module, select `cpu` as `Computation backend`, and click `Install PyTorch`.
 
-In this case, it is recommended to switch to use the CPU. The easiest is to install the CPU version of pytorch by exiting Slicer and typing this into the Windows terminal (replace `%localappdata%\NA-MIC\Slicer 5.2.1\bin` by the actual path of `PythonSlicer.exe` if not using Windows or not Slicer 5.2.1):
-
-```txt
-"%localappdata%\NA-MIC\Slicer 5.2.1\bin\PythonSlicer.exe" -m pip install torch torchvision torchaudio --force-reinstall
-```
-
-We have been discussing in the TotalSegmentator issue tracker how we could avoid this workaround to make switching to CPU easier in case the computer has a GPU but not powerful enough: https://github.com/wasserth/TotalSegmentator/issues/37. Hopefully a more convenient solution will be available soon.
+If your GPU has more than 7GB memory and you still get this error then the error message might indicate that the PyTorch CUDA version does not match the CUDA version installed on the system. Reinstall PyTorch with the correct CUDA version:
+- Go to `PyTorch Util` module, click `Uninstall PyTorch`. An error may be reported at the end of this step, as some PyTorch files are in use. Click `Restart the application` button to unload all PyTorch files.
+- Go to `PyTorch Util` module, select the `Computation backend` that matches the system CUDA version (if CUDA 11.7 is installed in the system then computation backend has to be `cu117`), and click `Install PyTorch`.
 
 ### GPU is not found
 
-[CUDA version must be one of those listed on pytorch website as "Compute platform" for your system](https://pytorch.org/get-started/locally/). You can download CUDA from [here](https://developer.nvidia.com/cuda-downloads). After updating CUDA, pytorch need to be reinstalled. Either uninstall and install Slicer again, or run this command in the Windows terminal to uninstall pytorch (Slicer will reinstall the correct version automatically):
-
-```txt
-"%localappdata%\NA-MIC\Slicer 5.2.1\bin\PythonSlicer.exe" -m pip uninstall torch torchvision torchaudio
-```
+[CUDA version must be one of those listed on pytorch website as "Compute platform" for your system](https://pytorch.org/get-started/locally/). You can download CUDA from [here](https://developer.nvidia.com/cuda-downloads). After updating CUDA, pytorch need to be reinstalled by the following steps:
+- Go to `PyTorch Util` module, click `Uninstall PyTorch`. An error may be reported at the end of this step, as some PyTorch files are in use. Click `Restart the application` button to unload all PyTorch files.
+- Go to `PyTorch Util` module, select the `Computation backend` that matches the system CUDA version (if CUDA 11.7 is installed in the system then computation backend has to be `cu117`), and click `Install PyTorch`.
 
 ### Face segment is inaccurate
 
