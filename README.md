@@ -15,8 +15,7 @@ If you use the TotalSegmentator nn-Unet function from this software in your rese
 If you have a powerful NVIDIA GPU then a full-quality segmentation can be computed in a few minutes (instead of 40-50 minutes on the CPU). Therefore, it is recommended to set up the correct graphics driver and CUDA version if such GPU is available. Currently, CUDA is not available on macOS.
 
 - If a CUDA-capable GPU with 7GB or more memory is available: Make sure CUDA is installed. [CUDA version must be one of those listed on pytorch website as "Compute platform" for your system](https://pytorch.org/get-started/locally/). You can download CUDA from [here](https://developer.nvidia.com/cuda-downloads).
-- If a CUDA-capable GPU is available but it has less than 7GB memory: TotalSegmentator can fail due to running out of memory. To use the CPU for segmentation (and thus allow segmentation to complete slowly, but successfully), you can force usage of the CPU by installing a CPU-only version of pytorch in Slicer. To do this, go to `PyTorch Utils` module, set `Computation backend` to `cpu`, and click `Install PyTorch` (if PyTorch is already installed then uninstall PyTorch and restart the application before installing).
-- If CUDA-capable GPU is not available then the everything still works, just takes more time.
+- If CUDA-capable GPU is not available or the GPU has less than 7GB memory: CUDA installation is not necessary, everything will still work, it will just take more time.
 
 2. Install latest version of [3D Slicer](https://slicer.readthedocs.io/en/latest/user_guide/getting_started.html#installing-3d-slicer)
 
@@ -58,15 +57,14 @@ If segmentation fails while predicting and the `RuntimeError: CUDA out of memory
 - Go to `PyTorch Util` module, click `Uninstall PyTorch`. An error may be reported at the end of this step, as some PyTorch files are in use. Click `Restart the application` button to unload all PyTorch files.
 - Go to `PyTorch Util` module, select `cpu` as `Computation backend`, and click `Install PyTorch`.
 
-If your GPU has more than 7GB memory and you still get this error then the error message might indicate that the PyTorch CUDA version does not match the CUDA version installed on the system. Reinstall PyTorch with the correct CUDA version:
-- Go to `PyTorch Util` module, click `Uninstall PyTorch`. An error may be reported at the end of this step, as some PyTorch files are in use. Click `Restart the application` button to unload all PyTorch files.
-- Go to `PyTorch Util` module, select the `Computation backend` that matches the system CUDA version (if CUDA 11.7 is installed in the system then computation backend has to be `cu117`), and click `Install PyTorch`.
+If your GPU has more than 7GB memory and you still get this error then the error message might indicate that the PyTorch CUDA version does not match the CUDA version installed on the system. Reinstall PyTorch with the correct CUDA version by following the instructions given below for [GPU is not found](#gpu-is-not-found).
 
 ### GPU is not found
 
-[CUDA version must be one of those listed on pytorch website as "Compute platform" for your system](https://pytorch.org/get-started/locally/). You can download CUDA from [here](https://developer.nvidia.com/cuda-downloads). After updating CUDA, pytorch need to be reinstalled by the following steps:
+If the computer has a CUDA-capable GPU but TotalSegmentator reports that GPU is not available then CUDA may not be installed on the system or CUDA version in PyTorch does not match the system CUDA version.
+- Make sure that the the CUDA vesion installed on the system [is one of those listed on pytorch website as "Compute platform" for your system](https://pytorch.org/get-started/locally/). You can download CUDA from [here](https://developer.nvidia.com/cuda-downloads).
 - Go to `PyTorch Util` module, click `Uninstall PyTorch`. An error may be reported at the end of this step, as some PyTorch files are in use. Click `Restart the application` button to unload all PyTorch files.
-- Go to `PyTorch Util` module, select the `Computation backend` that matches the system CUDA version (if CUDA 11.7 is installed in the system then computation backend has to be `cu117`), and click `Install PyTorch`.
+- Go to `PyTorch Util` module, select the `Computation backend` that matches the system CUDA version, and click `Install PyTorch`. The CUDA computational backend name has the format `cuNNN`, where _NNN_ corresponds to the CUDA major+minor version. For example, CUDA 11.7 backend name is `cu117`.
 
 ### Face segment is inaccurate
 
