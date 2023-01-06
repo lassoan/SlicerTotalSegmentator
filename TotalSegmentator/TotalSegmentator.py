@@ -516,80 +516,12 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         if needToInstallSegmenter or upgrade:
             self.log('TotalSegmentator Python package is required. Installing... (it may take several minutes)')
 
-            # Install from git+https requires presence of git
-            try:
-                import git
-                gitFound = True
-            except:
-                gitFound = False
-
-            # Automatic install of git is implemented for Windows only
-            # (on other operating system git is commonly available)
-            if not gitFound and os.name == 'nt':
-                if slicer.util.confirmOkCancelDisplay('This module requires "git" revision control tool. Click OK to install it now. Click Cancel and install it manually from <a href="https://git-scm.com/download/win">https://git-scm.com/download/win</a>'):
-                    result = os.system("winget install --id Git.Git -e --source winget")
-                    if result == 0:
-                        import winreg
-                        try:
-                            key = winreg.OpenKeyEx(winreg.HKEY_LOCAL_MACHINE, r"SOFTWARE\GitForWindows")
-                            value = winreg.QueryValueEx(key, "InstallPath")
-                            if key:
-                                winreg.CloseKey(key)
-                            gitInstallLocation = value[0]
-                            gitBinFolder = os.path.join(gitInstallLocation, "bin")
-                            if os.path.isfile(os.path.join(gitBinFolder, "git.exe")):
-                                # git is found, use it
-                                slicer.app.setEnvironmentVariable('path', slicer.app.environment().value('path')+";"+gitBinFolder)
-                                gitFound = True
-                        except Exception as e:
-                            logging.error(str(e))
-
-            if not gitFound:
-                raise ValueError('"git" is required to install TotalSegmentator.')
-
-            # TotalSegmentator requires an exact SimpleITK version (2.0.2).
-            # Simply installing TotalSegmentator would uninstall Slicer's SimpleITK, which would break
-            # image IO plugins (in particular, the in-memory image transfer IO plugin).
-
-            # As a workaround, TotalSegmentator installed without dependencies, then
-            # SimpleITK is removed from dependencies (from METADATA file)
-            # and then install TotalSegmentator with dependencies.
-
-            totalSegmentatorPackage = "git+https://github.com/wasserth/TotalSegmentator.git"
+            totalSegmentatorPackage = "https://github.com/wasserth/TotalSegmentator/archive/master.zip"
 
             # Install TotalSegmentator without dependencies
             # (because we need to remove SimpleITK requirement before installing dependencies,
             # as it would replace Slicer's SimpleITK)
-            slicer.util.pip_install(totalSegmentatorPackage + " --no-deps" + (" --upgrade" if upgrade else ""))
-
-            # Get path to site-packages\TotalSegmentator-1.4.0.dist-info\METADATA
-            import importlib.metadata
-            metadataPath = [p for p in importlib.metadata.files('TotalSegmentator') if 'METADATA' in str(p)][0]
-            metadataPath.locate()
-
-            # Remove line: `Requires-Dist: SimpleITK (==2.0.2)`
-            filteredMetadata = ""
-            with open(metadataPath.locate(), "r+") as file:
-                for line in file:
-                    if line.startswith('Requires-Dist') and 'SimpleITK' in line:
-                        # skip SimpleITK requirement
-                        continue
-                    filteredMetadata += line
-                # Update file content with filtered result
-                file.seek(0)
-                file.write(filteredMetadata)
-                file.truncate()
-
-            # Install all dependencies but SimpleITK (simply installing TotalSegmentator would still replace SimpleITK)
-            import importlib.metadata
-            requirements = importlib.metadata.requires('TotalSegmentator')
-            for requirement in requirements:
-                if requirement.startswith('SimpleITK'):
-                    continue
-                # requirement looks like this: nibabel (>=2.3.0), we need to remove space and parentheses
-                requirement = requirement.replace(' ','').replace('(','').replace(')','')
-                self.log(f'Installing {requirement}...')
-                slicer.util.pip_install(requirement)
+            slicer.util.pip_install(totalSegmentatorPackage + (" --upgrade" if upgrade else ""))
 
             self.log('TotalSegmentator installation is completed successfully.')
 

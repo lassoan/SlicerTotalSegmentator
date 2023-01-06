@@ -29,7 +29,7 @@ If you have a powerful NVIDIA GPU then a full-quality segmentation can be comput
 - Select `Input volume` -> `Panoramix-cropped`
 - Select `Segmentation` -> `Create new segmentation`
 - Click `Apply`
-  - When this module is used the first time, it needs to download and install PyTorch and TotalSegmentator Python packages and weights for the AI models. This can take 5-10 minutes and several GB disk space. Downloading of TotalSegmentator requires `git` revision control tool. It is often installed already on many computers. If it is not found then you may be asked at this point to install it (`git` can be downloaded from [here](https://git-scm.com/download)).
+  - When this module is used the first time, it needs to download and install PyTorch and TotalSegmentator Python packages and weights for the AI models. This can take 5-10 minutes and several GB disk space.
   - Expected computation time:
     - With CUDA-capable GPU: 20-30 seconds in fast mode, 40-50 seconds in full-resolution mode.
     - Without GPU: 1 minute in fast mode, 40-50 minutes in full-resolution mode.
