@@ -59,6 +59,8 @@ If segmentation fails while predicting and the `RuntimeError: CUDA out of memory
 
 If your GPU has more than 7GB memory and you still get this error then the error message might indicate that the PyTorch CUDA version does not match the CUDA version installed on the system. Reinstall PyTorch with the correct CUDA version by following the instructions given below for [GPU is not found](#gpu-is-not-found).
 
+For Linux systems onlyu: On certain Linux sytems, cuDNN library is not part of the CUDA package. If this happens on your system then you can follow [these instructions](https://docs.nvidia.com/deeplearning/cudnn/install-guide/index.html) to install cuDNN.
+
 ### GPU is not found
 
 If the computer has a CUDA-capable GPU but TotalSegmentator reports that GPU is not available then CUDA may not be installed on the system or CUDA version in PyTorch does not match the system CUDA version.
