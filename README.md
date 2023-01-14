@@ -12,10 +12,17 @@ If you use the TotalSegmentator nn-Unet function from this software in your rese
 
 1. Setup your GPU driver (optional)
 
-If you have a powerful NVIDIA GPU then a full-quality segmentation can be computed in a few minutes (instead of 40-50 minutes on the CPU). Therefore, it is recommended to set up the correct graphics driver and CUDA version if such GPU is available. Currently, CUDA is not available on macOS.
+If you have a powerful GPU is available then a full-quality segmentation can be computed in a few minutes, instead of 40-50 minutes on the CPU. Therefore, it is recommended to set up GPU acceleration as described in this section.
 
-- If a CUDA-capable GPU with 7GB or more memory is available: Make sure CUDA is installed. [CUDA version must be one of those listed on pytorch website as "Compute platform" for your system](https://pytorch.org/get-started/locally/). You can download CUDA from [here](https://developer.nvidia.com/cuda-downloads).
-- If CUDA-capable GPU is not available or the GPU has less than 7GB memory: CUDA installation is not necessary, everything will still work, it will just take more time.
+- If a strong GPU with 7GB or more memory is available:
+  - On Windows:
+    - If using NVIDIA GPU: Make sure CUDA is installed. [CUDA version must be one of those listed on pytorch website as "Compute platform" for your system](https://pytorch.org/get-started/locally/). You can download CUDA from [here](https://developer.nvidia.com/cuda-downloads).
+    - PyTorch does not officially support AMD GPUs for on Windows, therefore you need to use the CPU.
+  - On Linux:
+    - If using NVIDIA GPU: Make sure NVIDIA drivers are installed. If CUDA is installed then make sure [CUDA version is one of those listed on pytorch website as "Compute platform" for your system](https://pytorch.org/get-started/locally/). If CUDA is not installed then it will be set up automatically during installation (pytorch binary packages contain the appropriate CUDA version).
+    - If using AMD GPU: In theory, ROCm-compatible AMD GPUs should work, but this is not tested.
+  - On macOS: PyTorch does not officially support GPUs for macOS, therefore you need to use the CPU.
+- If suitable GPU is not available: Graphics driver updates or CUDA installation is not necessary, everything will still work, it will just take more time.
 
 2. Install latest version of [3D Slicer](https://slicer.readthedocs.io/en/latest/user_guide/getting_started.html#installing-3d-slicer)
 
