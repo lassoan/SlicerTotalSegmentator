@@ -722,6 +722,17 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         else:
             self.readSegmentationFolder(outputSegmentation, outputSegmentationFolder, task)
 
+        # Set source volume - required for DICOM Segmentation export
+        outputSegmentation.SetNodeReferenceID(outputSegmentation.GetReferenceImageGeometryReferenceRole(), inputVolume.GetID())
+        outputSegmentation.SetReferenceImageGeometryParameterFromVolumeNode(inputVolume)
+
+        # Place segmentation node in the same place as the input volume
+        shNode = slicer.vtkMRMLSubjectHierarchyNode.GetSubjectHierarchyNode(slicer.mrmlScene)
+        inputVolumeShItem = shNode.GetItemByDataNode(inputVolume)
+        studyShItem = shNode.GetItemParent(inputVolumeShItem)
+        segmentationShItem = shNode.GetItemByDataNode(outputSegmentation)
+        shNode.SetItemParent(segmentationShItem, studyShItem)
+
         if self.clearOutputFolder:
             self.log("Cleaning up temporary folder...")
             if os.path.isdir(tempFolder):
