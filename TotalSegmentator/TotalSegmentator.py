@@ -84,7 +84,8 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         self.logic = TotalSegmentatorLogic()
         self.logic.logCallback = self.addLog
 
-        self.ui.taskComboBox.addItems(self.logic.tasks)
+        for task in self.logic.tasks:
+            self.ui.taskComboBox.addItem(self.logic.tasks[task]['label'], task)
 
         # Connections
 
@@ -98,6 +99,7 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         self.ui.fastCheckBox.connect('toggled(bool)', self.updateParameterNodeFromGUI)
         self.ui.useStandardSegmentNamesCheckBox.connect('toggled(bool)', self.updateParameterNodeFromGUI)
         self.ui.taskComboBox.currentTextChanged.connect(self.updateParameterNodeFromGUI)
+        self.ui.outputSegmentationSelector.connect("currentNodeChanged(vtkMRMLNode*)", self.updateParameterNodeFromGUI)
         self.ui.outputSegmentationSelector.connect("currentNodeChanged(vtkMRMLNode*)", self.ui.segmentationShow3DButton.setSegmentationNode)
 
         # Buttons
@@ -193,7 +195,8 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 
         # Update node selectors and sliders
         self.ui.inputVolumeSelector.setCurrentNode(self._parameterNode.GetNodeReference("InputVolume"))
-        self.ui.taskComboBox.setCurrentText(self._parameterNode.GetParameter("Task"))
+        task = self._parameterNode.GetParameter("Task")
+        self.ui.taskComboBox.setCurrentIndex(self.ui.taskComboBox.findData(task))
         self.ui.fastCheckBox.checked = self._parameterNode.GetParameter("Fast") == "true"
         self.ui.useStandardSegmentNamesCheckBox.checked = self._parameterNode.GetParameter("UseStandardSegmentNames") == "true"
         self.ui.outputSegmentationSelector.setCurrentNode(self._parameterNode.GetNodeReference("OutputSegmentation"))
@@ -210,6 +213,10 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         if inputVolume:
             self.ui.outputSegmentationSelector.baseName = inputVolume.GetName() + " segmentation"
 
+        fastModeSupported = self.logic.isFastModeSupportedForTask(task)
+        self.ui.fastCheckBox.visible = fastModeSupported
+        self.ui.fastNotAvailableLabel.visible = not fastModeSupported
+
         # All the GUI updates are done
         self._updatingGUIFromParameterNode = False
 
@@ -225,7 +232,7 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         wasModified = self._parameterNode.StartModify()  # Modify all properties in a single batch
 
         self._parameterNode.SetNodeReferenceID("InputVolume", self.ui.inputVolumeSelector.currentNodeID)
-        self._parameterNode.SetParameter("Task", self.ui.taskComboBox.currentText)
+        self._parameterNode.SetParameter("Task", self.ui.taskComboBox.currentData)
         self._parameterNode.SetParameter("Fast", "true" if self.ui.fastCheckBox.checked else "false")
         self._parameterNode.SetParameter("UseStandardSegmentNames", "true" if self.ui.useStandardSegmentNamesCheckBox.checked else "false")
         self._parameterNode.SetNodeReferenceID("OutputSegmentation", self.ui.outputSegmentationSelector.currentNodeID)
@@ -250,13 +257,12 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
             # Create new segmentation node, if not selected yet
             if not self.ui.outputSegmentationSelector.currentNode():
                 self.ui.outputSegmentationSelector.addNode()
-                self._parameterNode.SetNodeReferenceID("OutputSegmentation", self.ui.outputSegmentationSelector.currentNodeID)
 
             self.logic.useStandardSegmentNames = self.ui.useStandardSegmentNamesCheckBox.checked
 
             # Compute output
             self.logic.process(self.ui.inputVolumeSelector.currentNode(), self.ui.outputSegmentationSelector.currentNode(),
-                self.ui.fastCheckBox.checked, self.ui.taskComboBox.currentText)
+                self.ui.fastCheckBox.checked, self.ui.taskComboBox.currentData)
 
         self.ui.statusLabel.appendPlainText("\nProcessing finished.")
 
@@ -288,19 +294,23 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         """
         Called when the logic class is instantiated. Can be used for initializing member variables.
         """
+        from collections import OrderedDict
+
         ScriptedLoadableModuleLogic.__init__(self)
 
         self.logCallback = None
         self.clearOutputFolder = True
         self.useStandardSegmentNames = True
 
-        self.tasks = [
-            "total",
-            "lung_vessels",
-            "cerebral_bleed",
-            "hip_implant",
-            "coronary_arteries"
-        ]
+        self.tasks = OrderedDict()
+        self.tasks['total'] = {'label': 'total', 'supportsFast': True, 'supportsMultiLabel': True}
+        self.tasks['lung_vessels'] = {'label': 'lung vessels', 'requiresPreSegmentation': True}
+        self.tasks['cerebral_bleed'] = {'label': 'cerebral bleed', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
+        self.tasks['hip_implant'] = {'label': 'hip implant', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
+        self.tasks['coronary_arteries'] = {'label': 'coronary arteries', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
+        self.tasks['body'] = {'label': 'body', 'supportsFast': True}
+        self.tasks['pleural_pericard_effusion'] = {'label': 'pleural and pericardial effusion', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
+        # self.tasks['covid'] = {'label': 'pleural and pericardial effusion'}
 
         self.totalSegmentatorLabelTerminology = {
             "spleen": "Segmentation category and type - DICOM master list~SCT^123037004^Anatomical Structure~SCT^78961009^Spleen~^^~Anatomic codes - DICOM master list~^^~^^|",
@@ -407,7 +417,64 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
             "iliopsoas_left": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^68455001^Iliopsoas muscle~SCT^7771000^Left~Anatomic codes - DICOM master list~^^~^^|",
             "iliopsoas_right": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^68455001^Iliopsoas muscle~SCT^24028007^Right~Anatomic codes - DICOM master list~^^~^^|",
             "urinary_bladder": "Segmentation category and type - DICOM master list~SCT^123037004^Anatomical Structure~SCT^89837001^Bladder~^^~Anatomic codes - DICOM master list~^^~^^|",
+
+            # SPecification of these codes are still work in progress:
+            #"femur": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^71341001^Femur~^^~Anatomic codes - DICOM master list~^^~^^|",
+            #"patella": "Segmentation category and type - DICOM master list~SCT^123037004^Anatomical Structure~SCT^64234005^Patella~^^~Anatomic codes - DICOM master list~^^~^^|",
+            #"tibia": "",
+            #"fibula": "Segmentation category and type - DICOM master list~SCT^123037004^Anatomical Structure~SCT^87342007^Fibula~^^~Anatomic codes - DICOM master list~^^~^^|",
+            #"tarsal": "",
+            #"metatarsal": "",
+            #"phalanges_feet": "",
+            #"humerus": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^85050009^Humerus~^^~Anatomic codes - DICOM master list~^^~^^|",
+            #"ulna": "",
+            #"radius": "",
+            #"carpal": "",
+            #"metacarpal": "",
+            #"phalanges_hand": "",
+            #"sternum": "Segmentation category and type - DICOM master list~SCT^123037004^Anatomical Structure~SCT^56873002^Sternum~^^~Anatomic codes - DICOM master list~^^~^^|",
+            #"skull": "Segmentation category and type - DICOM master list~SCT^123037004^Anatomical Structure~SCT^89546000^Skull~^^~Anatomic codes - DICOM master list~^^~^^|",
+            #"subcutaneous_fat": "",
+            #"skeletal_muscle": "",
+            #"torso_fat": "",
+            #"spinal_cord": "Segmentation category and type - DICOM master list~SCT^123037004^Anatomical Structure~SCT^2748008^Spinal cord~^^~Anatomic codes - DICOM master list~^^~^^|",
+            #"lung_covid_infiltrate": "",
+            #"intracerebral_hemorrhage": "",
+            #"hip_implant": "Segmentation category and type - DICOM master list~SCT^260787004^Physical object~SCT^40388003^Implant~^^~Anatomic codes - DICOM master list~SCT^24136001^Hip joint~SCT^51440002^Right and left|",
+            #"coronary_arteries": "Segmentation category and type - DICOM master list~SCT^123037004^Anatomical Structure~SCT^41801008^Coronary artery~^^~Anatomic codes - DICOM master list~^^~^^|",
+            #"kidney": "Segmentation category and type - DICOM master list~SCT^123037004^Anatomical Structure~SCT^64033007^Kidney~^^~Anatomic codes - DICOM master list~^^~^^|",
+            #"adrenal_gland": "Segmentation category and type - DICOM master list~SCT^123037004^Anatomical Structure~SCT^23451007^Adrenal gland~^^~Anatomic codes - DICOM master list~^^~^^|",
+            #"vertebrae_lumbar": "Segmentation category and type - DICOM master list~SCT^123037004^Anatomical Structure~SCT^51282000^Vertebra~^^~Anatomic codes - DICOM master list~SCT^122496007^Lumbar spine~^^|",
+            #"vertebrae_thoracic": "Segmentation category and type - DICOM master list~SCT^123037004^Anatomical Structure~SCT^51282000^Vertebra~^^~Anatomic codes - DICOM master list~SCT^122495006^Thoracic spine~^^|",
+            #"vertebrae_cervical": "Segmentation category and type - DICOM master list~SCT^123037004^Anatomical Structure~SCT^51282000^Vertebra~^^~Anatomic codes - DICOM master list~SCT^122494005^Cervical spine~^^|",
+            #"iliac_artery": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^73634005^Common iliac artery~^^~Anatomic codes - DICOM master list~^^~^^|",
+            #"iliac_vena": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^46027005^Common iliac vein~^^~Anatomic codes - DICOM master list~^^~^^|",
+            #"ribs": "Segmentation category and type - DICOM master list~SCT^123037004^Anatomical Structure~SCT^113197003^Rib~^^~Anatomic codes - DICOM master list~SCT^39607008^Lung~SCT^24028007^Right|",
+            #"scapula": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^79601000^Scapula~^^~Anatomic codes - DICOM master list~^^~^^|",
+            #"clavicula": "Segmentation category and type - DICOM master list~SCT^123037004^Anatomical Structure~SCT^51299004^Clavicle~^^~Anatomic codes - DICOM master list~^^~^^|",
+            #"hip": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^29836001^Hip~^^~Anatomic codes - DICOM master list~^^~^^|",
+            #"gluteus_maximus": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^181674001^Gluteus maximus muscle~^^~Anatomic codes - DICOM master list~^^~^^|",
+            #"gluteus_medius": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^78333006^Gluteus medius muscle~^^~Anatomic codes - DICOM master list~^^~^^|",
+            #"gluteus_minimus": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^78333006^Gluteus medius muscle~^^~Anatomic codes - DICOM master list~^^~^^|",
+            #"autochthon": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^44947003^Erector spinae muscle~^^~Anatomic codes - DICOM master list~^^~^^|",
+            #"iliopsoas": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^68455001^Iliopsoas muscle~^^~Anatomic codes - DICOM master list~^^~^^|",
+            #"lung_vessels": "Segmentation category and type - DICOM master list~SCT^85756007^Tissue~SCT^59820001^Blood vessel~^^~Anatomic codes - DICOM master list~SCT^39607008^Lung~SCT^24028007^Right|",
+            #"lung_trachea_bronchia": "Segmentation category and type - DICOM master list~SCT^123037004^Anatomical Structure~SCT^110726009^Trachea and bronchus~^^~Anatomic codes - DICOM master list~^^~^^|",
+            #"body_trunc": "",
+            #"body_extremities": "",
+            #"lung_pleural": "",
+            #"pleural_effusion": "",
+            #"pericardial_effusion": "",
         }
+
+    def isFastModeSupportedForTask(self, task):
+        return (task in self.tasks) and ('supportsFast' in self.tasks[task]) and self.tasks[task]['supportsFast']
+
+    def isMultiLabelSupportedForTask(self, task):
+        return (task in self.tasks) and ('supportsMultiLabel' in self.tasks[task]) and self.tasks[task]['supportsMultiLabel']
+
+    def isPreSegmentationRequiredForTask(self, task):
+        return (task in self.tasks) and ('requiresPreSegmentation' in self.tasks[task]) and self.tasks[task]['requiresPreSegmentation']
 
     def getSegmentLabelColor(self, terminologyEntryStr):
         """Get segment label and color from terminology"""
@@ -617,7 +684,10 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
 
         # Launch TotalSegmentator in fast mode to get initial segmentation, if needed
 
-        if task != "total":
+        #options.extend(["--nr_thr_saving", "1"])
+        #options.append("--force_split")
+
+        if self.isPreSegmentationRequiredForTask(task):
             preOptions = options + ["--fast"]
             self.log('Creating segmentations with TotalSegmentator AI (pre-run)...')
             self.log(f"Total Segmentator arguments: {preOptions}")
@@ -628,11 +698,10 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
 
         # When there are many segments then reading each segment from a separate file would be too slow,
         # but we need to do it for some specialized models.
-        multilabel = True
+        multilabel = self.isMultiLabelSupportedForTask(task)
 
-         # lung_vessels task does not support multilabel output or fast mode
-        if task == "lung_vessels":
-            multilabel = False
+        # some tasks do not support fast mode
+        if not self.isFastModeSupportedForTask(task):
             fast = False
 
         if multilabel:
