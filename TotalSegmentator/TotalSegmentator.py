@@ -86,6 +86,10 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 
         for task in self.logic.tasks:
             self.ui.taskComboBox.addItem(self.logic.tasks[task]['label'], task)
+       
+        for segmentName in self.logic.totalSegmentatorLabelTerminology:
+            self.ui.subsetListWidget.addItem(segmentName)
+
 
         # Connections
 
@@ -106,6 +110,9 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         self.ui.packageInfoUpdateButton.connect('clicked(bool)', self.onPackageInfoUpdate)
         self.ui.packageUpgradeButton.connect('clicked(bool)', self.onPackageUpgrade)
         self.ui.applyButton.connect('clicked(bool)', self.onApplyButton)
+
+        # Lists
+        self.ui.subsetListWidget.itemClicked.connect(self.onSubsetListWidgetItemClicked)
 
         # Make sure parameter node is initialized (needed for module reload)
         self.initializeParameterNode()
@@ -233,6 +240,14 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 
         self._parameterNode.SetNodeReferenceID("InputVolume", self.ui.inputVolumeSelector.currentNodeID)
         self._parameterNode.SetParameter("Task", self.ui.taskComboBox.currentData)
+
+        if self.ui.taskComboBox.currentData == "total":
+            self.ui.subsetListWidget.enabled = True
+        else:
+            self.ui.subsetListWidget.enabled = False
+            for i in range(self.ui.subsetListWidget.count):
+                self.ui.subsetListWidget.item(i).setSelected(False)
+
         self._parameterNode.SetParameter("Fast", "true" if self.ui.fastCheckBox.checked else "false")
         self._parameterNode.SetParameter("UseStandardSegmentNames", "true" if self.ui.useStandardSegmentNamesCheckBox.checked else "false")
         self._parameterNode.SetNodeReferenceID("OutputSegmentation", self.ui.outputSegmentationSelector.currentNodeID)
@@ -259,12 +274,18 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
                 self.ui.outputSegmentationSelector.addNode()
 
             self.logic.useStandardSegmentNames = self.ui.useStandardSegmentNamesCheckBox.checked
-
+            
+            subsetlist = self.ui.subsetListWidget.selectedItems()            
+            
             # Compute output
             self.logic.process(self.ui.inputVolumeSelector.currentNode(), self.ui.outputSegmentationSelector.currentNode(),
-                self.ui.fastCheckBox.checked, self.ui.taskComboBox.currentData)
+                subsetlist, self.ui.fastCheckBox.checked, self.ui.taskComboBox.currentData)
 
         self.ui.statusLabel.appendPlainText("\nProcessing finished.")
+
+    def onSubsetListWidgetItemClicked(self):
+        # print("test")
+        pass
 
     def onPackageInfoUpdate(self):
         self.ui.packageInfoTextBrowser.plainText = ''
@@ -622,7 +643,7 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         if retcode != 0:
             raise CalledProcessError(retcode, proc.args, output=proc.stdout, stderr=proc.stderr)
 
-    def process(self, inputVolume, outputSegmentation, fast=True, task=None):
+    def process(self, inputVolume, outputSegmentation, subsetlist=None, fast=True, task=None):
 
         """
         Run the processing algorithm.
@@ -704,12 +725,17 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         if not self.isFastModeSupportedForTask(task):
             fast = False
 
-        if multilabel:
+        if multilabel and not subsetlist:
             options.append("--ml")
-        if task:
+        if task and not subsetlist:
             options.extend(["--task", task])
         if fast:
             options.append("--fast")
+        if subsetlist:
+            options.append("--roi_subset")
+            for i in range(len(subsetlist)):
+                options.append(subsetlist[i].text())
+                
         self.log('Creating segmentations with TotalSegmentator AI...')
         self.log(f"Total Segmentator arguments: {options}")
         proc = slicer.util.launchConsoleProcess(totalSegmentatorCommand + options)
@@ -717,7 +743,7 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
 
         # Load result
         self.log('Importing segmentation results...')
-        if multilabel:
+        if multilabel and not subsetlist:
             self.readSegmentation(outputSegmentation, outputSegmentationFile, task)
         else:
             self.readSegmentationFolder(outputSegmentation, outputSegmentationFolder, task)
@@ -764,7 +790,6 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
             labelVolumePath = f"{output_segmentation_dir}/{segmentName}.nii.gz"
             if not exists(labelVolumePath):
                 continue
-
             labelmapVolumeNode = slicer.util.loadLabelVolume(labelVolumePath, {"name": segmentName})
 
             randomColorsNode.GetColor(labelValue,rgba)
