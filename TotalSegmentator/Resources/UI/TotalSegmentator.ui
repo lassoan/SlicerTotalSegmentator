@@ -200,10 +200,10 @@
       <item row="1" column="1">
        <widget class="QPushButton" name="packageUpgradeButton">
         <property name="toolTip">
-         <string>Update to latest version of TotalSegmentator Python package from GitHub</string>
+         <string>Force upgrade of TotalSegmentator Python package to the version required by this module.</string>
         </property>
         <property name="text">
-         <string>Upgrade</string>
+         <string>Force reinstall</string>
         </property>
        </widget>
       </item>

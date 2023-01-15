@@ -269,7 +269,7 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     def onPackageInfoUpdate(self):
         self.ui.packageInfoTextBrowser.plainText = ''
         with slicer.util.tryWithErrorDisplay("Failed to get TotalSegmenter package version information", waitCursor=True):
-            self.ui.packageInfoTextBrowser.plainText = self.logic.totalSegmentatorPythonPackageInfo().rstrip()
+            self.ui.packageInfoTextBrowser.plainText = self.logic.installedTotalSegmentatorPythonPackageInfo().rstrip()
 
     def onPackageUpgrade(self):
         with slicer.util.tryWithErrorDisplay("Failed to upgrade TotalSegmenter", waitCursor=True):
@@ -297,6 +297,8 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         from collections import OrderedDict
 
         ScriptedLoadableModuleLogic.__init__(self)
+
+        self.totalSegmentatorPythonPackageDownloadUrl = "https://github.com/wasserth/TotalSegmentator/archive/ecf84f9e59b84dddb447e2b13542f58c29ee4c6a.zip"
 
         self.logCallback = None
         self.clearOutputFolder = True
@@ -520,10 +522,29 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         if self.logCallback:
             self.logCallback(text)
 
-    def totalSegmentatorPythonPackageInfo(self):
+    def installedTotalSegmentatorPythonPackageDownloadUrl(self):
+        """Get package download URL of the installed TotalSegmentator Python package"""
+        import importlib.metadata
+        import json
+        try:
+            metadataPath = [p for p in importlib.metadata.files('TotalSegmentator') if 'direct_url.json' in str(p)][0]
+            with open(metadataPath.locate()) as json_file:
+                data = json.load(json_file)
+            return data['url']
+        except:
+            # Failed to get version information, probably not installed from download URL
+            return None
+
+    def installedTotalSegmentatorPythonPackageInfo(self):
         import shutil
         import subprocess
         versionInfo = subprocess.check_output([shutil.which('PythonSlicer'), "-m", "pip", "show", "TotalSegmentator"]).decode()
+
+        # Get download URL, as the version information does not contain the github hash
+        downloadUrl = self.installedTotalSegmentatorPythonPackageDownloadUrl()
+        if downloadUrl:
+            versionInfo += "Download URL: " + downloadUrl
+
         return versionInfo
 
     def simpleITKPythonPackageVersion(self):
@@ -577,18 +598,30 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         needToInstallSegmenter = False
         try:
             import totalsegmentator
+            if not upgrade:
+                # Check if we need to update TotalSegmentator Python package version
+                downloadUrl = self.installedTotalSegmentatorPythonPackageDownloadUrl()
+                if downloadUrl and (downloadUrl != self.totalSegmentatorPythonPackageDownloadUrl):
+                    # TotalSegmentator have been already installed from GitHub, from a different URL that this module needs
+                    if not slicer.util.confirmOkCancelDisplay(
+                        f"This module requires TotalSegmentator Python package update.",
+                        detailedText=f"Currently installed: {downloadUrl}\n\nRequired: {self.totalSegmentatorPythonPackageDownloadUrl}"):
+                      raise ValueError('TotalSegmentator update was cancelled.')
+                    upgrade = True
         except ModuleNotFoundError as e:
             needToInstallSegmenter = True
 
         if needToInstallSegmenter or upgrade:
             self.log('TotalSegmentator Python package is required. Installing... (it may take several minutes)')
 
-            totalSegmentatorPackage = "https://github.com/wasserth/TotalSegmentator/archive/master.zip"
-
-            # Install TotalSegmentator without dependencies
-            # (because we need to remove SimpleITK requirement before installing dependencies,
-            # as it would replace Slicer's SimpleITK)
-            slicer.util.pip_install(totalSegmentatorPackage + (" --upgrade" if upgrade else ""))
+            if upgrade:
+                # TotalSegmentator version information is usually not updated with each git revision, therefore we must uninstall it to force the upgrade
+                slicer.util.pip_uninstall("TotalSegmentator")
+                # Update TotalSegmentator and all its dependencies
+                slicer.util.pip_install(self.totalSegmentatorPythonPackageDownloadUrl + " --upgrade")
+            else:
+                # Install TotalSegmentator and all its dependencies
+                slicer.util.pip_install(self.totalSegmentatorPythonPackageDownloadUrl)
 
             self.log('TotalSegmentator installation is completed successfully.')
 
