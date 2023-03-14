@@ -662,7 +662,7 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         if retcode != 0:
             raise CalledProcessError(retcode, proc.args, output=proc.stdout, stderr=proc.stderr)
 
-    def process(self, inputVolume, outputSegmentation, fast=True, task=None):
+    def process(self, inputVolume, outputSegmentation, fast=True, task=None, subset=None):
 
         """
         Run the processing algorithm.
@@ -671,12 +671,14 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         :param outputVolume: thresholding result
         :param fast: faster and less accurate output
         :param task: one of self.tasks, default is "total"
+        :param subset: a list of structures (TotalSegmentator classe names https://github.com/wasserth/TotalSegmentator#class-detailsTotalSegmentator) to segment. 
+          Default is None, which means that all available structures will be segmented."
         """
 
         if not inputVolume:
             raise ValueError("Input or output volume is invalid")
 
-        if task == None:
+        if task == None and not subset:
             task = "total"
 
         import time
@@ -757,13 +759,24 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         # some tasks do not support fast mode
         if not self.isFastModeSupportedForTask(task):
             fast = False
-
+            
         if multilabel:
             options.append("--ml")
         if task:
             options.extend(["--task", task])
         if fast:
             options.append("--fast")
+        if subset:
+            options.append("--roi_subset")
+            # append each item of the subset
+            for item in subset:
+                try:
+                    if self.totalSegmentatorLabelTerminology[item]: 
+                        options.append(item)
+                except:
+                    # Failed to get terminology info, item probably misspelled
+                    raise ValueError("'" + item + "' is not a valid TotalSegmentator label terminology.")
+            
         self.log('Creating segmentations with TotalSegmentator AI...')
         self.log(f"Total Segmentator arguments: {options}")
         proc = slicer.util.launchConsoleProcess(totalSegmentatorCommand + options)
@@ -774,7 +787,7 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         if multilabel:
             self.readSegmentation(outputSegmentation, outputSegmentationFile, task)
         else:
-            self.readSegmentationFolder(outputSegmentation, outputSegmentationFolder, task)
+            self.readSegmentationFolder(outputSegmentation, outputSegmentationFolder, task, subset)
 
         # Set source volume - required for DICOM Segmentation export
         outputSegmentation.SetNodeReferenceID(outputSegmentation.GetReferenceImageGeometryReferenceRole(), inputVolume.GetID())
@@ -795,40 +808,51 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         stopTime = time.time()
         self.log(f'Processing completed in {stopTime-startTime:.2f} seconds')
 
-    def readSegmentationFolder(self, outputSegmentation, output_segmentation_dir, task):
-        """The method is very slow, but this is the only option for some specialized tasks.
+    def readSegmentationFolder(self, outputSegmentation, output_segmentation_dir, task, subset=None):
+        """
+        The method is very slow, but this is the only option for some specialized tasks.
         """
 
-        from os.path import exists
+        import os
 
         outputSegmentation.GetSegmentation().RemoveAllSegments()
-
-        # Get label descriptions
-        from totalsegmentator.map_to_binary import class_map
-        labelValueToSegmentName = class_map[task]
 
         # Get color node with random colors
         randomColorsNode = slicer.mrmlScene.GetNodeByID('vtkMRMLColorTableNodeRandom')
         rgba = [0, 0, 0, 0]
 
-        # Read each candidate file
-        for labelValue in labelValueToSegmentName:
-            segmentName = labelValueToSegmentName[labelValue]
-            self.log(f"Importing {segmentName}")
-            labelVolumePath = f"{output_segmentation_dir}/{segmentName}.nii.gz"
-            if not exists(labelVolumePath):
-                continue
+        # Get label descriptions if task is provided
+        labelValueToSegmentName = class_map[task] if task else {}
 
-            labelmapVolumeNode = slicer.util.loadLabelVolume(labelVolumePath, {"name": segmentName})
-
-            randomColorsNode.GetColor(labelValue,rgba)
-            segmentId = outputSegmentation.GetSegmentation().AddEmptySegment(segmentName, segmentName, rgba[0:3])
+        def import_labelmap_to_segmentation(labelmapVolumeNode, segmentName, segmentId):
             updatedSegmentIds = vtk.vtkStringArray()
             updatedSegmentIds.InsertNextValue(segmentId)
             slicer.modules.segmentations.logic().ImportLabelmapToSegmentationNode(labelmapVolumeNode, outputSegmentation, updatedSegmentIds)
             self.setTerminology(outputSegmentation, segmentName, segmentId)
-
             slicer.mrmlScene.RemoveNode(labelmapVolumeNode)
+
+        # Read each candidate file
+        for labelValue, segmentName in labelValueToSegmentName.items():
+            self.log(f"Importing {segmentName}")
+            labelVolumePath = os.path.join(output_segmentation_dir, f"{segmentName}.nii.gz")
+            if not os.path.exists(labelVolumePath):
+                continue
+            labelmapVolumeNode = slicer.util.loadLabelVolume(labelVolumePath, {"name": segmentName})
+            randomColorsNode.GetColor(labelValue, rgba)
+            segmentId = outputSegmentation.GetSegmentation().AddEmptySegment(segmentName, segmentName, rgba[0:3])
+            import_labelmap_to_segmentation(labelmapVolumeNode, segmentName, segmentId)
+
+        # Read each subset file if subset is provided
+        if subset is not None and task is None:
+            for segmentName in subset:
+                self.log(f"Importing {segmentName}")
+                labelVolumePath = os.path.join(output_segmentation_dir, f"{segmentName}.nii.gz")
+                if os.path.exists(labelVolumePath):
+                    labelmapVolumeNode = slicer.util.loadLabelVolume(labelVolumePath, {"name": segmentName})
+                    segmentId = outputSegmentation.GetSegmentation().AddEmptySegment(segmentName, segmentName)
+                    import_labelmap_to_segmentation(labelmapVolumeNode, segmentName, segmentId)
+                else:
+                    self.log(f"{segmentName} not found.")
 
     def readSegmentation(self, outputSegmentation, outputSegmentationFile, task):
 
@@ -906,6 +930,8 @@ class TotalSegmentatorTest(ScriptedLoadableModuleTest):
         """
         self.setUp()
         self.test_TotalSegmentator1()
+        self.setUp()
+        self.test_TotalSegmentatorSubset()
 
     def test_TotalSegmentator1(self):
         """ Ideally you should have several levels of tests.  At the lowest level
@@ -937,12 +963,60 @@ class TotalSegmentatorTest(ScriptedLoadableModuleTest):
 
         if testLogic:
             logic = TotalSegmentatorLogic()
+            logic.logCallback = self._mylog
 
             self.delayDisplay('Set up required Python packages')
             logic.setupPythonRequirements()
 
             self.delayDisplay('Compute output')
-            logic.process(inputVolume, outputSegmentation)
+            logic.process(inputVolume, outputSegmentation, fast=False)
+
+        else:
+            logging.warning("test_TotalSegmentator1 logic testing was skipped")
+
+        self.delayDisplay('Test passed')
+
+    def _mylog(self,text):
+        print(text)
+
+    def test_TotalSegmentatorSubset(self):
+        """ Ideally you should have several levels of tests.  At the lowest level
+        tests should exercise the functionality of the logic with different inputs
+        (both valid and invalid).  At higher levels your tests should emulate the
+        way the user would interact with your code and confirm that it still works
+        the way you intended.
+        One of the most important features of the tests is that it should alert other
+        developers when their changes will have an impact on the behavior of your
+        module.  For example, if a developer removes a feature that you depend on,
+        your test should break so they know that the feature is needed.
+        """
+
+        self.delayDisplay("Starting the test")
+
+        # Get/create input data
+
+        import SampleData
+        inputVolume = SampleData.downloadSample('CTACardio')
+        self.delayDisplay('Loaded test data set')
+
+        outputSegmentation = slicer.mrmlScene.AddNewNodeByClass('vtkMRMLSegmentationNode')
+
+        # Test the module logic
+
+        # Logic testing is disabled by default to not overload automatic build machines (pytorch is a huge package and computation
+        # on CPU takes 5-10 minutes). Set testLogic to True to enable testing.
+        testLogic = False
+
+        if testLogic:
+            logic = TotalSegmentatorLogic()
+            logic.logCallback = self._mylog
+
+            self.delayDisplay('Set up required Python packages')
+            logic.setupPythonRequirements()
+
+            self.delayDisplay('Compute output')
+            _subset = ["lung_upper_lobe_left","lung_lower_lobe_right","trachea"]
+            logic.process(inputVolume, outputSegmentation, fast = False, subset = _subset)
 
         else:
             logging.warning("test_TotalSegmentator1 logic testing was skipped")
