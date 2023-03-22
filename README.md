@@ -48,6 +48,7 @@ If you have a powerful GPU is available then a full-quality segmentation can be 
   - Input volume: input CT image
   - Segmentation task: instead of the default "total" segmentation, a more specialized segmentation model can be chosen
   - Fast: performs segmentation faster, but at lower resolution
+  - Body crop: crops the images to the body region before processing them, saves GPU memory
 - Outputs
   - Segmentation: it will contain a brain segment, which specifies the brain region
   - Show 3D: show/hide segments in 3D views
