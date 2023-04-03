@@ -570,6 +570,42 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
 
     def setupPythonRequirements(self, upgrade=False):
 
+        # Workaround to fix the issue that TotalSegmentator install fails for the first time
+        # due to a failed scipy downgrade.
+        try:
+            import packaging.version
+            import scipy
+            if packaging.version.parse(scipy.__version__) > packaging.version.parse('1.9.1'):
+                # scikit-image is not compatible with this scipy version (requires <1.9.2,
+                # see https://github.com/scikit-learn/scikit-learn/issues/24669), therefore
+                # we need to uninstall scipy and install scipy==1.9.1.
+                # However, scipy uninstallation usually requires restart, therefore we guide the user through it.
+                logging.debug(f"Incompatible scipy version found (scipy-{scipy.__version__}), need to downgrade.")
+                try:
+                    slicer.util.pip_install("scipy==1.9.1")
+                except:
+                    # Failed to downgrade scipy. This is expected, it is due to this error:
+                    #   ERROR: Could not install packages due to an OSError: [WinError 5] Access is denied:
+                    #   '...\\Slicer 5.2.2\\lib\\Python\\Lib\\site-packages\\~cipy\\_lib\\_ccallback_c.cp39-win_amd64.pyd'
+                    # Restarting Slicer solves the issue, as the uninstalled scipy will not be loaded after restart.
+                    logging.debug(f"Compatible scipy installation failed, request restart.")
+                    restartConfirmed = slicer.util.confirmOkCancelDisplay(
+                        f"The application need to be restarted to complete installation of TotalSegmentator. Click OK to restart the application now."
+                        " Click Cancel to restart later.",
+                        windowTitle="Restart the application?",
+                        detailedText="This module requires installing scipy version <1.9.2, but the current version is more recent."
+                                     "Updating scipy version requires restart of the application.")
+                    if not restartConfirmed:
+                        raise ValueError('TotalSegmentator installation was cancelled.')
+
+                    # Restart requests a restart but it does not happen immediately
+                    slicer.util.restart()
+                    raise RuntimeError("Restart required")
+
+        except ImportError:
+            logging.debug(f"scipy is not installed, the correct version will be installed later")
+            pass
+
         # Install PyTorch
         try:
           import PyTorchUtils
