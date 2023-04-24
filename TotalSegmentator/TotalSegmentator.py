@@ -730,8 +730,8 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
             import qt
             mbox = ctk.ctkMessageBox(slicer.util.mainWindow())
             mbox.text = "No GPU is detected. Switch to 'fast' mode to get low-resolution result in a few minutes or compute full-resolution result in about an hour?"
-            mbox.addButton("Fast (~2 minutes)", qt.QMessageBox.AcceptRole)
-            mbox.addButton("Full-resolution (~50 minutes)", qt.QMessageBox.RejectRole)
+            mbox.addButton("Fast (~2 minutes)", qt.QMessageBox.RejectRole)
+            mbox.addButton("Full-resolution (~50 minutes)", qt.QMessageBox.AcceptRole)
             # Windows 10 peek feature in taskbar shows all hidden but not destroyed windows
             # (after creating and closing a messagebox, hovering over the mouse on Slicer icon, moving up the
             # mouse to the peek thumbnail would show it again).
