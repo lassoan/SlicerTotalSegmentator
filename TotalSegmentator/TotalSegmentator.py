@@ -736,7 +736,7 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
             # (after creating and closing a messagebox, hovering over the mouse on Slicer icon, moving up the
             # mouse to the peek thumbnail would show it again).
             mbox.deleteLater()
-            fast = mbox.exec_()
+            fast = (mbox.exec_() == qt.QMessageBox.AcceptRole)
 
         if not fast and cuda and cuda.get_device_properties(cuda.current_device()).total_memory < 7e9:
             if slicer.util.confirmYesNoDisplay("You have less than 7 GB of GPU memory available. Enable 'fast' mode to ensure segmentation can be completed successfully?"):
