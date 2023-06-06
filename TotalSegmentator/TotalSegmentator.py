@@ -360,9 +360,9 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
             "trachea": "Segmentation category and type - DICOM master list~SCT^123037004^Anatomical Structure~SCT^44567001^Trachea~^^~Anatomic codes - DICOM master list~^^~^^|",
             "heart_myocardium": "Segmentation category and type - DICOM master list~SCT^123037004^Anatomical Structure~SCT^74281007^Myocardium~^^~Anatomic codes - DICOM master list~^^~^^|",
             "heart_atrium_left": "Segmentation category and type - DICOM master list~SCT^123037004^Anatomical Structure~SCT^82471001^Left atrium~^^~Anatomic codes - DICOM master list~^^~^^|",
-            "heart_ventricle_left": "Segmentation category and type - DICOM master list~SCT^123037004^Anatomical Structure~SCT^87878005^Left ventricle~^^~Anatomic codes - DICOM master list~^^~^^|",
+            "heart_ventricle_left": "Segmentation category and type - DICOM master list~SCT^123037004^Anatomical Structure~SCT^87878005^Left ventricle of heart~^^~Anatomic codes - DICOM master list~^^~^^|",
             "heart_atrium_right": "Segmentation category and type - DICOM master list~SCT^123037004^Anatomical Structure~SCT^73829009^Right atrium~^^~Anatomic codes - DICOM master list~^^~^^|",
-            "heart_ventricle_right": "Segmentation category and type - DICOM master list~SCT^123037004^Anatomical Structure~SCT^53085002^Right ventricle~^^~Anatomic codes - DICOM master list~^^~^^|",
+            "heart_ventricle_right": "Segmentation category and type - DICOM master list~SCT^123037004^Anatomical Structure~SCT^53085002^Right ventricle of heart~^^~Anatomic codes - DICOM master list~^^~^^|",
             "pulmonary_artery": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^81040000^Pulmonary artery~^^~Anatomic codes - DICOM master list~^^~^^|",
             "brain": "Segmentation category and type - DICOM master list~SCT^123037004^Anatomical Structure~SCT^12738006^Brain~^^~Anatomic codes - DICOM master list~^^~^^|",
             "iliac_artery_left": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^73634005^Common iliac artery~SCT^7771000^Left~Anatomic codes - DICOM master list~^^~^^|",
@@ -418,7 +418,7 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
             "autochthon_right": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^44947003^Erector spinae muscle~SCT^24028007^Right~Anatomic codes - DICOM master list~^^~^^|",
             "iliopsoas_left": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^68455001^Iliopsoas muscle~SCT^7771000^Left~Anatomic codes - DICOM master list~^^~^^|",
             "iliopsoas_right": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^68455001^Iliopsoas muscle~SCT^24028007^Right~Anatomic codes - DICOM master list~^^~^^|",
-            "urinary_bladder": "Segmentation category and type - DICOM master list~SCT^123037004^Anatomical Structure~SCT^89837001^Bladder~^^~Anatomic codes - DICOM master list~^^~^^|",
+            "urinary_bladder": "Segmentation category and type - DICOM master list~SCT^123037004^Anatomical Structure~SCT^89837001^Urinary bladder~^^~Anatomic codes - DICOM master list~^^~^^|",
 
             # SPecification of these codes are still work in progress:
             #"femur": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^71341001^Femur~^^~Anatomic codes - DICOM master list~^^~^^|",
