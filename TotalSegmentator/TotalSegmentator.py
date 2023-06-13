@@ -575,12 +575,20 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         except ModuleNotFoundError as e:
           raise RuntimeError("This module requires PyTorch extension. Install it from the Extensions Manager.")
 
+        minimumTorchVersion = "1.12"
         torchLogic = PyTorchUtils.PyTorchUtilsLogic()
         if not torchLogic.torchInstalled():
             self.log('PyTorch Python package is required. Installing... (it may take several minutes)')
-            torch = torchLogic.installTorch(askConfirmation=True)
+            torch = torchLogic.installTorch(askConfirmation=True, torchVersionRequirement = f">={minimumTorchVersion}")
             if torch is None:
                 raise ValueError('PyTorch extension needs to be installed to use this module.')
+        else:
+            # torch is installed, check version
+            from packaging import version
+            if version.parse(torchLogic.torch.__version__) < version.parse(minimumTorchVersion):
+                raise ValueError(f'PyTorch version {torchLogic.torch.__version__} is not compatible with this module.'
+                                 + f' Minimum required version is {minimumTorchVersion}. You can use "PyTorch Util" module to install PyTorch'
+                                 + f' with version requirement set to: >={minimumTorchVersion}')
 
         # nnunet\training\network_training\nnUNetTrainer.py requires matplotlib
         needToInstallMatplotlib = False
