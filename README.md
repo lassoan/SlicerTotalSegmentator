@@ -36,7 +36,9 @@ If you have a powerful GPU is available then a full-quality segmentation can be 
 - Select `Input volume` -> `Panoramix-cropped`
 - Select `Segmentation` -> `Create new segmentation`
 - Click `Apply`
-  - When this module is used the first time, it needs to download and install PyTorch and TotalSegmentator Python packages and weights for the AI models. This can take 5-10 minutes and several GB disk space.
+  - When this module is used the first time:
+    - It needs to download and install PyTorch and TotalSegmentator Python packages and weights for the AI models. This can take 5-10 minutes and several GB disk space.
+    - You may get an error popup: `Failed to compute results ... Command ... 'pip', 'install' ... returned non-zero exit status 1`. This may be normal, see what to do in [Troubleshooting section](#failed-to-compute-results-error-at-the-first-run)
   - Expected computation time:
     - With CUDA-capable GPU: 20-30 seconds in fast mode, 40-50 seconds in full-resolution mode.
     - Without GPU: 1 minute in fast mode, 40-50 minutes in full-resolution mode.
@@ -58,9 +60,21 @@ If you have a powerful GPU is available then a full-quality segmentation can be 
 
 ## Troubleshooting
 
+### Failed to compute results error at the first run
+
+Problem: You may get an error popup on the first run: `Failed to compute results ... Command ... 'pip', 'install' ... returned non-zero exit status 1`
+
+Explanation: This happens because when TotalSegmentator is run for the first time, it needs to download and install PyTorch and TotalSegmentator Python packages. Since the application may have already loaded different versions of these packages, the packages need to be uninstalled first. This uninstallation may fail because some packages may be already in use. Restarting the application unloads these modules so they are no longer in use. Therefore after a restart, TotalSegmentator will be able to install all the necessary packages.
+
+Solution: Restart Slicer and run TotalSegmentator module again.
+
 ### Segmentation fails while predicting
 
-If segmentation fails while predicting and the `RuntimeError: CUDA out of memory.` message is found in the message log (textbox under the Apply button) then it means that a CUDA-capable GPU is available, but it is not powerful enough to be used by TotalSegmentator. In this case, it is recommended to switch to use the CPU by the following steps:
+Problem: Segmentation fails while predicting and the `RuntimeError: CUDA out of memory.` message is found in the message log (textbox under the Apply button).
+
+Explanation: This means that a CUDA-capable GPU is available, but it is not powerful enough to be used by TotalSegmentator.
+
+Solution: It is recommended to switch to use the CPU by the following steps:
 - Go to `PyTorch Util` module, click `Uninstall PyTorch`. An error may be reported at the end of this step, as some PyTorch files are in use. Click `Restart the application` button to unload all PyTorch files.
 - Go to `PyTorch Util` module, select `cpu` as `Computation backend`, and click `Install PyTorch`.
 
@@ -68,14 +82,20 @@ If your GPU has more than 7GB memory and you still get this error then the error
 
 ### GPU is not found
 
-If the computer has a CUDA-capable GPU but TotalSegmentator reports that GPU is not available then CUDA may not be installed on the system or CUDA version in PyTorch does not match the system CUDA version.
+Problem: Your computer has a CUDA-capable GPU but TotalSegmentator reports that GPU is not available.
+
+Explanation: CUDA may not be installed on the system or CUDA version in PyTorch does not match the system CUDA version.
+
+Solution:
 - Make sure that the the CUDA vesion installed on the system [is one of those listed on pytorch website as "Compute platform" for your system](https://pytorch.org/get-started/locally/). You can download CUDA from [here](https://developer.nvidia.com/cuda-downloads).
 - Go to `PyTorch Util` module, click `Uninstall PyTorch`. An error may be reported at the end of this step, as some PyTorch files are in use. Click `Restart the application` button to unload all PyTorch files.
 - Go to `PyTorch Util` module, select the `Computation backend` that matches the system CUDA version, and click `Install PyTorch`. The CUDA computational backend name has the format `cuNNN`, where _NNN_ corresponds to the CUDA major+minor version. For example, CUDA 11.7 backend name is `cu117`.
 
 ### Face segment is inaccurate
 
-There is a big segment called `face` at the front of the head. This segment is not designed to match the shape of an anatomical feature, but it designates the general area of the face. It can be used to remove features (for example by masking or blurring the image or clipping models) that might otherwise identify the individual subject. Removing these features makes it easier to share 3D data.
+Problem: There is a big segment called `face` at the front of the head, which is not an accurate segmentation of the face.
+
+Explanation: This segment is not designed to match the shape of an anatomical feature, but it designates the general area of the face. It can be used to remove features (for example by masking or blurring the image or clipping models) that might otherwise identify the individual subject. Removing these features makes it easier to share 3D data.
 
 ## Contact
 
