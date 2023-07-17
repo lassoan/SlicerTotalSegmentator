@@ -312,6 +312,7 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         self.tasks['coronary_arteries'] = {'label': 'coronary arteries', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
         self.tasks['body'] = {'label': 'body', 'supportsFast': True}
         self.tasks['pleural_pericard_effusion'] = {'label': 'pleural and pericardial effusion', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
+        self.tasks['aortic_branches_test'] = {'label': 'aortic branches test', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
         # self.tasks['covid'] = {'label': 'pleural and pericardial effusion'}
 
         self.totalSegmentatorLabelTerminology = {
@@ -596,12 +597,13 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         # Install TotalSegmentator segmenter
 
         needToInstallSegmenter = False
+        gitinstall = True
         try:
             import totalsegmentator
             if not upgrade:
                 # Check if we need to update TotalSegmentator Python package version
                 downloadUrl = self.installedTotalSegmentatorPythonPackageDownloadUrl()
-                if downloadUrl and (downloadUrl != self.totalSegmentatorPythonPackageDownloadUrl):
+                if downloadUrl and (downloadUrl != self.totalSegmentatorPythonPackageDownloadUrl) and gitinstall:
                     # TotalSegmentator have been already installed from GitHub, from a different URL that this module needs
                     if not slicer.util.confirmOkCancelDisplay(
                         f"This module requires TotalSegmentator Python package update.",
