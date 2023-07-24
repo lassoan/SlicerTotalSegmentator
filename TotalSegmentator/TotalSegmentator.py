@@ -198,6 +198,7 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         task = self._parameterNode.GetParameter("Task")
         self.ui.taskComboBox.setCurrentIndex(self.ui.taskComboBox.findData(task))
         self.ui.fastCheckBox.checked = self._parameterNode.GetParameter("Fast") == "true"
+        self.ui.bodycropCheckBox.checked = self._parameterNode.GetParameter("BodyCrop") == "true"
         self.ui.useStandardSegmentNamesCheckBox.checked = self._parameterNode.GetParameter("UseStandardSegmentNames") == "true"
         self.ui.outputSegmentationSelector.setCurrentNode(self._parameterNode.GetNodeReference("OutputSegmentation"))
 
@@ -234,6 +235,7 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         self._parameterNode.SetNodeReferenceID("InputVolume", self.ui.inputVolumeSelector.currentNodeID)
         self._parameterNode.SetParameter("Task", self.ui.taskComboBox.currentData)
         self._parameterNode.SetParameter("Fast", "true" if self.ui.fastCheckBox.checked else "false")
+        self._parameterNode.SetParameter("BodyCrop", "true" if self.ui.bodycropCheckBox.checked else "false")
         self._parameterNode.SetParameter("UseStandardSegmentNames", "true" if self.ui.useStandardSegmentNamesCheckBox.checked else "false")
         self._parameterNode.SetNodeReferenceID("OutputSegmentation", self.ui.outputSegmentationSelector.currentNodeID)
 
@@ -262,7 +264,7 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 
             # Compute output
             self.logic.process(self.ui.inputVolumeSelector.currentNode(), self.ui.outputSegmentationSelector.currentNode(),
-                self.ui.fastCheckBox.checked, self.ui.taskComboBox.currentData)
+                self.ui.fastCheckBox.checked, self.ui.bodycropCheckBox.checked, self.ui.taskComboBox.currentData)
 
         self.ui.statusLabel.appendPlainText("\nProcessing finished.")
 
@@ -638,6 +640,8 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         """
         if not parameterNode.GetParameter("Fast"):
             parameterNode.SetParameter("Fast", "True")
+        if not parameterNode.GetParameter("BodyCrop"):
+            parameterNode.SetParameter("BodyCrop", "False")
         if not parameterNode.GetParameter("Task"):
             parameterNode.SetParameter("Task", "total")
         if not parameterNode.GetParameter("UseStandardSegmentNames"):
@@ -662,7 +666,7 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         if retcode != 0:
             raise CalledProcessError(retcode, proc.args, output=proc.stdout, stderr=proc.stderr)
 
-    def process(self, inputVolume, outputSegmentation, fast=True, task=None):
+    def process(self, inputVolume, outputSegmentation, fast=True, bodycrop=False, task=None):
 
         """
         Run the processing algorithm.
@@ -670,6 +674,7 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         :param inputVolume: volume to be thresholded
         :param outputVolume: thresholding result
         :param fast: faster and less accurate output
+        :param bodycrop: crop the image to the body region before processing it, saves GPU memory
         :param task: one of self.tasks, default is "total"
         """
 
@@ -764,6 +769,8 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
             options.extend(["--task", task])
         if fast:
             options.append("--fast")
+        if bodycrop:
+            options.append("--body_seg")
         self.log('Creating segmentations with TotalSegmentator AI...')
         self.log(f"Total Segmentator arguments: {options}")
         proc = slicer.util.launchConsoleProcess(totalSegmentatorCommand + options)

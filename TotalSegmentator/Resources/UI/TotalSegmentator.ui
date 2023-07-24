@@ -12,8 +12,8 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="ctkCollapsibleButton" name="inputsCollapsibleButton">
-     <property name="text">
+    <widget class="ctkCollapsibleButton" name="inputsCollapsibleButton" native="true">
+     <property name="text" stdset="0">
       <string>Inputs</string>
      </property>
      <layout class="QFormLayout" name="formLayout_2">
@@ -25,22 +25,22 @@
        </widget>
       </item>
       <item row="0" column="1">
-       <widget class="qMRMLNodeComboBox" name="inputVolumeSelector">
+       <widget class="qMRMLNodeComboBox" name="inputVolumeSelector" native="true">
         <property name="toolTip">
          <string>Input abdominal, chest, or whole body CT.</string>
         </property>
-        <property name="nodeTypes">
+        <property name="nodeTypes" stdset="0">
          <stringlist>
           <string>vtkMRMLScalarVolumeNode</string>
          </stringlist>
         </property>
-        <property name="showChildNodeTypes">
+        <property name="showChildNodeTypes" stdset="0">
          <bool>false</bool>
         </property>
-        <property name="addEnabled">
+        <property name="addEnabled" stdset="0">
          <bool>false</bool>
         </property>
-        <property name="removeEnabled">
+        <property name="removeEnabled" stdset="0">
          <bool>false</bool>
         </property>
        </widget>
@@ -90,12 +90,30 @@
         </item>
        </layout>
       </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string>Body crop:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <widget class="QCheckBox" name="bodycropCheckBox">
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
      </layout>
     </widget>
    </item>
    <item>
-    <widget class="ctkCollapsibleButton" name="outputsCollapsibleButton">
-     <property name="text">
+    <widget class="ctkCollapsibleButton" name="outputsCollapsibleButton" native="true">
+     <property name="text" stdset="0">
       <string>Outputs</string>
      </property>
      <layout class="QFormLayout" name="formLayout_4">
@@ -107,37 +125,37 @@
        </widget>
       </item>
       <item row="0" column="1">
-       <widget class="qMRMLNodeComboBox" name="outputSegmentationSelector">
+       <widget class="qMRMLNodeComboBox" name="outputSegmentationSelector" native="true">
         <property name="toolTip">
          <string>This will store the segmentation result.</string>
         </property>
-        <property name="nodeTypes">
+        <property name="nodeTypes" stdset="0">
          <stringlist>
           <string>vtkMRMLSegmentationNode</string>
          </stringlist>
         </property>
-        <property name="showChildNodeTypes">
+        <property name="showChildNodeTypes" stdset="0">
          <bool>false</bool>
         </property>
-        <property name="baseName">
+        <property name="baseName" stdset="0">
          <string>Brain</string>
         </property>
-        <property name="noneEnabled">
+        <property name="noneEnabled" stdset="0">
          <bool>true</bool>
         </property>
-        <property name="addEnabled">
+        <property name="addEnabled" stdset="0">
          <bool>true</bool>
         </property>
-        <property name="removeEnabled">
+        <property name="removeEnabled" stdset="0">
          <bool>true</bool>
         </property>
-        <property name="editEnabled">
+        <property name="editEnabled" stdset="0">
          <bool>true</bool>
         </property>
-        <property name="renameEnabled">
+        <property name="renameEnabled" stdset="0">
          <bool>true</bool>
         </property>
-        <property name="noneDisplay">
+        <property name="noneDisplay" stdset="0">
          <string>Create new segmentation on Apply</string>
         </property>
        </widget>
@@ -149,23 +167,23 @@
     </widget>
    </item>
    <item>
-    <widget class="ctkCollapsibleButton" name="advancedCollapsibleButton">
-     <property name="text">
+    <widget class="ctkCollapsibleButton" name="advancedCollapsibleButton" native="true">
+     <property name="text" stdset="0">
       <string>Advanced</string>
      </property>
-     <property name="collapsed">
+     <property name="collapsed" stdset="0">
       <bool>true</bool>
      </property>
      <layout class="QFormLayout" name="formLayout_3">
       <item row="3" column="0" colspan="2">
        <widget class="ctkFittedTextBrowser" name="packageInfoTextBrowser">
-        <property name="collapsed">
+        <property name="collapsed" stdset="0">
          <bool>false</bool>
         </property>
-        <property name="showDetailsText">
+        <property name="showDetailsText" stdset="0">
          <string/>
         </property>
-        <property name="hideDetailsText">
+        <property name="hideDetailsText" stdset="0">
          <string/>
         </property>
        </widget>
