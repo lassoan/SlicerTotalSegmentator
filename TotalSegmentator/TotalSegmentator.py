@@ -312,8 +312,16 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         self.tasks['coronary_arteries'] = {'label': 'coronary arteries', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
         self.tasks['body'] = {'label': 'body', 'supportsFast': True}
         self.tasks['pleural_pericard_effusion'] = {'label': 'pleural and pericardial effusion', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
+        self.tasks['liver_vessels'] = {'label': 'liver vessels', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
+        self.tasks['bones_extremities'] = {'label': 'bones extremities', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
+        self.tasks['tissue_types'] = {'label': 'tissue types', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
+        self.tasks['heartchambers_highres'] = {'label': 'heartchambers highres' ,  'requiresPreSegmentation': True, 'supportsMultiLabel': True}
+        self.tasks['head'] = {'label': 'head', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
+        self.tasks['aortic_branches'] = {'label': 'aortic branches', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
+        self.tasks['heartchambers_test'] = {'label': 'heartchambers test', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
         self.tasks['aortic_branches_test'] = {'label': 'aortic branches test', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
         self.tasks['bones_tissue_test'] = {'label': 'bones tissue test', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
+        self.tasks['test'] = {'label': 'test', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
 
         # self.tasks['covid'] = {'label': 'pleural and pericardial effusion'}
 
