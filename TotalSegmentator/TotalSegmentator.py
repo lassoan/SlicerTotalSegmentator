@@ -313,6 +313,8 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         self.tasks['body'] = {'label': 'body', 'supportsFast': True}
         self.tasks['pleural_pericard_effusion'] = {'label': 'pleural and pericardial effusion', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
         self.tasks['aortic_branches_test'] = {'label': 'aortic branches test', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
+        self.tasks['bones_tissue_test'] = {'label': 'bones tissue test', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
+
         # self.tasks['covid'] = {'label': 'pleural and pericardial effusion'}
 
         self.totalSegmentatorLabelTerminology = {
@@ -620,10 +622,14 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         except ModuleNotFoundError as e:
             needToInstallSegmenter = True
 
-        if needToInstallSegmenter or upgrade:
+        if needToInstallSegmenter or upgrade or gitinstall:
             self.log('TotalSegmentator Python package is required. Installing... (it may take several minutes)')
 
-            if upgrade:
+            if gitinstall: 
+                slicer.util.pip_uninstall("TotalSegmentator")
+                # Update TotalSegmentator and all its dependencies
+                slicer.util.pip_install("git+https://github.com/wasserth/TotalSegmentator.git")
+            elif upgrade:
                 # TotalSegmentator version information is usually not updated with each git revision, therefore we must uninstall it to force the upgrade
                 slicer.util.pip_uninstall("TotalSegmentator")
                 # Update TotalSegmentator and all its dependencies
