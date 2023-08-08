@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>288</width>
+    <width>289</width>
     <height>525</height>
    </rect>
   </property>
@@ -154,10 +154,10 @@
       <string>Advanced</string>
      </property>
      <property name="collapsed">
-      <bool>true</bool>
+      <bool>false</bool>
      </property>
      <layout class="QFormLayout" name="formLayout_3">
-      <item row="3" column="0" colspan="2">
+      <item row="4" column="0" colspan="2">
        <widget class="ctkFittedTextBrowser" name="packageInfoTextBrowser">
         <property name="collapsed">
          <bool>false</bool>
@@ -190,14 +190,14 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="0">
+      <item row="2" column="0">
        <widget class="QLabel" name="label_8">
         <property name="text">
          <string>TotalSegmentator Python package:</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="1">
+      <item row="2" column="1">
        <widget class="QPushButton" name="packageUpgradeButton">
         <property name="toolTip">
          <string>Force upgrade of TotalSegmentator Python package to the version required by this module.</string>
@@ -207,13 +207,30 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="0" colspan="2">
+      <item row="3" column="0" colspan="2">
        <widget class="QPushButton" name="packageInfoUpdateButton">
         <property name="toolTip">
          <string>Update to latest version of TotalSegmentator Python package from GitHub</string>
         </property>
         <property name="text">
          <string>Get TotalSegmenter package information</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QCheckBox" name="pullMasterBranchCheckBox">
+        <property name="toolTip">
+         <string>Use TotalSegmentator master branch (latest changes)  during forced reinstall. </string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string>Use master branch</string>
         </property>
        </widget>
       </item>
