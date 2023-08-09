@@ -649,11 +649,13 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         if needToInstallSegmenter or upgrade:
             self.log('TotalSegmentator Python package is required. Installing... (it may take several minutes)')
             if self.pullMaster: 
+                # This may fail due to file in use and user may need to restart and try again; but this has not been observed to happen in practice
                 slicer.util.pip_uninstall("TotalSegmentator")
                 # Update TotalSegmentator and all its dependencies
                 slicer.util.pip_install("git+https://github.com/wasserth/TotalSegmentator.git")
             elif upgrade:
                 # TotalSegmentator version information is usually not updated with each git revision, therefore we must uninstall it to force the upgrade
+                # This may fail due to file in use and user may need to restart and try again; but this has not been observed to happen in practice
                 slicer.util.pip_uninstall("TotalSegmentator")
                 # Update TotalSegmentator and all its dependencies
                 slicer.util.pip_install(self.totalSegmentatorPythonPackageDownloadUrl + " --upgrade")
