@@ -98,7 +98,7 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         self.ui.inputVolumeSelector.connect("currentNodeChanged(vtkMRMLNode*)", self.updateParameterNodeFromGUI)
         self.ui.fastCheckBox.connect('toggled(bool)', self.updateParameterNodeFromGUI)
         self.ui.useStandardSegmentNamesCheckBox.connect('toggled(bool)', self.updateParameterNodeFromGUI)
-        self.ui.pullMasterBranchCheckBox.connect('toggled(bool)', self.updateParameterNodeFromGUI)
+        self.ui.installLatestDevelopmentCheckBox.connect('toggled(bool)', self.updateParameterNodeFromGUI)
         
         
         self.ui.taskComboBox.currentTextChanged.connect(self.updateParameterNodeFromGUI)
@@ -202,7 +202,7 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         self.ui.taskComboBox.setCurrentIndex(self.ui.taskComboBox.findData(task))
         self.ui.fastCheckBox.checked = self._parameterNode.GetParameter("Fast") == "true"
         self.ui.useStandardSegmentNamesCheckBox.checked = self._parameterNode.GetParameter("UseStandardSegmentNames") == "true"
-        self.ui.pullMasterBranchCheckBox.checked = self._parameterNode.GetParameter("PullMaster") == "true"
+        self.ui.installLatestDevelopmentCheckBox.checked = self._parameterNode.GetParameter("InstallLatestDevelopmentVersion") == "true"
         self.ui.outputSegmentationSelector.setCurrentNode(self._parameterNode.GetNodeReference("OutputSegmentation"))
 
         # Update buttons states and tooltips
@@ -239,7 +239,7 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         self._parameterNode.SetParameter("Task", self.ui.taskComboBox.currentData)
         self._parameterNode.SetParameter("Fast", "true" if self.ui.fastCheckBox.checked else "false")
         self._parameterNode.SetParameter("UseStandardSegmentNames", "true" if self.ui.useStandardSegmentNamesCheckBox.checked else "false")
-        self._parameterNode.SetParameter("PullMaster", "true" if self.ui.pullMasterBranchCheckBox.checked else "false")
+        self._parameterNode.SetParameter("InstallLatestDevelopmentVersion", "true" if self.ui.installLatestDevelopmentCheckBox.checked else "false")
         self._parameterNode.SetNodeReferenceID("OutputSegmentation", self.ui.outputSegmentationSelector.currentNodeID)
 
         self._parameterNode.EndModify(wasModified)
@@ -257,7 +257,7 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         with slicer.util.tryWithErrorDisplay("Failed to compute results.", waitCursor=True):
 
             self.ui.statusLabel.plainText = ''
-            self.logic.pullMaster = self.ui.useStandardSegmentNamesCheckBox.checked
+            self.logic.pullMaster = self.ui.installLatestDevelopmentCheckBox.checked
             self.logic.setupPythonRequirements()
 
             # Create new segmentation node, if not selected yet
@@ -274,12 +274,12 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 
     def onPackageInfoUpdate(self):
         self.ui.packageInfoTextBrowser.plainText = ''
-        with slicer.util.tryWithErrorDisplay("Failed to get TotalSegmenter package version information", waitCursor=True):
+        with slicer.util.tryWithErrorDisplay("Failed to get TotalSegmentator package version information", waitCursor=True):
             self.ui.packageInfoTextBrowser.plainText = self.logic.installedTotalSegmentatorPythonPackageInfo().rstrip()
 
     def onPackageUpgrade(self):
-        with slicer.util.tryWithErrorDisplay("Failed to upgrade TotalSegmenter", waitCursor=True):           
-            self.logic.pullMaster = self.ui.useStandardSegmentNamesCheckBox.checked
+        with slicer.util.tryWithErrorDisplay("Failed to upgrade TotalSegmentator", waitCursor=True):           
+            self.logic.pullMaster = self.ui.installLatestDevelopmentCheckBox.checked
             self.logic.setupPythonRequirements(upgrade=True)
         self.onPackageInfoUpdate()
 
@@ -639,7 +639,6 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
 
         if needToInstallSegmenter or upgrade:
             self.log('TotalSegmentator Python package is required. Installing... (it may take several minutes)')
-
             if self.pullMaster: 
                 slicer.util.pip_uninstall("TotalSegmentator")
                 # Update TotalSegmentator and all its dependencies
@@ -652,7 +651,6 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
             else:
                 # Install TotalSegmentator and all its dependencies
                 slicer.util.pip_install(self.totalSegmentatorPythonPackageDownloadUrl)
-
             self.log('TotalSegmentator installation is completed successfully.')
 
     def setDefaultParameters(self, parameterNode):
@@ -665,8 +663,8 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
             parameterNode.SetParameter("Task", "total")
         if not parameterNode.GetParameter("UseStandardSegmentNames"):
             parameterNode.SetParameter("UseStandardSegmentNames", "true")
-        if parameterNode.GetParameter("PullMaster"):
-            parameterNode.SetParameter("PullMaster", "false")
+        if parameterNode.GetParameter("InstallLatestDevelopmentVersion"):
+            parameterNode.SetParameter("InstallLatestDevelopmentVersion", "false")
 
     def logProcessOutput(self, proc):
         # Wait for the process to end and forward output to the log
