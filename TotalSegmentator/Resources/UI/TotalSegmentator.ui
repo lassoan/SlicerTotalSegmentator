@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>289</width>
-    <height>525</height>
+    <width>294</width>
+    <height>539</height>
    </rect>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
@@ -236,6 +236,9 @@
       </item>
       <item row="3" column="1">
        <widget class="QPushButton" name="importWeightsButton">
+        <property name="toolTip">
+         <string>Normally weights are automatically downloaded when running TotalSegmentator. If you manually downloaded  weights or receive licensed weights  you can import them by pressing this button so TotalSegmentator can find them. </string>
+        </property>
         <property name="text">
          <string>Import weights</string>
         </property>
