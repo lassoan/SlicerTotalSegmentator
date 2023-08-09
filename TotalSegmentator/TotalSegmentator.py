@@ -627,7 +627,8 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
             if not upgrade:
                 # Check if we need to update TotalSegmentator Python package version
                 downloadUrl = self.installedTotalSegmentatorPythonPackageDownloadUrl()
-                if downloadUrl and (downloadUrl != self.totalSegmentatorPythonPackageDownloadUrl) and not self.pullMaster:
+                
+                if downloadUrl and (downloadUrl != self.totalSegmentatorPythonPackageDownloadUrl) and (downloadUrl != "https://github.com/wasserth/TotalSegmentator.git"):
                     # TotalSegmentator have been already installed from GitHub, from a different URL that this module needs
                     if not slicer.util.confirmOkCancelDisplay(
                         f"This module requires TotalSegmentator Python package update.",
