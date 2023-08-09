@@ -108,6 +108,7 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         # Buttons
         self.ui.packageInfoUpdateButton.connect('clicked(bool)', self.onPackageInfoUpdate)
         self.ui.packageUpgradeButton.connect('clicked(bool)', self.onPackageUpgrade)
+        self.ui.importWeightsButton.connect('clicked(bool)', self.onImportWeights)
         self.ui.applyButton.connect('clicked(bool)', self.onApplyButton)
 
         # Make sure parameter node is initialized (needed for module reload)
@@ -283,6 +284,13 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
             self.logic.setupPythonRequirements(upgrade=True)
         self.onPackageInfoUpdate()
 
+    def onImportWeights(self):
+        import qt    
+        filePath = qt.QFileDialog.getOpenFileName(None, 'Select TotalSegmentator weight file', '', "Zip file (*.zip)")
+        if filePath: 
+            self.logic.import_weights(filePath)
+            
+    
 #
 # TotalSegmentatorLogic
 #
@@ -685,6 +693,48 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         retcode = proc.returncode
         if retcode != 0:
             raise CalledProcessError(retcode, proc.args, output=proc.stdout, stderr=proc.stderr)
+
+
+    def check_zip_extension(self, file_path):
+        _, ext = os.path.splitext(file_path)
+        
+        if ext.lower() != '.zip':
+            raise ValueError(f"The selected file '{file_path}' is not a .zip file!")
+            
+    def import_weights(self, filePath):
+
+        """
+        Import weights.
+        Weights are provided in ZIP format. 
+        This function can be used without GUI widget.
+        """
+
+        # Get totalseg_import_weights command
+        # totalseg_import_weights (.py file, without extension) is installed in Python Scripts folder
+        
+        try:
+            self.check_zip_extension(filePath)
+        except ValueError as e:
+            print(e)
+        
+        self.log('Importing weights started ...')
+        import sysconfig
+        totalseg_import_weights_Path = os.path.join(sysconfig.get_path('scripts'), "totalseg_import_weights")
+        # Get Python executable path
+        import shutil
+        pythonSlicerExecutablePath = shutil.which('PythonSlicer')
+        if not pythonSlicerExecutablePath:
+            raise RuntimeError("Python was not found")
+        totalseg_import_weights_Command = [ pythonSlicerExecutablePath, totalseg_import_weights_Path]
+        options = ["-i", filePath]
+
+        # Launch command
+        cmd = totalseg_import_weights_Command + options
+        # print(*cmd)
+        proc = slicer.util.launchConsoleProcess(cmd)
+        self.logProcessOutput(proc)
+        self.log('Importing weights finished.')
+
 
     def process(self, inputVolume, outputSegmentation, fast=True, task=None, subset=None):
 
