@@ -55,7 +55,9 @@ If you have a powerful GPU is available then a full-quality segmentation can be 
   - Show 3D: show/hide segments in 3D views
 - Advanced:
   - Use standard segment names: use names defined in standard terminology files from [DCMQI](https://github.com/QIICR/dcmqi) (enabled by default). If disabled then TotalSegmentator identifiers will be used as segment names.
+  - Use latest development version: use latest development version from TotalSegmentator master branch during a forced reinstall. 
   - Force reinstall: force reinstallation of the AI engine - TotalSegmentator Python package. This may be needed if other modules compromise the installation.
+  - Import weights: When using TotalSegmentator, weights are often downloaded automatically. You can import any specialized or licensed weights you receive from the developer so that TotalSegmentator can find and use them.  
   - Get TotalSegmentator package information: retrieve installed version of the AI engine - TotalSegmentator Python package.
 
 ## Troubleshooting
