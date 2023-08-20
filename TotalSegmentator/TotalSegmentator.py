@@ -283,6 +283,10 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
             self.logic.pullMaster = self.ui.installLatestDevelopmentCheckBox.checked
             self.logic.setupPythonRequirements(upgrade=True)
         self.onPackageInfoUpdate()
+        if not slicer.util.confirmOkCancelDisplay(f"This TotalSegmentator update requires a 3D Slicer restart.","Press OK to restart."):
+            raise ValueError('Restart was cancelled.')
+        else:
+            slicer.util.restart()
 
     def onImportWeights(self):
         import qt    
@@ -736,6 +740,11 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         proc = slicer.util.launchConsoleProcess(cmd)
         self.logProcessOutput(proc)
         self.log('Importing weights finished.')
+        
+        if not slicer.util.confirmOkCancelDisplay(f"This weight update requires a 3D Slicer restart.","Press OK to restart."):
+            raise ValueError('Restart was cancelled.')
+        else:
+            slicer.util.restart()
 
 
     def process(self, inputVolume, outputSegmentation, fast=True, task=None, subset=None):
