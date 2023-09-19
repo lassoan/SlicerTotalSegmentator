@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>294</width>
-    <height>539</height>
+    <width>297</width>
+    <height>366</height>
    </rect>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
@@ -154,7 +154,7 @@
       <string>Advanced</string>
      </property>
      <property name="collapsed">
-      <bool>false</bool>
+      <bool>true</bool>
      </property>
      <layout class="QFormLayout" name="formLayout_3">
       <item row="7" column="0" colspan="2">
