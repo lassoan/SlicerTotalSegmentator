@@ -1,5 +1,6 @@
 import logging
 import os
+import re
 
 import vtk
 
@@ -10,6 +11,7 @@ from slicer.util import VTKObservationMixin
 
 #
 # TotalSegmentator
+#
 #
 
 class TotalSegmentator(ScriptedLoadableModule):
@@ -97,8 +99,8 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         # (in the selected parameter node).
         self.ui.inputVolumeSelector.connect("currentNodeChanged(vtkMRMLNode*)", self.updateParameterNodeFromGUI)
         self.ui.fastCheckBox.connect('toggled(bool)', self.updateParameterNodeFromGUI)
+        self.ui.cpuCheckBox.connect('toggled(bool)', self.updateParameterNodeFromGUI)
         self.ui.useStandardSegmentNamesCheckBox.connect('toggled(bool)', self.updateParameterNodeFromGUI)
-        self.ui.installLatestDevelopmentCheckBox.connect('toggled(bool)', self.updateParameterNodeFromGUI)
 
 
         self.ui.taskComboBox.currentTextChanged.connect(self.updateParameterNodeFromGUI)
@@ -108,7 +110,7 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         # Buttons
         self.ui.packageInfoUpdateButton.connect('clicked(bool)', self.onPackageInfoUpdate)
         self.ui.packageUpgradeButton.connect('clicked(bool)', self.onPackageUpgrade)
-        self.ui.importWeightsButton.connect('clicked(bool)', self.onImportWeights)
+        self.ui.setLicenseButton.connect('clicked(bool)', self.onSetLicense)
         self.ui.applyButton.connect('clicked(bool)', self.onApplyButton)
 
         # Make sure parameter node is initialized (needed for module reload)
@@ -202,8 +204,8 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         task = self._parameterNode.GetParameter("Task")
         self.ui.taskComboBox.setCurrentIndex(self.ui.taskComboBox.findData(task))
         self.ui.fastCheckBox.checked = self._parameterNode.GetParameter("Fast") == "true"
+        self.ui.cpuCheckBox.checked = self._parameterNode.GetParameter("CPU") == "true"
         self.ui.useStandardSegmentNamesCheckBox.checked = self._parameterNode.GetParameter("UseStandardSegmentNames") == "true"
-        self.ui.installLatestDevelopmentCheckBox.checked = self._parameterNode.GetParameter("InstallLatestDevelopmentVersion") == "true"
         self.ui.outputSegmentationSelector.setCurrentNode(self._parameterNode.GetNodeReference("OutputSegmentation"))
 
         # Update buttons states and tooltips
@@ -239,8 +241,8 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         self._parameterNode.SetNodeReferenceID("InputVolume", self.ui.inputVolumeSelector.currentNodeID)
         self._parameterNode.SetParameter("Task", self.ui.taskComboBox.currentData)
         self._parameterNode.SetParameter("Fast", "true" if self.ui.fastCheckBox.checked else "false")
+        self._parameterNode.SetParameter("CPU", "true" if self.ui.cpuCheckBox.checked else "false")
         self._parameterNode.SetParameter("UseStandardSegmentNames", "true" if self.ui.useStandardSegmentNamesCheckBox.checked else "false")
-        self._parameterNode.SetParameter("InstallLatestDevelopmentVersion", "true" if self.ui.installLatestDevelopmentCheckBox.checked else "false")
         self._parameterNode.SetNodeReferenceID("OutputSegmentation", self.ui.outputSegmentationSelector.currentNodeID)
 
         self._parameterNode.EndModify(wasModified)
@@ -258,7 +260,6 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         with slicer.util.tryWithErrorDisplay("Failed to compute results.", waitCursor=True):
 
             self.ui.statusLabel.plainText = ''
-            self.logic.pullMaster = self.ui.installLatestDevelopmentCheckBox.checked
             self.logic.setupPythonRequirements()
 
             # Create new segmentation node, if not selected yet
@@ -269,7 +270,7 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 
             # Compute output
             self.logic.process(self.ui.inputVolumeSelector.currentNode(), self.ui.outputSegmentationSelector.currentNode(),
-                self.ui.fastCheckBox.checked, self.ui.taskComboBox.currentData)
+                self.ui.fastCheckBox.checked, self.ui.cpuCheckBox.checked, self.ui.taskComboBox.currentData)
 
         self.ui.statusLabel.appendPlainText("\nProcessing finished.")
 
@@ -280,7 +281,6 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 
     def onPackageUpgrade(self):
         with slicer.util.tryWithErrorDisplay("Failed to upgrade TotalSegmentator", waitCursor=True):
-            self.logic.pullMaster = self.ui.installLatestDevelopmentCheckBox.checked
             self.logic.setupPythonRequirements(upgrade=True)
         self.onPackageInfoUpdate()
         if not slicer.util.confirmOkCancelDisplay(f"This TotalSegmentator update requires a 3D Slicer restart.","Press OK to restart."):
@@ -288,11 +288,11 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         else:
             slicer.util.restart()
 
-    def onImportWeights(self):
-        import qt
-        filePath = qt.QFileDialog.getOpenFileName(None, 'Select TotalSegmentator weight file', '', "Zip file (*.zip)")
-        if filePath:
-            self.logic.import_weights(filePath)
+    def onSetLicense(self):
+        #import qt
+        #filePath = qt.QFileDialog.getOpenFileName(None, 'Select TotalSegmentator weight file', '', "Zip file (*.zip)")
+        if self.ui.licenseLineEdit.text:
+            self.logic.setlicense(self.ui.licenseLineEdit.text)
 
 
 #
@@ -317,7 +317,7 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
 
         ScriptedLoadableModuleLogic.__init__(self)
 
-        self.totalSegmentatorPythonPackageDownloadUrl = "https://github.com/wasserth/TotalSegmentator/archive/951f07b9721404f5a4306236358d1d7cab1e3610.zip"  # tag: 1.5.7
+        self.totalSegmentatorPythonPackageDownloadUrl = "https://github.com/wasserth/TotalSegmentator/archive/216397e52ec70d098e495793a980527999e6805c.zip"  # tag: 2.0.3
 
         self.logCallback = None
         self.clearOutputFolder = True
@@ -333,21 +333,23 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         self.tasks['coronary_arteries'] = {'label': 'coronary arteries', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
         self.tasks['body'] = {'label': 'body', 'supportsFast': True}
         self.tasks['pleural_pericard_effusion'] = {'label': 'pleural and pericardial effusion', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
+        self.tasks['covid'] = {'label': 'covid', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
         self.tasks['liver_vessels'] = {'label': 'liver vessels', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
-        self.tasks['bones_extremities'] = {'label': 'bones extremities', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
+        self.tasks['appendicular_bones'] = {'label': 'appendicular_bones', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
         self.tasks['tissue_types'] = {'label': 'tissue types', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
         self.tasks['heartchambers_highres'] = {'label': 'heartchambers highres' ,  'requiresPreSegmentation': True, 'supportsMultiLabel': True}
         self.tasks['head'] = {'label': 'head', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
+        self.tasks['face'] = {'label': 'face', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
         self.tasks['aortic_branches'] = {'label': 'aortic branches', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
         self.tasks['heartchambers_test'] = {'label': 'heartchambers test', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
         self.tasks['aortic_branches_test'] = {'label': 'aortic branches test', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
         self.tasks['bones_tissue_test'] = {'label': 'bones tissue test', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
         self.tasks['test'] = {'label': 'test', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
 
+
         # self.tasks['covid'] = {'label': 'pleural and pericardial effusion'}
 
         self.loadTotalSegmentatorLabelTerminology()
-
 
     def loadTotalSegmentatorLabelTerminology(self):
         """Load label terminology from totalsegmentator_snomed_mapping.csv file.
@@ -434,7 +436,8 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         tlogic = slicer.modules.terminologies.logic()
 
         terminologyEntry = slicer.vtkSlicerTerminologyEntry()
-        tlogic.DeserializeTerminologyEntry(terminologyEntryStr, terminologyEntry)
+        if not tlogic.DeserializeTerminologyEntry(terminologyEntryStr, terminologyEntry):
+            raise RuntimeError(f"Failed to deserialize terminology string: {terminologyEntryStr}")
 
         numberOfTypes = tlogic.GetNumberOfTypesInTerminologyCategory(terminologyEntry.GetTerminologyContextName(), terminologyEntry.GetCategoryObject())
         foundTerminologyEntry = slicer.vtkSlicerTerminologyEntry()
@@ -512,7 +515,73 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         version = versionInfo.split('\n')[1].split(' ')[1].strip()
         return version
 
+    def pipInstallSelective(self, packageToInstall, installCommand, packagesToSkip):
+        slicer.util.pip_install(f"{installCommand} --no-deps")
+
+        # Get path to site-packages\nnunetv2-2.2.dist-info\METADATA
+        import importlib.metadata
+        metadataPath = [p for p in importlib.metadata.files(packageToInstall) if 'METADATA' in str(p)][0]
+        metadataPath.locate()
+
+        # Remove line: `Requires-Dist: SimpleITK (==2.0.2)`
+        filteredMetadata = ""
+        with open(metadataPath.locate(), "r+") as file:
+            for line in file:
+                skipThisPackage = False
+                if line.startswith('Requires-Dist'):
+                    for packageToSkip in packagesToSkip:
+                        if packageToSkip in line:
+                            skipThisPackage = True
+                            break
+                if skipThisPackage:
+                    # skip SimpleITK requirement
+                    continue
+                filteredMetadata += line
+            # Update file content with filtered result
+            file.seek(0)
+            file.write(filteredMetadata)
+            file.truncate()
+
+        # Install all dependencies but the ones listed in packagesToSkip
+        import importlib.metadata
+        requirements = importlib.metadata.requires(packageToInstall)
+        for requirement in requirements:
+            skipThisPackage = False
+            for packageToSkip in packagesToSkip:
+                if requirement.startswith(packageToSkip):
+                    # Do not install
+                    skipThisPackage = True
+                    break
+            if skipThisPackage:
+                self.log(f'- Skip {requirement}')
+                continue
+
+            match = False
+            if not match:
+                # ruff ; extra == 'dev' -> rewrite to: ruff[extra]
+                match = re.match(r"([\S]+)[\s]*; extra == '([^']+)'", requirement)
+                if match:
+                    requirement = f"{match.group(1)}[{match.group(2)}]"
+            if not match:
+                # nibabel >=2.3.0 -> rewrite to: nibabel>=2.3.0
+                match = re.match("([\S]+)[\s](.+)", requirement)
+                if match:
+                    requirement = f"{match.group(1)}{match.group(2)}"
+
+            self.log(f'- Installing {requirement}...')
+            slicer.util.pip_install(requirement)
+
     def setupPythonRequirements(self, upgrade=False):
+
+        import importlib.util
+
+        # These packages come preinstalled with Slicer and should remain unchanged
+        packagesToSkip = [
+            'SimpleITK',  # Slicer's SimpleITK uses a special IO class, which should not be replaced
+            'torch',  # needs special installation using SlicerPyTorch
+            'requests',  # TotalSegmentator would want to force a specific version of requests, which would require a restart of Slicer and it is unnecessary
+            ]
+
         # Install PyTorch
         try:
           import PyTorchUtils
@@ -534,26 +603,29 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
                                  + f' Minimum required version is {minimumTorchVersion}. You can use "PyTorch Util" module to install PyTorch'
                                  + f' with version requirement set to: >={minimumTorchVersion}')
 
-        # nnunet\training\network_training\nnUNetTrainer.py requires matplotlib
-        needToInstallMatplotlib = False
-        try:
-            import matplotlib
-        except ModuleNotFoundError as e:
-            needToInstallMatplotlib = True
-        if needToInstallMatplotlib:
-            self.log('Matplotlib Python package is required. Installing...')
-            slicer.util.pip_install("matplotlib")
+        # Install nnunetv2 with selected dependencies only
+        # (it would replace Slicer's "SimpleITK")
+        needToInstallNnunet = False
+        if upgrade:
+            needToInstallNnunet = True
+        else:
+            try:
+                import nnunetv2
+            except ModuleNotFoundError as e:
+                needToInstallNnunet = True
+        if needToInstallNnunet:
+            self.log('nnunetv2 Python package is required. Installing...')
+            self.pipInstallSelective('nnunetv2', "nnunetv2==2.2", packagesToSkip)
 
-        # Install TotalSegmentator segmenter
-
+        # Install TotalSegmentator with selected dependencies only
+        # (it would replace Slicer's "requests")
         needToInstallSegmenter = False
         try:
             import totalsegmentator
             if not upgrade:
                 # Check if we need to update TotalSegmentator Python package version
                 downloadUrl = self.installedTotalSegmentatorPythonPackageDownloadUrl()
-
-                if downloadUrl and (downloadUrl != self.totalSegmentatorPythonPackageDownloadUrl) and (downloadUrl != "https://github.com/wasserth/TotalSegmentator.git"):
+                if downloadUrl and (downloadUrl != self.totalSegmentatorPythonPackageDownloadUrl):
                     # TotalSegmentator have been already installed from GitHub, from a different URL that this module needs
                     if not slicer.util.confirmOkCancelDisplay(
                         f"This module requires TotalSegmentator Python package update.",
@@ -565,21 +637,18 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
 
         if needToInstallSegmenter or upgrade:
             self.log('TotalSegmentator Python package is required. Installing... (it may take several minutes)')
-            if self.pullMaster:
-                # This may fail due to file in use and user may need to restart and try again; but this has not been observed to happen in practice
-                slicer.util.pip_uninstall("TotalSegmentator")
-                # Update TotalSegmentator and all its dependencies
-                slicer.util.pip_install("git+https://github.com/wasserth/TotalSegmentator.git")
-            elif upgrade:
+
+            if upgrade:
                 # TotalSegmentator version information is usually not updated with each git revision, therefore we must uninstall it to force the upgrade
-                # This may fail due to file in use and user may need to restart and try again; but this has not been observed to happen in practice
                 slicer.util.pip_uninstall("TotalSegmentator")
                 # Update TotalSegmentator and all its dependencies
-                slicer.util.pip_install(self.totalSegmentatorPythonPackageDownloadUrl + " --upgrade")
+                self.pipInstallSelective("TotalSegmentator", self.totalSegmentatorPythonPackageDownloadUrl + " --upgrade", packagesToSkip + ["nnunetv2"])
             else:
                 # Install TotalSegmentator and all its dependencies
-                slicer.util.pip_install(self.totalSegmentatorPythonPackageDownloadUrl)
+                self.pipInstallSelective("TotalSegmentator", self.totalSegmentatorPythonPackageDownloadUrl, packagesToSkip + ["nnunetv2"])
+
             self.log('TotalSegmentator installation is completed successfully.')
+
 
     def setDefaultParameters(self, parameterNode):
         """
@@ -591,8 +660,6 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
             parameterNode.SetParameter("Task", "total")
         if not parameterNode.GetParameter("UseStandardSegmentNames"):
             parameterNode.SetParameter("UseStandardSegmentNames", "true")
-        if parameterNode.GetParameter("InstallLatestDevelopmentVersion"):
-            parameterNode.SetParameter("InstallLatestDevelopmentVersion", "false")
 
     def logProcessOutput(self, proc):
         # Wait for the process to end and forward output to the log
@@ -620,7 +687,11 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         if ext.lower() != '.zip':
             raise ValueError(f"The selected file '{file_path}' is not a .zip file!")
 
-    def import_weights(self, filePath):
+    @staticmethod
+    def executableName(name):
+        return name + ".exe" if os.name == "nt" else name
+
+    def setlicense(self, licenseStr):
 
         """
         Import weights.
@@ -631,36 +702,35 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         # Get totalseg_import_weights command
         # totalseg_import_weights (.py file, without extension) is installed in Python Scripts folder
 
-        try:
-            self.check_zip_extension(filePath)
-        except ValueError as e:
-            print(e)
+        if not licenseStr:
+            raise ValueError(f"The license string is empty.")
 
-        self.log('Importing weights started ...')
+        self.log('Set license started ...')
         import sysconfig
-        totalseg_import_weights_Path = os.path.join(sysconfig.get_path('scripts'), "totalseg_import_weights")
+
+        totalseg_set_license_Path = os.path.join(sysconfig.get_path('scripts'), TotalSegmentatorLogic.executableName("totalseg_set_license"))
         # Get Python executable path
         import shutil
         pythonSlicerExecutablePath = shutil.which('PythonSlicer')
         if not pythonSlicerExecutablePath:
             raise RuntimeError("Python was not found")
-        totalseg_import_weights_Command = [ pythonSlicerExecutablePath, totalseg_import_weights_Path]
-        options = ["-i", filePath]
+        totalseg_set_license_Command = [ pythonSlicerExecutablePath, totalseg_set_license_Path]
+        options = ["-l", licenseStr]
 
         # Launch command
-        cmd = totalseg_import_weights_Command + options
+        cmd = totalseg_set_license_Command + options
         # print(*cmd)
         proc = slicer.util.launchConsoleProcess(cmd)
         self.logProcessOutput(proc)
-        self.log('Importing weights finished.')
+        self.log('Set license finished.')
 
-        if not slicer.util.confirmOkCancelDisplay(f"This weight update requires a 3D Slicer restart.","Press OK to restart."):
+        if not slicer.util.confirmOkCancelDisplay(f"This license update requires a 3D Slicer restart.","Press OK to restart."):
             raise ValueError('Restart was cancelled.')
         else:
             slicer.util.restart()
 
 
-    def process(self, inputVolume, outputSegmentation, fast=True, task=None, subset=None):
+    def process(self, inputVolume, outputSegmentation, fast=True, cpu=False, task=None, subset=None):
 
         """
         Run the processing algorithm.
@@ -683,11 +753,17 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         startTime = time.time()
         self.log('Processing started')
 
+        import sysconfig
+
+        print(sysconfig.get_path('scripts'))
+        os.environ["TOTALSEG_WEIGHTS_PATH"] = sysconfig.get_path('scripts')
+
         # Create new empty folder
         tempFolder = slicer.util.tempDirectory()
 
         inputFile = tempFolder+"/total-segmentator-input.nii"
         outputSegmentationFolder = tempFolder + "/segmentation"
+        # print (outputSegmentationFolder)
         outputSegmentationFile = tempFolder + "/segmentation.nii"
 
         # Recommend the user to switch to fast mode if no GPU or not enough memory is available
@@ -716,7 +792,7 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         # Get TotalSegmentator launcher command
         # TotalSegmentator (.py file, without extension) is installed in Python Scripts folder
         import sysconfig
-        totalSegmentatorPath = os.path.join(sysconfig.get_path('scripts'), "TotalSegmentator")
+        totalSegmentatorPath = os.path.join(sysconfig.get_path('scripts'), TotalSegmentatorLogic.executableName("TotalSegmentator"))
         # Get Python executable path
         import shutil
         pythonSlicerExecutablePath = shutil.which('PythonSlicer')
@@ -764,6 +840,8 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
             options.extend(["--task", task])
         if fast:
             options.append("--fast")
+        if cpu:
+            options.extend(["--device", "cpu"])
         if subset:
             options.append("--roi_subset")
             # append each item of the subset
@@ -802,6 +880,8 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
             self.log("Cleaning up temporary folder...")
             if os.path.isdir(tempFolder):
                 shutil.rmtree(tempFolder)
+        else:
+            self.log(f"Not cleaning up temporary folder: {tempFolder}")
 
         stopTime = time.time()
         self.log(f'Processing completed in {stopTime-startTime:.2f} seconds')
@@ -818,7 +898,9 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         # Get color node with random colors
         randomColorsNode = slicer.mrmlScene.GetNodeByID('vtkMRMLColorTableNodeRandom')
         rgba = [0, 0, 0, 0]
+        # Get label descriptions
 
+        from totalsegmentator.map_to_binary import class_map
         # Get label descriptions if task is provided
         from totalsegmentator.map_to_binary import class_map
         labelValueToSegmentName = class_map[task] if task else {}
@@ -832,9 +914,10 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
 
         # Read each candidate file
         for labelValue, segmentName in labelValueToSegmentName.items():
-            self.log(f"Importing {segmentName}")
+            self.log(f"Importing candidate {segmentName}")
             labelVolumePath = os.path.join(output_segmentation_dir, f"{segmentName}.nii.gz")
             if not os.path.exists(labelVolumePath):
+                self.log(f"Path {segmentName} not exists.")
                 continue
             labelmapVolumeNode = slicer.util.loadLabelVolume(labelVolumePath, {"name": segmentName})
             randomColorsNode.GetColor(labelValue, rgba)
@@ -844,7 +927,7 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         # Read each subset file if subset is provided
         if subset is not None and task is None:
             for segmentName in subset:
-                self.log(f"Importing {segmentName}")
+                self.log(f"Importing subset {segmentName}")
                 labelVolumePath = os.path.join(output_segmentation_dir, f"{segmentName}.nii.gz")
                 if os.path.exists(labelVolumePath):
                     labelmapVolumeNode = slicer.util.loadLabelVolume(labelVolumePath, {"name": segmentName})
