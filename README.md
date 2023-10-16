@@ -99,6 +99,13 @@ Problem: There is a big segment called `face` at the front of the head, which is
 
 Explanation: This segment is not designed to match the shape of an anatomical feature, but it designates the general area of the face. It can be used to remove features (for example by masking or blurring the image or clipping models) that might otherwise identify the individual subject. Removing these features makes it easier to share 3D data.
 
+### Fail to download model files
+
+Model files are hosted on Zenodo.org and downloaded automatically when segmenting the first time. Insitutional firewall or proxy servers may prevent access or the server may be temporarily overloaded, which may cause an error report similar to `requests.exceptions.HTTPError: 404 Client Error: Not Found for url: https://zenodo.org/record/6802052/files/Task256_TotalSegmentator_3mm_1139subj.zip?download=1`. Potential solutions:
+- retry later when the server may be less overloaded
+- talk to IT administrators or use a VPN to access the server
+- download the file manually and unzip it in the `.totalsegmentator` folder in the user's profile (for example in `c:\Users\(yourusername)\.totalsegmentator\nnunet\results\Dataset291_TotalSegmentator_part1_organs_1559subj`)
+
 ## Contact
 
 Please post any questions to the [Slicer Forum](https://discourse.slicer.org).
