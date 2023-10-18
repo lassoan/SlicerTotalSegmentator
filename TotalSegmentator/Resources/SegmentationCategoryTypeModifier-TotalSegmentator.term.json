@@ -241,6 +241,55 @@
             ]
           },
           {
+            "CodeMeaning": "Deep muscle of back",
+            "CodingSchemeDesignator": "SCT",
+            "CodeValue": "244849004",
+            "SNOMEDCTConceptID": "244849004",
+            "contextGroupName": "MuscularAnatomy",
+            "paired": "Y",
+            "Modifier": [
+              {
+                "recommendedDisplayRGBValue": [
+                  171,
+                  85,
+                  68
+                ],
+                "CodeMeaning": "Right",
+                "CodingSchemeDesignator": "SCT",
+                "cid": "244",
+                "3dSlicerLabel": "right deep back muscle",
+                "UMLSConceptUID": "C0205090",
+                "CodeValue": "24028007",
+                "contextGroupName": "Laterality",
+                "SNOMEDCTConceptID": "24028007"
+              },
+              {
+                "recommendedDisplayRGBValue": [
+                  171,
+                  85,
+                  68
+                ],
+                "CodeMeaning": "Left",
+                "CodingSchemeDesignator": "SCT",
+                "3dSlicerLabel": "left deep back muscle",
+                "cid": "244",
+                "UMLSConceptUID": "C0205091",
+                "CodeValue": "7771000",
+                "contextGroupName": "Laterality",
+                "SNOMEDCTConceptID": "7771000"
+              },
+              {
+                "CodeMeaning": "Right and left",
+                "CodingSchemeDesignator": "SCT",
+                "cid": "244",
+                "UMLSConceptUID": "C0238767",
+                "CodeValue": "51440002",
+                "contextGroupName": "Laterality",
+                "SNOMEDCTConceptID": "51440002"
+              }
+            ]
+          },
+          {
             "recommendedDisplayRGBValue": [
               0,
               122,
@@ -396,6 +445,19 @@
                 "contextGroupName": "Laterality",
                 "SNOMEDCTConceptID": "51440002"
               }
+            ]
+          },
+          {
+            "CodeMeaning": "Portal vein and splenic vein",
+            "CodingSchemeDesignator": "SCT",
+            "CodeValue": "110765007",
+            "SNOMEDCTConceptID": "110765007",
+            "contextGroupName": "CardiovascularAnatomicLocations",
+            "3dSlicerLabel": "Portal vein and splenic vein",
+            "recommendedDisplayRGBValue": [
+              0,
+              151,
+              206
             ]
           },
           {
@@ -1652,6 +1714,19 @@
                 "contextGroupName": "Laterality",
                 "SNOMEDCTConceptID": "51440002"
               }
+            ]
+          },
+          {
+            "CodeMeaning": "Myocardium",
+            "CodingSchemeDesignator": "SCT",
+            "CodeValue": "74281007",
+            "SNOMEDCTConceptID": "74281007",
+            "contextGroupName": "AnatomicRegion,CommonAnatomicRegions,MediastinumAnatomyFindingorFeature,CardiacStructureSegmentationTypes",
+            "3dSlicerLabel": "myocardium",
+            "recommendedDisplayRGBValue": [
+              206,
+              110,
+              84
             ]
           }
         ]

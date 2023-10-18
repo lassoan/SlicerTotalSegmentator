@@ -99,8 +99,8 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         self.ui.fastCheckBox.connect('toggled(bool)', self.updateParameterNodeFromGUI)
         self.ui.useStandardSegmentNamesCheckBox.connect('toggled(bool)', self.updateParameterNodeFromGUI)
         self.ui.installLatestDevelopmentCheckBox.connect('toggled(bool)', self.updateParameterNodeFromGUI)
-        
-        
+
+
         self.ui.taskComboBox.currentTextChanged.connect(self.updateParameterNodeFromGUI)
         self.ui.outputSegmentationSelector.connect("currentNodeChanged(vtkMRMLNode*)", self.updateParameterNodeFromGUI)
         self.ui.outputSegmentationSelector.connect("currentNodeChanged(vtkMRMLNode*)", self.ui.segmentationShow3DButton.setSegmentationNode)
@@ -279,7 +279,7 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
             self.ui.packageInfoTextBrowser.plainText = self.logic.installedTotalSegmentatorPythonPackageInfo().rstrip()
 
     def onPackageUpgrade(self):
-        with slicer.util.tryWithErrorDisplay("Failed to upgrade TotalSegmentator", waitCursor=True):           
+        with slicer.util.tryWithErrorDisplay("Failed to upgrade TotalSegmentator", waitCursor=True):
             self.logic.pullMaster = self.ui.installLatestDevelopmentCheckBox.checked
             self.logic.setupPythonRequirements(upgrade=True)
         self.onPackageInfoUpdate()
@@ -289,12 +289,12 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
             slicer.util.restart()
 
     def onImportWeights(self):
-        import qt    
+        import qt
         filePath = qt.QFileDialog.getOpenFileName(None, 'Select TotalSegmentator weight file', '', "Zip file (*.zip)")
-        if filePath: 
+        if filePath:
             self.logic.import_weights(filePath)
-            
-    
+
+
 #
 # TotalSegmentatorLogic
 #
@@ -323,6 +323,7 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         self.clearOutputFolder = True
         self.useStandardSegmentNames = True
         self.pullMaster = False
+        self.totalSegmentatorLabelTerminology = {}  # Map from TotalSegmentator structure name to terminology string
 
         self.tasks = OrderedDict()
         self.tasks['total'] = {'label': 'total', 'supportsFast': True, 'supportsMultiLabel': True}
@@ -345,160 +346,72 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
 
         # self.tasks['covid'] = {'label': 'pleural and pericardial effusion'}
 
-        self.totalSegmentatorLabelTerminology = {
-            "spleen": "Segmentation category and type - DICOM master list~SCT^123037004^Anatomical Structure~SCT^78961009^Spleen~^^~Anatomic codes - DICOM master list~^^~^^|",
-            "kidney_right": "Segmentation category and type - DICOM master list~SCT^123037004^Anatomical Structure~SCT^64033007^Kidney~SCT^24028007^Right~Anatomic codes - DICOM master list~^^~^^|",
-            "kidney_left": "Segmentation category and type - DICOM master list~SCT^123037004^Anatomical Structure~SCT^64033007^Kidney~SCT^7771000^Left~Anatomic codes - DICOM master list~^^~^^|",
-            "gallbladder": "Segmentation category and type - DICOM master list~SCT^123037004^Anatomical Structure~SCT^28231008^Gallbladder~^^~Anatomic codes - DICOM master list~^^~^^|",
-            "liver": "Segmentation category and type - DICOM master list~SCT^123037004^Anatomical Structure~SCT^10200004^Liver~^^~Anatomic codes - DICOM master list~^^~^^|",
-            "stomach": "Segmentation category and type - DICOM master list~SCT^123037004^Anatomical Structure~SCT^69695003^Stomach~^^~Anatomic codes - DICOM master list~^^~^^|",
-            "aorta": "Segmentation category and type - DICOM master list~SCT^123037004^Anatomical Structure~SCT^15825003^Aorta~^^~Anatomic codes - DICOM master list~^^~^^|",
-            "inferior_vena_cava": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^64131007^Inferior vena cava~^^~Anatomic codes - DICOM master list~^^~^^|",
-            "portal_vein_and_splenic_vein": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^110765007^Portal vein and splenic vein~^^~Anatomic codes - DICOM master list~^^~^^|",
-            "pancreas": "Segmentation category and type - DICOM master list~SCT^123037004^Anatomical Structure~SCT^15776009^Pancreas~^^~Anatomic codes - DICOM master list~^^~^^|",
-            "adrenal_gland_right": "Segmentation category and type - DICOM master list~SCT^123037004^Anatomical Structure~SCT^23451007^Adrenal gland~SCT^24028007^Right~Anatomic codes - DICOM master list~^^~^^|",
-            "adrenal_gland_left": "Segmentation category and type - DICOM master list~SCT^123037004^Anatomical Structure~SCT^23451007^Adrenal gland~SCT^7771000^Left~Anatomic codes - DICOM master list~^^~^^|",
-            "lung_upper_lobe_left": "Segmentation category and type - DICOM master list~SCT^123037004^Anatomical Structure~SCT^45653009^Upper lobe of lung~SCT^7771000^Left~Anatomic codes - DICOM master list~^^~^^|",
-            "lung_lower_lobe_left": "Segmentation category and type - DICOM master list~SCT^123037004^Anatomical Structure~SCT^90572001^Lower lobe of lung~SCT^7771000^Left~Anatomic codes - DICOM master list~^^~^^|",
-            "lung_upper_lobe_right": "Segmentation category and type - DICOM master list~SCT^123037004^Anatomical Structure~SCT^45653009^Upper lobe of lung~SCT^24028007^Right~Anatomic codes - DICOM master list~^^~^^|",
-            "lung_middle_lobe_right": "Segmentation category and type - DICOM master list~SCT^123037004^Anatomical Structure~SCT^72481006^Middle lobe of right lung~^^~Anatomic codes - DICOM master list~^^~^^|",
-            "lung_lower_lobe_right": "Segmentation category and type - DICOM master list~SCT^123037004^Anatomical Structure~SCT^90572001^Lower lobe of lung~SCT^24028007^Right~Anatomic codes - DICOM master list~^^~^^|",
-            "vertebrae_L5": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^49668003^L5 vertebra~^^~Anatomic codes - DICOM master list~^^~^^|",
-            "vertebrae_L4": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^11994002^L4 vertebra~^^~Anatomic codes - DICOM master list~^^~^^|",
-            "vertebrae_L3": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^36470004^L3 vertebra~^^~Anatomic codes - DICOM master list~^^~^^|",
-            "vertebrae_L2": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^14293000^L2 vertebra~^^~Anatomic codes - DICOM master list~^^~^^|",
-            "vertebrae_L1": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^66794005^L1 vertebra~^^~Anatomic codes - DICOM master list~^^~^^|",
-            "vertebrae_T12": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^23215003^T12 vertebra~^^~Anatomic codes - DICOM master list~^^~^^|",
-            "vertebrae_T11": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^12989004^T11 vertebra~^^~Anatomic codes - DICOM master list~^^~^^|",
-            "vertebrae_T10": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^7610001^T10 vertebra~^^~Anatomic codes - DICOM master list~^^~^^|",
-            "vertebrae_T9": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^82687006^T9 vertebra~^^~Anatomic codes - DICOM master list~^^~^^|",
-            "vertebrae_T8": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^11068009^T8 vertebra~^^~Anatomic codes - DICOM master list~^^~^^|",
-            "vertebrae_T7": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^62487009^T7 vertebra~^^~Anatomic codes - DICOM master list~^^~^^|",
-            "vertebrae_T6": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^45296009^T6 vertebra~^^~Anatomic codes - DICOM master list~^^~^^|",
-            "vertebrae_T5": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^56401006^T5 vertebra~^^~Anatomic codes - DICOM master list~^^~^^|",
-            "vertebrae_T4": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^73071006^T4 vertebra~^^~Anatomic codes - DICOM master list~^^~^^|",
-            "vertebrae_T3": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^1626008^T3 vertebra~^^~Anatomic codes - DICOM master list~^^~^^|",
-            "vertebrae_T2": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^53733008^T2 vertebra~^^~Anatomic codes - DICOM master list~^^~^^|",
-            "vertebrae_T1": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^64864005^T1 vertebra~^^~Anatomic codes - DICOM master list~^^~^^|",
-            "vertebrae_C7": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^87391001^C7 vertebra~^^~Anatomic codes - DICOM master list~^^~^^|",
-            "vertebrae_C6": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^36054005^C6 vertebra~^^~Anatomic codes - DICOM master list~^^~^^|",
-            "vertebrae_C5": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^36978003^C5 vertebra~^^~Anatomic codes - DICOM master list~^^~^^|",
-            "vertebrae_C4": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^5329002^C4 vertebra~^^~Anatomic codes - DICOM master list~^^~^^|",
-            "vertebrae_C3": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^113205007^C3 vertebra~^^~Anatomic codes - DICOM master list~^^~^^|",
-            "vertebrae_C2": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^39976000^C2 vertebra~^^~Anatomic codes - DICOM master list~^^~^^|",
-            "vertebrae_C1": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^14806007^C1 vertebra~^^~Anatomic codes - DICOM master list~^^~^^|",
-            "esophagus": "Segmentation category and type - DICOM master list~SCT^123037004^Anatomical Structure~SCT^32849002^Esophagus~^^~Anatomic codes - DICOM master list~^^~^^|",
-            "trachea": "Segmentation category and type - DICOM master list~SCT^123037004^Anatomical Structure~SCT^44567001^Trachea~^^~Anatomic codes - DICOM master list~^^~^^|",
-            "heart_myocardium": "Segmentation category and type - DICOM master list~SCT^123037004^Anatomical Structure~SCT^74281007^Myocardium~^^~Anatomic codes - DICOM master list~^^~^^|",
-            "heart_atrium_left": "Segmentation category and type - DICOM master list~SCT^123037004^Anatomical Structure~SCT^82471001^Left atrium~^^~Anatomic codes - DICOM master list~^^~^^|",
-            "heart_ventricle_left": "Segmentation category and type - DICOM master list~SCT^123037004^Anatomical Structure~SCT^87878005^Left ventricle of heart~^^~Anatomic codes - DICOM master list~^^~^^|",
-            "heart_atrium_right": "Segmentation category and type - DICOM master list~SCT^123037004^Anatomical Structure~SCT^73829009^Right atrium~^^~Anatomic codes - DICOM master list~^^~^^|",
-            "heart_ventricle_right": "Segmentation category and type - DICOM master list~SCT^123037004^Anatomical Structure~SCT^53085002^Right ventricle of heart~^^~Anatomic codes - DICOM master list~^^~^^|",
-            "pulmonary_artery": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^81040000^Pulmonary artery~^^~Anatomic codes - DICOM master list~^^~^^|",
-            "brain": "Segmentation category and type - DICOM master list~SCT^123037004^Anatomical Structure~SCT^12738006^Brain~^^~Anatomic codes - DICOM master list~^^~^^|",
-            "iliac_artery_left": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^73634005^Common iliac artery~SCT^7771000^Left~Anatomic codes - DICOM master list~^^~^^|",
-            "iliac_artery_right": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^73634005^Common iliac artery~SCT^24028007^Right~Anatomic codes - DICOM master list~^^~^^|",
-            "iliac_vena_left": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^46027005^Common iliac vein~SCT^7771000^Left~Anatomic codes - DICOM master list~^^~^^|",
-            "iliac_vena_right": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^46027005^Common iliac vein~SCT^24028007^Right~Anatomic codes - DICOM master list~^^~^^|",
-            "small_bowel": "Segmentation category and type - DICOM master list~SCT^123037004^Anatomical Structure~SCT^30315005^Small Intestine~^^~Anatomic codes - DICOM master list~^^~^^|",
-            "duodenum": "Segmentation category and type - DICOM master list~SCT^123037004^Anatomical Structure~SCT^38848004^Duodenum~^^~Anatomic codes - DICOM master list~^^~^^|",
-            "colon": "Segmentation category and type - DICOM master list~SCT^123037004^Anatomical Structure~SCT^71854001^Colon~^^~Anatomic codes - DICOM master list~^^~^^|",
-            "rib_left_1": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^48535007^First rib~SCT^7771000^Left~Anatomic codes - DICOM master list~^^~^^|",
-            "rib_left_2": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^78247007^Second rib~SCT^7771000^Left~Anatomic codes - DICOM master list~^^~^^|",
-            "rib_left_3": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^25888004^Third rib~SCT^7771000^Left~Anatomic codes - DICOM master list~^^~^^|",
-            "rib_left_4": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^25523003^Fourth rib~SCT^7771000^Left~Anatomic codes - DICOM master list~^^~^^|",
-            "rib_left_5": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^15339008^Fifth rib~SCT^7771000^Left~Anatomic codes - DICOM master list~^^~^^|",
-            "rib_left_6": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^59558009^Sixth rib~SCT^7771000^Left~Anatomic codes - DICOM master list~^^~^^|",
-            "rib_left_7": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^24915002^Seventh rib~SCT^7771000^Left~Anatomic codes - DICOM master list~^^~^^|",
-            "rib_left_8": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^5953002^Eighth rib~SCT^7771000^Left~Anatomic codes - DICOM master list~^^~^^|",
-            "rib_left_9": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^22565002^Ninth rib~SCT^7771000^Left~Anatomic codes - DICOM master list~^^~^^|",
-            "rib_left_10": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^77644006^Tenth rib~SCT^7771000^Left~Anatomic codes - DICOM master list~^^~^^|",
-            "rib_left_11": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^58830002^Eleventh rib~SCT^7771000^Left~Anatomic codes - DICOM master list~^^~^^|",
-            "rib_left_12": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^43993008^Twelfth rib~SCT^7771000^Left~Anatomic codes - DICOM master list~^^~^^|",
-            "rib_right_1": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^48535007^First rib~SCT^24028007^Right~Anatomic codes - DICOM master list~^^~^^|",
-            "rib_right_2": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^78247007^Second rib~SCT^24028007^Right~Anatomic codes - DICOM master list~^^~^^|",
-            "rib_right_3": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^25888004^Third rib~SCT^24028007^Right~Anatomic codes - DICOM master list~^^~^^|",
-            "rib_right_4": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^25523003^Fourth rib~SCT^24028007^Right~Anatomic codes - DICOM master list~^^~^^|",
-            "rib_right_5": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^15339008^Fifth rib~SCT^24028007^Right~Anatomic codes - DICOM master list~^^~^^|",
-            "rib_right_6": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^59558009^Sixth rib~SCT^24028007^Right~Anatomic codes - DICOM master list~^^~^^|",
-            "rib_right_7": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^24915002^Seventh rib~SCT^24028007^Right~Anatomic codes - DICOM master list~^^~^^|",
-            "rib_right_8": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^5953002^Eighth rib~SCT^24028007^Right~Anatomic codes - DICOM master list~^^~^^|",
-            "rib_right_9": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^22565002^Ninth rib~SCT^24028007^Right~Anatomic codes - DICOM master list~^^~^^|",
-            "rib_right_10": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^77644006^Tenth rib~SCT^24028007^Right~Anatomic codes - DICOM master list~^^~^^|",
-            "rib_right_11": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^58830002^Eleventh rib~SCT^24028007^Right~Anatomic codes - DICOM master list~^^~^^|",
-            "rib_right_12": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^43993008^Twelfth rib~SCT^24028007^Right~Anatomic codes - DICOM master list~^^~^^|",
-            "humerus_left": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^85050009^Humerus~SCT^7771000^Left~Anatomic codes - DICOM master list~^^~^^|",
-            "humerus_right": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^85050009^Humerus~SCT^24028007^Right~Anatomic codes - DICOM master list~^^~^^|",
-            "scapula_left": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^79601000^Scapula~SCT^7771000^Left~Anatomic codes - DICOM master list~^^~^^|",
-            "scapula_right": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^79601000^Scapula~SCT^24028007^Right~Anatomic codes - DICOM master list~^^~^^|",
-            "clavicula_left": "Segmentation category and type - DICOM master list~SCT^123037004^Anatomical Structure~SCT^51299004^Clavicle~SCT^7771000^Left~Anatomic codes - DICOM master list~^^~^^|",
-            "clavicula_right": "Segmentation category and type - DICOM master list~SCT^123037004^Anatomical Structure~SCT^51299004^Clavicle~SCT^24028007^Right~Anatomic codes - DICOM master list~^^~^^|",
-            "femur_left": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^71341001^Femur~SCT^7771000^Left~Anatomic codes - DICOM master list~^^~^^|",
-            "femur_right": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^71341001^Femur~SCT^24028007^Right~Anatomic codes - DICOM master list~^^~^^|",
-            "hip_left": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^29836001^Hip~SCT^7771000^Left~Anatomic codes - DICOM master list~^^~^^|",
-            "hip_right": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^29836001^Hip~SCT^24028007^Right~Anatomic codes - DICOM master list~^^~^^|",
-            "sacrum": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^54735007^Sacrum~^^~Anatomic codes - DICOM master list~^^~^^|",
-            "face": "Segmentation category and type - DICOM master list~SCT^123037004^Anatomical Structure~SCT^89545001^Face~^^~Anatomic codes - DICOM master list~^^~^^|",
-            "gluteus_maximus_left": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^181674001^Gluteus maximus muscle~SCT^7771000^Left~Anatomic codes - DICOM master list~^^~^^|",
-            "gluteus_maximus_right": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^181674001^Gluteus maximus muscle~SCT^24028007^Right~Anatomic codes - DICOM master list~^^~^^|",
-            "gluteus_medius_left": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^78333006^Gluteus medius muscle~SCT^7771000^Left~Anatomic codes - DICOM master list~^^~^^|",
-            "gluteus_medius_right": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^78333006^Gluteus medius muscle~SCT^24028007^Right~Anatomic codes - DICOM master list~^^~^^|",
-            "gluteus_minimus_left": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^75297007^Gluteus minimus muscle~SCT^7771000^Left~Anatomic codes - DICOM master list~^^~^^|",
-            "gluteus_minimus_right": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^75297007^Gluteus minimus muscle~SCT^24028007^Right~Anatomic codes - DICOM master list~^^~^^|",
-            "autochthon_left": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^244849004^Deep muscle of back~SCT^7771000^Left~Anatomic codes - DICOM master list~^^~^^|",
-            "autochthon_right": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^244849004^Deep muscle of back~SCT^24028007^Right~Anatomic codes - DICOM master list~^^~^^|",
-            "iliopsoas_left": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^68455001^Iliopsoas muscle~SCT^7771000^Left~Anatomic codes - DICOM master list~^^~^^|",
-            "iliopsoas_right": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^68455001^Iliopsoas muscle~SCT^24028007^Right~Anatomic codes - DICOM master list~^^~^^|",
-            "urinary_bladder": "Segmentation category and type - DICOM master list~SCT^123037004^Anatomical Structure~SCT^89837001^Urinary bladder~^^~Anatomic codes - DICOM master list~^^~^^|",
+        self.loadTotalSegmentatorLabelTerminology()
 
-            # SPecification of these codes are still work in progress:
-            #"femur": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^71341001^Femur~^^~Anatomic codes - DICOM master list~^^~^^|",
-            #"patella": "Segmentation category and type - DICOM master list~SCT^123037004^Anatomical Structure~SCT^64234005^Patella~^^~Anatomic codes - DICOM master list~^^~^^|",
-            #"tibia": "",
-            #"fibula": "Segmentation category and type - DICOM master list~SCT^123037004^Anatomical Structure~SCT^87342007^Fibula~^^~Anatomic codes - DICOM master list~^^~^^|",
-            #"tarsal": "",
-            #"metatarsal": "",
-            #"phalanges_feet": "",
-            #"humerus": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^85050009^Humerus~^^~Anatomic codes - DICOM master list~^^~^^|",
-            #"ulna": "",
-            #"radius": "",
-            #"carpal": "",
-            #"metacarpal": "",
-            #"phalanges_hand": "",
-            #"sternum": "Segmentation category and type - DICOM master list~SCT^123037004^Anatomical Structure~SCT^56873002^Sternum~^^~Anatomic codes - DICOM master list~^^~^^|",
-            #"skull": "Segmentation category and type - DICOM master list~SCT^123037004^Anatomical Structure~SCT^89546000^Skull~^^~Anatomic codes - DICOM master list~^^~^^|",
-            #"subcutaneous_fat": "",
-            #"skeletal_muscle": "",
-            #"torso_fat": "",
-            #"spinal_cord": "Segmentation category and type - DICOM master list~SCT^123037004^Anatomical Structure~SCT^2748008^Spinal cord~^^~Anatomic codes - DICOM master list~^^~^^|",
-            #"lung_covid_infiltrate": "",
-            #"intracerebral_hemorrhage": "",
-            #"hip_implant": "Segmentation category and type - DICOM master list~SCT^260787004^Physical object~SCT^40388003^Implant~^^~Anatomic codes - DICOM master list~SCT^24136001^Hip joint~SCT^51440002^Right and left|",
-            #"coronary_arteries": "Segmentation category and type - DICOM master list~SCT^123037004^Anatomical Structure~SCT^41801008^Coronary artery~^^~Anatomic codes - DICOM master list~^^~^^|",
-            #"kidney": "Segmentation category and type - DICOM master list~SCT^123037004^Anatomical Structure~SCT^64033007^Kidney~^^~Anatomic codes - DICOM master list~^^~^^|",
-            #"adrenal_gland": "Segmentation category and type - DICOM master list~SCT^123037004^Anatomical Structure~SCT^23451007^Adrenal gland~^^~Anatomic codes - DICOM master list~^^~^^|",
-            #"vertebrae_lumbar": "Segmentation category and type - DICOM master list~SCT^123037004^Anatomical Structure~SCT^51282000^Vertebra~^^~Anatomic codes - DICOM master list~SCT^122496007^Lumbar spine~^^|",
-            #"vertebrae_thoracic": "Segmentation category and type - DICOM master list~SCT^123037004^Anatomical Structure~SCT^51282000^Vertebra~^^~Anatomic codes - DICOM master list~SCT^122495006^Thoracic spine~^^|",
-            #"vertebrae_cervical": "Segmentation category and type - DICOM master list~SCT^123037004^Anatomical Structure~SCT^51282000^Vertebra~^^~Anatomic codes - DICOM master list~SCT^122494005^Cervical spine~^^|",
-            #"iliac_artery": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^73634005^Common iliac artery~^^~Anatomic codes - DICOM master list~^^~^^|",
-            #"iliac_vena": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^46027005^Common iliac vein~^^~Anatomic codes - DICOM master list~^^~^^|",
-            #"ribs": "Segmentation category and type - DICOM master list~SCT^123037004^Anatomical Structure~SCT^113197003^Rib~^^~Anatomic codes - DICOM master list~SCT^39607008^Lung~SCT^24028007^Right|",
-            #"scapula": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^79601000^Scapula~^^~Anatomic codes - DICOM master list~^^~^^|",
-            #"clavicula": "Segmentation category and type - DICOM master list~SCT^123037004^Anatomical Structure~SCT^51299004^Clavicle~^^~Anatomic codes - DICOM master list~^^~^^|",
-            #"hip": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^29836001^Hip~^^~Anatomic codes - DICOM master list~^^~^^|",
-            #"gluteus_maximus": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^181674001^Gluteus maximus muscle~^^~Anatomic codes - DICOM master list~^^~^^|",
-            #"gluteus_medius": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^78333006^Gluteus medius muscle~^^~Anatomic codes - DICOM master list~^^~^^|",
-            #"gluteus_minimus": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^78333006^Gluteus medius muscle~^^~Anatomic codes - DICOM master list~^^~^^|",
-            #"autochthon": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^44947003^Erector spinae muscle~^^~Anatomic codes - DICOM master list~^^~^^|",
-            #"iliopsoas": "Segmentation category and type - Total Segmentator~SCT^123037004^Anatomical Structure~SCT^68455001^Iliopsoas muscle~^^~Anatomic codes - DICOM master list~^^~^^|",
-            #"lung_vessels": "Segmentation category and type - DICOM master list~SCT^85756007^Tissue~SCT^59820001^Blood vessel~^^~Anatomic codes - DICOM master list~SCT^39607008^Lung~SCT^24028007^Right|",
-            #"lung_trachea_bronchia": "Segmentation category and type - DICOM master list~SCT^123037004^Anatomical Structure~SCT^110726009^Trachea and bronchus~^^~Anatomic codes - DICOM master list~^^~^^|",
-            #"body_trunc": "",
-            #"body_extremities": "",
-            #"lung_pleural": "",
-            #"pleural_effusion": "",
-            #"pericardial_effusion": "",
-        }
+
+    def loadTotalSegmentatorLabelTerminology(self):
+        """Load label terminology from totalsegmentator_snomed_mapping.csv file.
+        Terminology entries are either in DICOM or TotalSegmentator "Segmentation category and type".
+        """
+
+        moduleDir = os.path.dirname(slicer.util.getModule('TotalSegmentator').path)
+        totalSegmentatorTerminologyMappingFilePath = os.path.join(moduleDir, 'Resources', 'totalsegmentator_snomed_mapping.csv')
+
+        terminologiesLogic = slicer.util.getModuleLogic('Terminologies')
+        totalSegmentatorTerminologyName = "Segmentation category and type - Total Segmentator"
+
+        anatomicalStructureCategory = slicer.vtkSlicerTerminologyCategory()
+        numberOfCategories = terminologiesLogic.GetNumberOfCategoriesInTerminology(totalSegmentatorTerminologyName)
+        for i in range(numberOfCategories):
+            terminologiesLogic.GetNthCategoryInTerminology(totalSegmentatorTerminologyName, i, anatomicalStructureCategory)
+            if anatomicalStructureCategory.GetCodingSchemeDesignator() == 'SCT' and anatomicalStructureCategory.GetCodeValue() == '123037004':
+                # Found the (123037004, SCT, "Anatomical Structure") category within DICOM master list
+                break
+
+        self.totalSegmentatorAnatomicalStuctures = []  # List of codes that are specified by in the TotalSegmentator terminology (SCT^123456)
+        terminologyType = slicer.vtkSlicerTerminologyType()
+        numberOfTypes = terminologiesLogic.GetNumberOfTypesInTerminologyCategory(totalSegmentatorTerminologyName, anatomicalStructureCategory)
+        for i in range(numberOfTypes):
+            if terminologiesLogic.GetNthTypeInTerminologyCategory(totalSegmentatorTerminologyName, anatomicalStructureCategory, i, terminologyType):
+                self.totalSegmentatorAnatomicalStuctures.append(terminologyType.GetCodingSchemeDesignator() + "^" + terminologyType.GetCodeValue())
+
+        # Helper function to get code string from CSV file row
+        def getCodeString(field, columnNames, row):
+            codingSchemeDesignator = row[columnNames.index(field + ".CodingSchemeDesignator")]
+            codeValue = row[columnNames.index(field + ".CodeValue")]
+            codeMeaning = row[columnNames.index(field + ".CodeMeaning")]
+            return [codingSchemeDesignator, codeValue, codeMeaning]
+
+        import csv
+        with open(totalSegmentatorTerminologyMappingFilePath, "r") as f:
+            reader = csv.reader(f)
+            columnNames = next(reader)
+            data = {}
+            # Loop through the rows of the csv file
+            for row in reader:
+
+                # Determine segmentation category (DICOM or TotalSegmentator)
+                terminologyEntryStrWithoutCategoryName = (
+                    "~"
+                    + '^'.join(getCodeString("SegmentedPropertyCategoryCodeSequence", columnNames, row))  # SCT^123037004^Anatomical Structure
+                    + '~'
+                    + '^'.join(getCodeString("SegmentedPropertyTypeCodeSequence", columnNames, row))  # SCT^23451007^Adrenal gland
+                    + '~'
+                    + '^'.join(getCodeString("SegmentedPropertyTypeModifierCodeSequence", columnNames, row))  # SCT^7771000^Left
+                    + '~Anatomic codes - DICOM master list~^^~^^|')
+                terminologyEntry = slicer.vtkSlicerTerminologyEntry()
+                anatomicalStructureCodeStr = (  # Example: SCT^23451007
+                    row[columnNames.index("SegmentedPropertyTypeCodeSequence.CodingSchemeDesignator")]
+                    + "^" + row[columnNames.index("SegmentedPropertyTypeCodeSequence.CodeValue")])
+                if anatomicalStructureCodeStr in self.totalSegmentatorAnatomicalStuctures:
+                    terminologyEntryStr = "Segmentation category and type - Total Segmentator" + terminologyEntryStrWithoutCategoryName
+                else:
+                    terminologyEntryStr = "Segmentation category and type - DICOM master list" + terminologyEntryStrWithoutCategoryName
+
+                # Store the terminology string for this structure
+                totalSegmentatorStructureName = row[columnNames.index("Structure")]  # TotalSegmentator structure name, such as "adrenal_gland_left"
+                self.totalSegmentatorLabelTerminology[totalSegmentatorStructureName] = terminologyEntryStr
+
 
     def isFastModeSupportedForTask(self, task):
         return (task in self.tasks) and ('supportsFast' in self.tasks[task]) and self.tasks[task]['supportsFast']
@@ -639,7 +552,7 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
             if not upgrade:
                 # Check if we need to update TotalSegmentator Python package version
                 downloadUrl = self.installedTotalSegmentatorPythonPackageDownloadUrl()
-                
+
                 if downloadUrl and (downloadUrl != self.totalSegmentatorPythonPackageDownloadUrl) and (downloadUrl != "https://github.com/wasserth/TotalSegmentator.git"):
                     # TotalSegmentator have been already installed from GitHub, from a different URL that this module needs
                     if not slicer.util.confirmOkCancelDisplay(
@@ -652,7 +565,7 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
 
         if needToInstallSegmenter or upgrade:
             self.log('TotalSegmentator Python package is required. Installing... (it may take several minutes)')
-            if self.pullMaster: 
+            if self.pullMaster:
                 # This may fail due to file in use and user may need to restart and try again; but this has not been observed to happen in practice
                 slicer.util.pip_uninstall("TotalSegmentator")
                 # Update TotalSegmentator and all its dependencies
@@ -703,26 +616,26 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
 
     def check_zip_extension(self, file_path):
         _, ext = os.path.splitext(file_path)
-        
+
         if ext.lower() != '.zip':
             raise ValueError(f"The selected file '{file_path}' is not a .zip file!")
-            
+
     def import_weights(self, filePath):
 
         """
         Import weights.
-        Weights are provided in ZIP format. 
+        Weights are provided in ZIP format.
         This function can be used without GUI widget.
         """
 
         # Get totalseg_import_weights command
         # totalseg_import_weights (.py file, without extension) is installed in Python Scripts folder
-        
+
         try:
             self.check_zip_extension(filePath)
         except ValueError as e:
             print(e)
-        
+
         self.log('Importing weights started ...')
         import sysconfig
         totalseg_import_weights_Path = os.path.join(sysconfig.get_path('scripts'), "totalseg_import_weights")
@@ -740,7 +653,7 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         proc = slicer.util.launchConsoleProcess(cmd)
         self.logProcessOutput(proc)
         self.log('Importing weights finished.')
-        
+
         if not slicer.util.confirmOkCancelDisplay(f"This weight update requires a 3D Slicer restart.","Press OK to restart."):
             raise ValueError('Restart was cancelled.')
         else:
@@ -756,7 +669,7 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         :param outputVolume: thresholding result
         :param fast: faster and less accurate output
         :param task: one of self.tasks, default is "total"
-        :param subset: a list of structures (TotalSegmentator classe names https://github.com/wasserth/TotalSegmentator#class-detailsTotalSegmentator) to segment. 
+        :param subset: a list of structures (TotalSegmentator classe names https://github.com/wasserth/TotalSegmentator#class-detailsTotalSegmentator) to segment.
           Default is None, which means that all available structures will be segmented."
         """
 
@@ -844,7 +757,7 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         # some tasks do not support fast mode
         if not self.isFastModeSupportedForTask(task):
             fast = False
-            
+
         if multilabel:
             options.append("--ml")
         if task:
@@ -856,12 +769,12 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
             # append each item of the subset
             for item in subset:
                 try:
-                    if self.totalSegmentatorLabelTerminology[item]: 
+                    if self.totalSegmentatorLabelTerminology[item]:
                         options.append(item)
                 except:
                     # Failed to get terminology info, item probably misspelled
                     raise ValueError("'" + item + "' is not a valid TotalSegmentator label terminology.")
-            
+
         self.log('Creating segmentations with TotalSegmentator AI...')
         self.log(f"Total Segmentator arguments: {options}")
         proc = slicer.util.launchConsoleProcess(totalSegmentatorCommand + options)

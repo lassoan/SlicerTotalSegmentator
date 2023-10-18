@@ -10,6 +10,7 @@ set(MODULE_PYTHON_RESOURCES
   Resources/SegmentationCategoryTypeModifier-TotalSegmentator.term.json
   Resources/Icons/${MODULE_NAME}.png
   Resources/UI/${MODULE_NAME}.ui
+  Resources/totalsegmentator_snomed_mapping.csv
   )
 
 #-----------------------------------------------------------------------------
