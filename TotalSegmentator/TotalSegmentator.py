@@ -379,10 +379,16 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
 
         # Helper function to get code string from CSV file row
         def getCodeString(field, columnNames, row):
-            codingSchemeDesignator = row[columnNames.index(field + ".CodingSchemeDesignator")]
-            codeValue = row[columnNames.index(field + ".CodeValue")]
-            codeMeaning = row[columnNames.index(field + ".CodeMeaning")]
-            return [codingSchemeDesignator, codeValue, codeMeaning]
+            columnValues = []
+            for fieldName in ["CodingSchemeDesignator", "CodeValue", "CodeMeaning"]:
+                columnIndex = columnNames.index(f"{field}.{fieldName}")
+                try:
+                    columnValue = row[columnIndex]
+                except IndexError:
+                    # Probably the line in the CSV file was not terminated by multiple commas (,)
+                    columnValue = ''
+                columnValues.append(columnValue)
+            return columnValues
 
         import csv
         with open(totalSegmentatorTerminologyMappingFilePath, "r") as f:
