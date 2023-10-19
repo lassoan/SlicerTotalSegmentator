@@ -820,6 +820,7 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         rgba = [0, 0, 0, 0]
 
         # Get label descriptions if task is provided
+        from totalsegmentator.map_to_binary import class_map
         labelValueToSegmentName = class_map[task] if task else {}
 
         def import_labelmap_to_segmentation(labelmapVolumeNode, segmentName, segmentId):
