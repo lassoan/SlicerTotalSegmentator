@@ -155,7 +155,7 @@
 153,gluteus_medius,SCT,123037004,Anatomical Structure,SCT,78333006,Gluteus medius muscle,,,,,,
 154,gluteus_minimus,SCT,123037004,Anatomical Structure,SCT,78333006,Gluteus medius muscle,,,,,,
 155,autochthon,SCT,123037004,Anatomical Structure,SCT,244849004,Deep muscle of back,,,,,,
-156,iliopsoas_left,SCT,123037004,Anatomical Structure,SCT,68455001,Iliopsoas muscle,,,,,,
+156,iliopsoas,SCT,123037004,Anatomical Structure,SCT,68455001,Iliopsoas muscle,,,,,,
 157,lung_vessels,SCT,85756007,Tissue,SCT,59820001,Blood vessel,,,,SCT,39607008,Lung
 158,lung_trachea_bronchia,SCT,123037004,Anatomical Structure,SCT,110726009,Trachea and bronchus,,,,,,
 159,body_trunc,SCT,123037004,Anatomical Structure,SCT,22943007,Trunk structure,,,,,,
