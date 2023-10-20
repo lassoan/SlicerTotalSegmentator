@@ -317,7 +317,7 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
 
         ScriptedLoadableModuleLogic.__init__(self)
 
-        self.totalSegmentatorPythonPackageDownloadUrl = "https://github.com/wasserth/TotalSegmentator/archive/d70479bcc425f8f6a5a7b0f771d897e1a68c8ea1.zip"  # tag: 2.0.4
+        self.totalSegmentatorPythonPackageDownloadUrl = "https://github.com/wasserth/TotalSegmentator/archive/bbc1e7b3df64339e67acbebe2cf3c739098aabf4.zip"  # tag: 2.0.5
 
         self.logCallback = None
         self.clearOutputFolder = True
