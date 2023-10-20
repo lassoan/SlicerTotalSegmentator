@@ -405,6 +405,22 @@
           {
             "recommendedDisplayRGBValue": [
               0,
+              141,
+              226
+            ],
+            "CodeMeaning": "Superior vena cava",
+            "CodingSchemeDesignator": "SCT",
+            "3dSlicerLabel": "superior vena cava",
+            "cid": "3010,6117",
+            "UMLSConceptUID": "C0042459",
+            "CodeValue": "48345005",
+            "contextGroupName": "CardiovascularAnatomicLocations,VascularAnatomy",
+            "SNOMEDCTConceptID": "48345005",
+            "paired": "U"
+          },
+          {
+            "recommendedDisplayRGBValue": [
+              0,
               151,
               206
             ],
@@ -453,7 +469,7 @@
             "CodeValue": "110765007",
             "SNOMEDCTConceptID": "110765007",
             "contextGroupName": "CardiovascularAnatomicLocations",
-            "3dSlicerLabel": "Portal vein and splenic vein",
+            "3dSlicerLabel": "portal vein and splenic vein",
             "recommendedDisplayRGBValue": [
               0,
               151,
@@ -1727,6 +1743,236 @@
               206,
               110,
               84
+            ]
+          },
+          {
+            "CodeMeaning": "Innominate artery",
+            "CodingSchemeDesignator": "SCT",
+            "cid": "3010,6117",
+            "UMLSConceptUID": "C0006094",
+            "CodeValue": "12691009",
+            "contextGroupName": "CardiovascularAnatomicLocations,VascularAnatomy",
+            "3dSlicerLabel": "brachiocephalic trunk",
+            "SNOMEDCTConceptID": "12691009",
+            "paired": "U",
+            "recommendedDisplayRGBValue": [
+              196,
+              121,
+              79
+            ]
+          },
+          {
+            "CodeMeaning": "Subclavian artery",
+            "CodingSchemeDesignator": "SCT",
+            "cid": "3010,6117",
+            "UMLSConceptUID": "C0038530",
+            "CodeValue": "36765005",
+            "contextGroupName": "CardiovascularAnatomicLocations,VascularAnatomy",
+            "SNOMEDCTConceptID": "36765005",
+            "paired": "Y",
+            "Modifier": [
+              {
+                "CodeMeaning": "Right",
+                "CodingSchemeDesignator": "SCT",
+                "cid": "244",
+                "UMLSConceptUID": "C0205090",
+                "CodeValue": "24028007",
+                "contextGroupName": "Laterality",
+                "SNOMEDCTConceptID": "24028007",
+                "3dSlicerLabel": "right subclavian artery",
+                "recommendedDisplayRGBValue": [
+                  216,
+                  101,
+                  89
+                ]
+              },
+              {
+                "CodeMeaning": "Left",
+                "CodingSchemeDesignator": "SCT",
+                "cid": "244",
+                "UMLSConceptUID": "C0205091",
+                "CodeValue": "7771000",
+                "contextGroupName": "Laterality",
+                "SNOMEDCTConceptID": "7771000",
+                "3dSlicerLabel": "left subclavian artery",
+                "recommendedDisplayRGBValue": [
+                  216,
+                  101,
+                  69
+                ]
+              },
+              {
+                "CodeMeaning": "Right and left",
+                "CodingSchemeDesignator": "SCT",
+                "cid": "244",
+                "UMLSConceptUID": "C0238767",
+                "CodeValue": "51440002",
+                "contextGroupName": "Laterality",
+                "SNOMEDCTConceptID": "51440002"
+              }
+            ]
+          },
+          {
+            "CodeMeaning": "Common carotid artery",
+            "CodingSchemeDesignator": "SCT",
+            "cid": "3010,6117",
+            "UMLSConceptUID": "C0162859",
+            "CodeValue": "32062004",
+            "contextGroupName": "CardiovascularAnatomicLocations,VascularAnatomy",
+            "SNOMEDCTConceptID": "32062004",
+            "paired": "Y",
+            "Modifier": [
+              {
+                "CodeMeaning": "Right",
+                "CodingSchemeDesignator": "SCT",
+                "cid": "244",
+                "UMLSConceptUID": "C0205090",
+                "CodeValue": "24028007",
+                "contextGroupName": "Laterality",
+                "SNOMEDCTConceptID": "24028007",
+                "3dSlicerLabel": "right common carotid artery",
+                "recommendedDisplayRGBValue": [
+                  0,
+                  112,
+                  165
+                ]
+              },
+              {
+                "CodeMeaning": "Left",
+                "CodingSchemeDesignator": "SCT",
+                "cid": "244",
+                "UMLSConceptUID": "C0205091",
+                "CodeValue": "7771000",
+                "contextGroupName": "Laterality",
+                "SNOMEDCTConceptID": "7771000",
+                "3dSlicerLabel": "left common carotid artery",
+                "recommendedDisplayRGBValue": [
+                  10,
+                  105,
+                  155
+                ]
+              },
+              {
+                "CodeMeaning": "Right and left",
+                "CodingSchemeDesignator": "SCT",
+                "cid": "244",
+                "UMLSConceptUID": "C0238767",
+                "CodeValue": "51440002",
+                "contextGroupName": "Laterality",
+                "SNOMEDCTConceptID": "51440002"
+              }
+            ]
+          },
+          {
+            "CodeMeaning": "Innominate vein",
+            "CodingSchemeDesignator": "SCT",
+            "cid": "3010,6117",
+            "UMLSConceptUID": "C0006095",
+            "CodeValue": "8887007",
+            "contextGroupName": "CardiovascularAnatomicLocations,VascularAnatomy",
+            "SNOMEDCTConceptID": "8887007",
+            "paired": "Y",
+            "Modifier": [
+              {
+                "CodeMeaning": "Right",
+                "CodingSchemeDesignator": "SCT",
+                "cid": "244",
+                "UMLSConceptUID": "C0205090",
+                "CodeValue": "24028007",
+                "contextGroupName": "Laterality",
+                "SNOMEDCTConceptID": "24028007",
+                "3dSlicerLabel": "right brachiocephalic vein",
+                "recommendedDisplayRGBValue": [
+                  0,
+                  151,
+                  206
+                ]
+              },
+              {
+                "CodeMeaning": "Left",
+                "CodingSchemeDesignator": "SCT",
+                "cid": "244",
+                "UMLSConceptUID": "C0205091",
+                "CodeValue": "7771000",
+                "contextGroupName": "Laterality",
+                "SNOMEDCTConceptID": "7771000",
+                "3dSlicerLabel": "left brachiocephalic vein",
+                "recommendedDisplayRGBValue": [
+                  0,
+                  161,
+                  196
+                ]
+              },
+              {
+                "CodeMeaning": "Right and left",
+                "CodingSchemeDesignator": "SCT",
+                "cid": "244",
+                "UMLSConceptUID": "C0238767",
+                "CodeValue": "51440002",
+                "contextGroupName": "Laterality",
+                "SNOMEDCTConceptID": "51440002"
+              }
+            ]
+          },
+          {
+            "CodeMeaning": "Left auricular appendage",
+            "CodingSchemeDesignator": "SCT",
+            "cid": "3010",
+            "UMLSConceptUID": "C0225861",
+            "CodeValue": "33626005",
+            "contextGroupName": "CardiovascularAnatomicLocations",
+            "SNOMEDCTConceptID": "33626005",
+            "paired": "N",
+            "3dSlicerLabel": "left atrial appendage",
+            "recommendedDisplayRGBValue": [
+              180,
+              151,
+              26
+            ]
+          },
+          {
+            "recommendedDisplayRGBValue": [
+              111,
+              184,
+              210
+            ],
+            "CodeMeaning": "Costal Cartilage",
+            "CodingSchemeDesignator": "SCT",
+            "cid": "6113",
+            "UMLSConceptUID": "C0222787",
+            "3dSlicerLabel": "costal cartilage",
+            "CodeValue": "50016007",
+            "contextGroupName": "MediastinumAnatomyFindingorFeature",
+            "SNOMEDCTConceptID": "50016007",
+            "paired": "Y",
+            "Modifier": [
+              {
+                "CodeMeaning": "Right",
+                "CodingSchemeDesignator": "SCT",
+                "cid": "244",
+                "UMLSConceptUID": "C0205090",
+                "CodeValue": "24028007",
+                "contextGroupName": "Laterality",
+                "SNOMEDCTConceptID": "24028007"
+              },
+              {
+                "CodeMeaning": "Left",
+                "CodingSchemeDesignator": "SCT",
+                "cid": "244",
+                "UMLSConceptUID": "C0205091",
+                "CodeValue": "7771000",
+                "contextGroupName": "Laterality",
+                "SNOMEDCTConceptID": "7771000"
+              },
+              {
+                "CodeMeaning": "Right and left",
+                "CodingSchemeDesignator": "SCT",
+                "cid": "244",
+                "UMLSConceptUID": "C0238767",
+                "CodeValue": "51440002",
+                "contextGroupName": "Laterality",
+                "SNOMEDCTConceptID": "51440002"
+              }
             ]
           }
         ]
