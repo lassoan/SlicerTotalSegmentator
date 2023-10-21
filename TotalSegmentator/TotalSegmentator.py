@@ -522,7 +522,11 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         return version
 
     def pipInstallSelective(self, packageToInstall, installCommand, packagesToSkip):
+        """Installs a Python package, skipping a list of packages.
+        Return the list of skipped requirements (package name with version requirement).
+        """
         slicer.util.pip_install(f"{installCommand} --no-deps")
+        skippedRequirements = []  # list of all missed packages and their version
 
         # Get path to site-packages\nnunetv2-2.2.dist-info\METADATA
         import importlib.metadata
@@ -534,13 +538,15 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         with open(metadataPath.locate(), "r+") as file:
             for line in file:
                 skipThisPackage = False
-                if line.startswith('Requires-Dist'):
+                requirementPrefix = 'Requires-Dist: '
+                if line.startswith(requirementPrefix):
                     for packageToSkip in packagesToSkip:
                         if packageToSkip in line:
                             skipThisPackage = True
                             break
                 if skipThisPackage:
                     # skip SimpleITK requirement
+                    skippedRequirements.append(line.removeprefix(requirementPrefix))
                     continue
                 filteredMetadata += line
             # Update file content with filtered result
@@ -558,9 +564,6 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
                     # Do not install
                     skipThisPackage = True
                     break
-            if skipThisPackage:
-                self.log(f'- Skip {requirement}')
-                continue
 
             match = False
             if not match:
@@ -574,8 +577,13 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
                 if match:
                     requirement = f"{match.group(1)}{match.group(2)}"
 
-            self.log(f'- Installing {requirement}...')
-            slicer.util.pip_install(requirement)
+            if skipThisPackage:
+                self.log(f'- Skip {requirement}')
+            else:
+                self.log(f'- Installing {requirement}...')
+                slicer.util.pip_install(requirement)
+
+        return skippedRequirements
 
     def setupPythonRequirements(self, upgrade=False):
 
@@ -609,20 +617,6 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
                                  + f' Minimum required version is {minimumTorchVersion}. You can use "PyTorch Util" module to install PyTorch'
                                  + f' with version requirement set to: >={minimumTorchVersion}')
 
-        # Install nnunetv2 with selected dependencies only
-        # (it would replace Slicer's "SimpleITK")
-        needToInstallNnunet = False
-        if upgrade:
-            needToInstallNnunet = True
-        else:
-            try:
-                import nnunetv2
-            except ModuleNotFoundError as e:
-                needToInstallNnunet = True
-        if needToInstallNnunet:
-            self.log('nnunetv2 Python package is required. Installing...')
-            self.pipInstallSelective('nnunetv2', "nnunetv2==2.2", packagesToSkip)
-
         # Install TotalSegmentator with selected dependencies only
         # (it would replace Slicer's "requests")
         needToInstallSegmenter = False
@@ -642,16 +636,30 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
             needToInstallSegmenter = True
 
         if needToInstallSegmenter or upgrade:
-            self.log('TotalSegmentator Python package is required. Installing... (it may take several minutes)')
+            self.log(f'TotalSegmentator Python package is required. Installing it from {self.totalSegmentatorPythonPackageDownloadUrl}... (it may take several minutes)')
 
             if upgrade:
                 # TotalSegmentator version information is usually not updated with each git revision, therefore we must uninstall it to force the upgrade
                 slicer.util.pip_uninstall("TotalSegmentator")
-                # Update TotalSegmentator and all its dependencies
-                self.pipInstallSelective("TotalSegmentator", self.totalSegmentatorPythonPackageDownloadUrl + " --upgrade", packagesToSkip + ["nnunetv2"])
-            else:
-                # Install TotalSegmentator and all its dependencies
-                self.pipInstallSelective("TotalSegmentator", self.totalSegmentatorPythonPackageDownloadUrl, packagesToSkip + ["nnunetv2"])
+
+            # Update TotalSegmentator and all its dependencies
+            skippedRequirements = self.pipInstallSelective(
+                "TotalSegmentator",
+                self.totalSegmentatorPythonPackageDownloadUrl + (" --upgrade" if upgrade else ""),
+                packagesToSkip + ["nnunetv2"])
+
+            # Install nnunetv2 with selected dependencies only
+            # (it would replace Slicer's "SimpleITK")
+            try:
+                nnunetRequirement = next(requirement for requirement in skippedRequirements if requirement.startswith('nnunetv2'))
+            except StopIteration:
+                # nnunetv2 requiremen was not found in TotalSegmentator - this must be an error, so let's report it
+                raise ValueError("nnunetv2 requiremen was not found in TotalSegmentator")
+            # Remove spaces and parentheses from version requirement (convert from "nnunetv2 (==2.1)" to "nnunetv2==2.1")
+            import re
+            nnunetRequirement = re.sub('[ \(\)]', '', nnunetRequirement)
+            self.log(f'nnunetv2 Python package is required. Installing {nnunetRequirement} ...')
+            self.pipInstallSelective('nnunetv2', nnunetRequirement, packagesToSkip)
 
             self.log('TotalSegmentator installation is completed successfully.')
 
