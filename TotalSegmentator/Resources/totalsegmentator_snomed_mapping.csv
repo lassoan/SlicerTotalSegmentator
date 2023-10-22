@@ -166,3 +166,4 @@
 164,pericardial_effusion,SCT,49755003,Morphologically Altered Structure,SCT,41699000,Effusion,,,,SCT,25489000,Pericardial cavity,,,
 165,liver_vessels,SCT,123037004,Anatomical Structure,SCT,59820001,Blood vessel,,,,SCT,10200004,Liver,,,
 166,liver_tumor,SCT,49755003,Morphologically Altered Structure,SCT,108369006,Neoplasm,,,,SCT,10200004,Liver,,,
+167,costal_cartilages,SCT,123037004,Anatomical Structure,SCT,244703004,Entire costal cartilage,,,,,,,,,
