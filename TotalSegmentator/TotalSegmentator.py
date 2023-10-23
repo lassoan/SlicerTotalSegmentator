@@ -87,7 +87,7 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         self.logic.logCallback = self.addLog
 
         for task in self.logic.tasks:
-            self.ui.taskComboBox.addItem(self.logic.tasks[task]['label'], task)
+            self.ui.taskComboBox.addItem(self.logic.tasks[task]['title'], task)
 
         # Connections
 
@@ -319,6 +319,12 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
 
         self.totalSegmentatorPythonPackageDownloadUrl = "https://github.com/wasserth/TotalSegmentator/archive/bbc1e7b3df64339e67acbebe2cf3c739098aabf4.zip"  # tag: 2.0.5
 
+        # Custom applications can set custom location for weights.
+        # For example, it could be set to `sysconfig.get_path('scripts')` to have an independent copy of
+        # the weights for each Slicer installation. However, setting such custom path would result in extra downloads and
+        # storage space usage if there were multiple Slicer installations on the same computer.
+        self.totalSegmentatorWeightsPath = None
+
         self.logCallback = None
         self.clearOutputFolder = True
         self.useStandardSegmentNames = True
@@ -343,28 +349,28 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         # Segmentation tasks specified by TotalSegmentator
         # Ideally, this information should be provided by TotalSegmentator itself.
         self.tasks = OrderedDict()
-        self.tasks['total'] = {'label': 'total', 'supportsFast': True, 'supportsMultiLabel': True}
-        self.tasks['lung_vessels'] = {'label': 'lung vessels', 'requiresPreSegmentation': True}
-        self.tasks['cerebral_bleed'] = {'label': 'cerebral bleed', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
-        self.tasks['hip_implant'] = {'label': 'hip implant', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
-        self.tasks['coronary_arteries'] = {'label': 'coronary arteries', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
-        self.tasks['body'] = {'label': 'body', 'supportsFast': True}
-        self.tasks['pleural_pericard_effusion'] = {'label': 'pleural and pericardial effusion', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
-        self.tasks['covid'] = {'label': 'covid', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
-        self.tasks['liver_vessels'] = {'label': 'liver vessels', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
-        self.tasks['appendicular_bones'] = {'label': 'appendicular_bones', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
-        self.tasks['tissue_types'] = {'label': 'tissue types', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
-        self.tasks['heartchambers_highres'] = {'label': 'heartchambers highres' ,  'requiresPreSegmentation': True, 'supportsMultiLabel': True}
-        self.tasks['head'] = {'label': 'head', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
-        self.tasks['face'] = {'label': 'face', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
-        self.tasks['aortic_branches'] = {'label': 'aortic branches', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
-        self.tasks['heartchambers_test'] = {'label': 'heartchambers test', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
-        self.tasks['aortic_branches_test'] = {'label': 'aortic branches test', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
-        self.tasks['bones_tissue_test'] = {'label': 'bones tissue test', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
-        self.tasks['test'] = {'label': 'test', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
+        self.tasks['total'] = {'title': 'total', 'supportsFast': True, 'supportsMultiLabel': True}
+        self.tasks['lung_vessels'] = {'title': 'lung vessels', 'requiresPreSegmentation': True}
+        self.tasks['cerebral_bleed'] = {'title': 'cerebral bleed', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
+        self.tasks['hip_implant'] = {'title': 'hip implant', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
+        self.tasks['coronary_arteries'] = {'title': 'coronary arteries', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
+        self.tasks['body'] = {'title': 'body', 'supportsFast': True}
+        self.tasks['pleural_pericard_effusion'] = {'title': 'pleural and pericardial effusion', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
+        self.tasks['covid'] = {'title': 'covid', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
+        self.tasks['liver_vessels'] = {'title': 'liver vessels', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
+        self.tasks['appendicular_bones'] = {'title': 'appendicular_bones', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
+        self.tasks['tissue_types'] = {'title': 'tissue types', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
+        self.tasks['heartchambers_highres'] = {'title': 'heartchambers highres' ,  'requiresPreSegmentation': True, 'supportsMultiLabel': True}
+        self.tasks['head'] = {'title': 'head', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
+        self.tasks['face'] = {'title': 'face', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
+        self.tasks['aortic_branches'] = {'title': 'aortic branches', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
+        self.tasks['heartchambers_test'] = {'title': 'heartchambers test', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
+        self.tasks['aortic_branches_test'] = {'title': 'aortic branches test', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
+        self.tasks['bones_tissue_test'] = {'title': 'bones tissue test', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
+        self.tasks['test'] = {'title': 'test', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
 
 
-        # self.tasks['covid'] = {'label': 'pleural and pericardial effusion'}
+        # self.tasks['covid'] = {'title': 'pleural and pericardial effusion'}
 
         self.loadTotalSegmentatorLabelTerminology()
 
@@ -747,24 +753,24 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         if not licenseStr:
             raise ValueError(f"The license string is empty.")
 
-        self.log('Set license started ...')
-        import sysconfig
+        self.log('Setting license...')
 
-        totalseg_set_license_Path = os.path.join(sysconfig.get_path('scripts'), TotalSegmentatorLogic.executableName("totalseg_set_license"))
         # Get Python executable path
         import shutil
         pythonSlicerExecutablePath = shutil.which('PythonSlicer')
         if not pythonSlicerExecutablePath:
             raise RuntimeError("Python was not found")
-        totalseg_set_license_Command = [ pythonSlicerExecutablePath, totalseg_set_license_Path]
-        options = ["-l", licenseStr]
+
+        # Get arguments
+        import sysconfig
+        totalSegmentatorLicenseToolExecutablePath = os.path.join(sysconfig.get_path('scripts'), TotalSegmentatorLogic.executableName("totalseg_set_license"))
+        cmd = [pythonSlicerExecutablePath, totalSegmentatorLicenseToolExecutablePath, "-l", licenseStr]
 
         # Launch command
-        cmd = totalseg_set_license_Command + options
-        # print(*cmd)
+        logging.debug(f"Launch TotalSegmentator license tool: {cmd}")
         proc = slicer.util.launchConsoleProcess(cmd)
         self.logProcessOutput(proc)
-        self.log('Set license finished.')
+        self.log('License has been successfully set.')
 
         if not slicer.util.confirmOkCancelDisplay(f"This license update requires a 3D Slicer restart.","Press OK to restart."):
             raise ValueError('Restart was cancelled.')
@@ -795,10 +801,8 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         startTime = time.time()
         self.log('Processing started')
 
-        import sysconfig
-
-        print(sysconfig.get_path('scripts'))
-        os.environ["TOTALSEG_WEIGHTS_PATH"] = sysconfig.get_path('scripts')
+        if self.totalSegmentatorWeightsPath:
+            os.environ["TOTALSEG_WEIGHTS_PATH"] = self.totalSegmentatorWeightsPath
 
         # Create new empty folder
         tempFolder = slicer.util.tempDirectory()
@@ -834,13 +838,13 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         # Get TotalSegmentator launcher command
         # TotalSegmentator (.py file, without extension) is installed in Python Scripts folder
         import sysconfig
-        totalSegmentatorPath = os.path.join(sysconfig.get_path('scripts'), TotalSegmentatorLogic.executableName("TotalSegmentator"))
+        totalSegmentatorExecutablePath = os.path.join(sysconfig.get_path('scripts'), TotalSegmentatorLogic.executableName("TotalSegmentator"))
         # Get Python executable path
         import shutil
         pythonSlicerExecutablePath = shutil.which('PythonSlicer')
         if not pythonSlicerExecutablePath:
             raise RuntimeError("Python was not found")
-        totalSegmentatorCommand = [ pythonSlicerExecutablePath, totalSegmentatorPath]
+        totalSegmentatorCommand = [ pythonSlicerExecutablePath, totalSegmentatorExecutablePath]
 
         # Write input volume to file
         # TotalSegmentator requires NIFTI
