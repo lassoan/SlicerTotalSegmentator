@@ -408,15 +408,19 @@
               141,
               226
             ],
-            "CodeMeaning": "Superior vena cava",
+            "CodeMeaning": "Vena cava",
             "CodingSchemeDesignator": "SCT",
-            "3dSlicerLabel": "superior vena cava",
-            "cid": "3010,6117",
-            "UMLSConceptUID": "C0042459",
-            "CodeValue": "48345005",
-            "contextGroupName": "CardiovascularAnatomicLocations,VascularAnatomy",
-            "SNOMEDCTConceptID": "48345005",
-            "paired": "U"
+            "3dSlicerLabel": "vena cava",
+            "CodeValue": "35532006",
+            "paired": "U",
+            "Modifier": [
+              {
+                "CodeMeaning": "Superior",
+                "CodingSchemeDesignator": "SCT",
+                "CodeValue": "264217000",
+                "3dSlicerLabel": "superior vena cava"
+              }
+            ]
           },
           {
             "recommendedDisplayRGBValue": [
@@ -1764,11 +1768,7 @@
           {
             "CodeMeaning": "Subclavian artery",
             "CodingSchemeDesignator": "SCT",
-            "cid": "3010,6117",
-            "UMLSConceptUID": "C0038530",
-            "CodeValue": "36765005",
-            "contextGroupName": "CardiovascularAnatomicLocations,VascularAnatomy",
-            "SNOMEDCTConceptID": "36765005",
+            "CodeValue": "29700009",
             "paired": "Y",
             "Modifier": [
               {
@@ -1915,13 +1915,9 @@
             ]
           },
           {
-            "CodeMeaning": "Left auricular appendage",
+            "CodeMeaning": "Entire atrial appendage",
             "CodingSchemeDesignator": "SCT",
-            "cid": "3010",
-            "UMLSConceptUID": "C0225861",
-            "CodeValue": "33626005",
-            "contextGroupName": "CardiovascularAnatomicLocations",
-            "SNOMEDCTConceptID": "33626005",
+            "CodeValue": "305223006",
             "paired": "N",
             "3dSlicerLabel": "left atrial appendage",
             "recommendedDisplayRGBValue": [
@@ -1938,12 +1934,8 @@
             ],
             "CodeMeaning": "Costal Cartilage",
             "CodingSchemeDesignator": "SCT",
-            "cid": "6113",
-            "UMLSConceptUID": "C0222787",
             "3dSlicerLabel": "costal cartilage",
-            "CodeValue": "50016007",
-            "contextGroupName": "MediastinumAnatomyFindingorFeature",
-            "SNOMEDCTConceptID": "50016007",
+            "CodeValue": "244703004",
             "paired": "Y",
             "Modifier": [
               {

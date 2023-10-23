@@ -323,8 +323,25 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         self.clearOutputFolder = True
         self.useStandardSegmentNames = True
         self.pullMaster = False
-        self.totalSegmentatorLabelTerminology = {}  # Map from TotalSegmentator structure name to terminology string
 
+        # List of property type codes that are specified by in the TotalSegmentator terminology.
+        #
+        # # Codes are stored as a list of strings containing coding scheme designator and code value of the property type,
+        # separated by "^" character. For example "SCT^123456".
+        #
+        # If property the code is found in this list then the TotalSegmentator terminology will be used,
+        # otherwise the DICOM terminology will be used. This is necessary because the DICOM terminology
+        # does not contain all the necessary items and some items are incomplete (e.g., don't have color or 3D Slicer label).
+        #
+        self.totalSegmentatorTerminologyPropertyTypes = []
+
+        # Map from TotalSegmentator structure name to terminology string.
+        # Terminology string uses Slicer terminology entry format - see specification at
+        # https://slicer.readthedocs.io/en/latest/developer_guide/modules/segmentations.html#terminologyentry-tag
+        self.totalSegmentatorLabelTerminology = {}
+
+        # Segmentation tasks specified by TotalSegmentator
+        # Ideally, this information should be provided by TotalSegmentator itself.
         self.tasks = OrderedDict()
         self.tasks['total'] = {'label': 'total', 'supportsFast': True, 'supportsMultiLabel': True}
         self.tasks['lung_vessels'] = {'label': 'lung vessels', 'requiresPreSegmentation': True}
@@ -370,12 +387,13 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
                 # Found the (123037004, SCT, "Anatomical Structure") category within DICOM master list
                 break
 
-        self.totalSegmentatorAnatomicalStuctures = []  # List of codes that are specified by in the TotalSegmentator terminology (SCT^123456)
+        # Retrieve all property type codes from the TotalSegmentator terminology
+        self.totalSegmentatorTerminologyPropertyTypes = []
         terminologyType = slicer.vtkSlicerTerminologyType()
         numberOfTypes = terminologiesLogic.GetNumberOfTypesInTerminologyCategory(totalSegmentatorTerminologyName, anatomicalStructureCategory)
         for i in range(numberOfTypes):
             if terminologiesLogic.GetNthTypeInTerminologyCategory(totalSegmentatorTerminologyName, anatomicalStructureCategory, i, terminologyType):
-                self.totalSegmentatorAnatomicalStuctures.append(terminologyType.GetCodingSchemeDesignator() + "^" + terminologyType.GetCodeValue())
+                self.totalSegmentatorTerminologyPropertyTypes.append(terminologyType.GetCodingSchemeDesignator() + "^" + terminologyType.GetCodeValue())
 
         # Helper function to get code string from CSV file row
         def getCodeString(field, columnNames, row):
@@ -401,17 +419,27 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
                 # Determine segmentation category (DICOM or TotalSegmentator)
                 terminologyEntryStrWithoutCategoryName = (
                     "~"
-                    + '^'.join(getCodeString("SegmentedPropertyCategoryCodeSequence", columnNames, row))  # SCT^123037004^Anatomical Structure
+                    # Property category: "SCT^123037004^Anatomical Structure" or "SCT^49755003^Morphologically Altered Structure"
+                    + '^'.join(getCodeString("SegmentedPropertyCategoryCodeSequence", columnNames, row))
                     + '~'
-                    + '^'.join(getCodeString("SegmentedPropertyTypeCodeSequence", columnNames, row))  # SCT^23451007^Adrenal gland
+                    # Property type: "SCT^23451007^Adrenal gland", "SCT^367643001^Cyst", ...
+                    + '^'.join(getCodeString("SegmentedPropertyTypeCodeSequence", columnNames, row))
                     + '~'
-                    + '^'.join(getCodeString("SegmentedPropertyTypeModifierCodeSequence", columnNames, row))  # SCT^7771000^Left
-                    + '~Anatomic codes - DICOM master list~^^~^^|')
+                    # Property type modifier: "SCT^7771000^Left", ...
+                    + '^'.join(getCodeString("SegmentedPropertyTypeModifierCodeSequence", columnNames, row))
+                    + '~Anatomic codes - DICOM master list'
+                    + '~'
+                    # Anatomic region (set if category is not anatomical structure): "SCT^64033007^Kidney", ...
+                    + '^'.join(getCodeString("AnatomicRegionSequence", columnNames, row))
+                    + '~'
+                    # Anatomic region modifier: "SCT^7771000^Left", ...
+                    + '^'.join(getCodeString("AnatomicRegionSequence", columnNames, row))
+                    + '|')
                 terminologyEntry = slicer.vtkSlicerTerminologyEntry()
-                anatomicalStructureCodeStr = (  # Example: SCT^23451007
+                terminologyPropertyTypeStr = (  # Example: SCT^23451007
                     row[columnNames.index("SegmentedPropertyTypeCodeSequence.CodingSchemeDesignator")]
                     + "^" + row[columnNames.index("SegmentedPropertyTypeCodeSequence.CodeValue")])
-                if anatomicalStructureCodeStr in self.totalSegmentatorAnatomicalStuctures:
+                if terminologyPropertyTypeStr in self.totalSegmentatorTerminologyPropertyTypes:
                     terminologyEntryStr = "Segmentation category and type - Total Segmentator" + terminologyEntryStrWithoutCategoryName
                 else:
                     terminologyEntryStr = "Segmentation category and type - DICOM master list" + terminologyEntryStrWithoutCategoryName
