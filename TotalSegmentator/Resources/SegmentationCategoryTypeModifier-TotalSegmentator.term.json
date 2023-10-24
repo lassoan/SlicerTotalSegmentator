@@ -1966,6 +1966,81 @@
                 "SNOMEDCTConceptID": "51440002"
               }
             ]
+          },
+          {
+            "recommendedDisplayRGBValue": [
+              180,
+              20,
+              22
+            ],
+            "3dSlicerLabel": "blood vessel",
+            "CodeMeaning": "Blood vessel",
+            "CodingSchemeDesignator": "SCT",
+            "cid": "7166",
+            "UMLSConceptUID": "C0005847",
+            "CodeValue": "59820001",
+            "contextGroupName": "CommonTissueSegmentationTypes",
+            "SNOMEDCTConceptID": "59820001"
+          },
+          {
+            "recommendedDisplayRGBValue": [
+              178,
+              222,
+              248
+            ],
+            "3dSlicerLabel": "trachea and bronchus",
+            "CodeMeaning": "Trachea and bronchus",
+            "CodingSchemeDesignator": "SCT",
+            "cid": "4040",
+            "UMLSConceptUID": "C1268276",
+            "CodeValue": "110726009",
+            "contextGroupName": "EndoscopyAnatomicRegions",
+            "SNOMEDCTConceptID": "110726009"
+          },
+          {
+            "recommendedDisplayRGBValue": [
+              220,
+              20,
+              22
+            ],
+            "3dSlicerLabel": "coronary artery",
+            "CodeMeaning": "Coronary artery",
+            "CodingSchemeDesignator": "SCT",
+            "cid": "3010,4030",
+            "UMLSConceptUID": "C0205042",
+            "CodeValue": "41801008",
+            "contextGroupName": "CardiovascularAnatomicLocations,CT,MRandPETAnatomyImaged",
+            "SNOMEDCTConceptID": "41801008",
+            "paired": "Y",
+            "Modifier": [
+              {
+                "CodeMeaning": "Right",
+                "CodingSchemeDesignator": "SCT",
+                "cid": "244",
+                "UMLSConceptUID": "C0205090",
+                "CodeValue": "24028007",
+                "contextGroupName": "Laterality",
+                "SNOMEDCTConceptID": "24028007"
+              },
+              {
+                "CodeMeaning": "Left",
+                "CodingSchemeDesignator": "SCT",
+                "cid": "244",
+                "UMLSConceptUID": "C0205091",
+                "CodeValue": "7771000",
+                "contextGroupName": "Laterality",
+                "SNOMEDCTConceptID": "7771000"
+              },
+              {
+                "CodeMeaning": "Right and left",
+                "CodingSchemeDesignator": "SCT",
+                "cid": "244",
+                "UMLSConceptUID": "C0238767",
+                "CodeValue": "51440002",
+                "contextGroupName": "Laterality",
+                "SNOMEDCTConceptID": "51440002"
+              }
+            ]
           }
         ]
       }
