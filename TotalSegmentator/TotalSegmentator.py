@@ -87,7 +87,10 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         self.logic.logCallback = self.addLog
 
         for task in self.logic.tasks:
-            self.ui.taskComboBox.addItem(self.logic.tasks[task]['title'], task)
+            taskTitle = self.logic.tasks[task]['title']
+            if self.logic.isLicenseRequiredForTask(task):
+                taskTitle += " [license required]"
+            self.ui.taskComboBox.addItem(taskTitle, task)
 
         # Connections
 
@@ -289,9 +292,12 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
             slicer.util.restart()
 
     def onSetLicense(self):
-        #import qt
-        #filePath = qt.QFileDialog.getOpenFileName(None, 'Select TotalSegmentator weight file', '', "Zip file (*.zip)")
-        if self.ui.licenseLineEdit.text:
+        with slicer.util.tryWithErrorDisplay("Failed to set TotalSegmentator license.", waitCursor=True):
+            licenseText = self.ui.licenseLineEdit.text
+            if not licenseText:
+                raise ValueError("License is not specified.")
+            self.ui.statusLabel.plainText = ''
+            self.logic.setupPythonRequirements()
             self.logic.setlicense(self.ui.licenseLineEdit.text)
 
 
@@ -349,26 +355,36 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         # Segmentation tasks specified by TotalSegmentator
         # Ideally, this information should be provided by TotalSegmentator itself.
         self.tasks = OrderedDict()
+
+        # Main
         self.tasks['total'] = {'title': 'total', 'supportsFast': True, 'supportsMultiLabel': True}
+        self.tasks['body'] = {'title': 'body', 'supportsFast': True}
+        self.tasks['vertebrae_body'] = {'title': 'vertebrae body'}
         self.tasks['lung_vessels'] = {'title': 'lung vessels', 'requiresPreSegmentation': True}
+
+        # Trained on reduced data set
         self.tasks['cerebral_bleed'] = {'title': 'cerebral bleed', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
         self.tasks['hip_implant'] = {'title': 'hip implant', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
         self.tasks['coronary_arteries'] = {'title': 'coronary arteries', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
-        self.tasks['body'] = {'title': 'body', 'supportsFast': True}
         self.tasks['pleural_pericard_effusion'] = {'title': 'pleural and pericardial effusion', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
-        self.tasks['covid'] = {'title': 'covid', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
-        self.tasks['liver_vessels'] = {'title': 'liver vessels', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
-        self.tasks['appendicular_bones'] = {'title': 'appendicular_bones', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
-        self.tasks['tissue_types'] = {'title': 'tissue types', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
-        self.tasks['heartchambers_highres'] = {'title': 'heartchambers highres' ,  'requiresPreSegmentation': True, 'supportsMultiLabel': True}
-        self.tasks['head'] = {'title': 'head', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
-        self.tasks['face'] = {'title': 'face', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
-        self.tasks['aortic_branches'] = {'title': 'aortic branches', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
-        self.tasks['heartchambers_test'] = {'title': 'heartchambers test', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
-        self.tasks['aortic_branches_test'] = {'title': 'aortic branches test', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
-        self.tasks['bones_tissue_test'] = {'title': 'bones tissue test', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
-        self.tasks['test'] = {'title': 'test', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
 
+        # Requires license
+        self.tasks['appendicular_bones'] = {'title': 'appendicular bones', 'requiresPreSegmentation': True, 'supportsMultiLabel': True, 'requiresLicense': True}
+        self.tasks['tissue_types'] = {'title': 'tissue types', 'requiresPreSegmentation': True, 'supportsMultiLabel': True, 'requiresLicense': True}
+        self.tasks['heartchambers_highres'] = {'title': 'heartchambers highres' , 'requiresPreSegmentation': True, 'supportsMultiLabel': True, 'requiresLicense': True}
+        self.tasks['face'] = {'title': 'face', 'requiresPreSegmentation': True, 'supportsMultiLabel': True, 'requiresLicense': True}
+
+        # Experimental
+        # self.tasks['liver_vessels'] = {'title': 'liver vessels', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
+        # self.tasks['aortic_branches'] = {'title': 'aortic branches', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
+        # self.tasks['head'] = {'title': 'head', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
+        # self.tasks['covid'] = {'title': 'covid', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
+
+        # Testing
+        # self.tasks['heartchambers_test'] = {'title': 'heartchambers test', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
+        # self.tasks['aortic_branches_test'] = {'title': 'aortic branches test', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
+        # self.tasks['bones_tissue_test'] = {'title': 'bones tissue test', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
+        # self.tasks['test'] = {'title': 'test', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
 
         # self.tasks['covid'] = {'title': 'pleural and pericardial effusion'}
 
@@ -439,7 +455,7 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
                     + '^'.join(getCodeString("AnatomicRegionSequence", columnNames, row))
                     + '~'
                     # Anatomic region modifier: "SCT^7771000^Left", ...
-                    + '^'.join(getCodeString("AnatomicRegionSequence", columnNames, row))
+                    + '^'.join(getCodeString("AnatomicRegionModifierSequence", columnNames, row))
                     + '|')
                 terminologyEntry = slicer.vtkSlicerTerminologyEntry()
                 terminologyPropertyTypeStr = (  # Example: SCT^23451007
@@ -463,6 +479,9 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
 
     def isPreSegmentationRequiredForTask(self, task):
         return (task in self.tasks) and ('requiresPreSegmentation' in self.tasks[task]) and self.tasks[task]['requiresPreSegmentation']
+
+    def isLicenseRequiredForTask(self, task):
+        return (task in self.tasks) and ('requiresLicense' in self.tasks[task]) and self.tasks[task]['requiresLicense']
 
     def getSegmentLabelColor(self, terminologyEntryStr):
         """Get segment label and color from terminology"""
@@ -690,7 +709,6 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
                 # nnunetv2 requiremen was not found in TotalSegmentator - this must be an error, so let's report it
                 raise ValueError("nnunetv2 requiremen was not found in TotalSegmentator")
             # Remove spaces and parentheses from version requirement (convert from "nnunetv2 (==2.1)" to "nnunetv2==2.1")
-            import re
             nnunetRequirement = re.sub('[ \(\)]', '', nnunetRequirement)
             self.log(f'nnunetv2 Python package is required. Installing {nnunetRequirement} ...')
             self.pipInstallSelective('nnunetv2', nnunetRequirement, packagesToSkip)
@@ -709,8 +727,9 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         if not parameterNode.GetParameter("UseStandardSegmentNames"):
             parameterNode.SetParameter("UseStandardSegmentNames", "true")
 
-    def logProcessOutput(self, proc):
+    def logProcessOutput(self, proc, returnOutput=False):
         # Wait for the process to end and forward output to the log
+        output = ""
         from subprocess import CalledProcessError
         while True:
             try:
@@ -722,11 +741,14 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
                 pass
             if not line:
                 break
+            if returnOutput:
+                output += line
             self.log(line.rstrip())
         proc.wait()
         retcode = proc.returncode
         if retcode != 0:
             raise CalledProcessError(retcode, proc.args, output=proc.stdout, stderr=proc.stderr)
+        return output if returnOutput else None
 
 
     def check_zip_extension(self, file_path):
@@ -769,7 +791,10 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         # Launch command
         logging.debug(f"Launch TotalSegmentator license tool: {cmd}")
         proc = slicer.util.launchConsoleProcess(cmd)
-        self.logProcessOutput(proc)
+        licenseToolOutput = self.logProcessOutput(proc, returnOutput=True)
+        if "ERROR: Invalid license number" in licenseToolOutput:
+            raise ValueError('Invalid license number. Please check your license number or contact support.')
+
         self.log('License has been successfully set.')
 
         if not slicer.util.confirmOkCancelDisplay(f"This license update requires a 3D Slicer restart.","Press OK to restart."):
