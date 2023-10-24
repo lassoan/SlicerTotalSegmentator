@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>479</width>
-    <height>583</height>
+    <width>421</width>
+    <height>676</height>
    </rect>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
@@ -200,6 +200,16 @@
         </property>
        </widget>
       </item>
+      <item row="1" column="1">
+       <widget class="QCheckBox" name="cpuCheckBox">
+        <property name="toolTip">
+         <string>Use CPU, even if GPU is available. Useful if the GPU does not have enough memory.</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
       <item row="2" column="0">
        <widget class="QLabel" name="label_8">
         <property name="text">
@@ -220,34 +230,38 @@
       <item row="3" column="0">
        <widget class="QLabel" name="licenseLabel">
         <property name="text">
-         <string>License number: </string>
+         <string>TotalSegmentator license number: </string>
         </property>
        </widget>
       </item>
       <item row="3" column="1">
-       <widget class="QLineEdit" name="licenseLineEdit">
-        <property name="toolTip">
-         <string>There are a few TotalsSegmentator tasks that require a special license. Free academic licenses are available. If you have received a TotalSegmentator license number, enter it here and press &quot;Set License&quot;. The weights will be downloaded automatically. </string>
-        </property>
-        <property name="inputMethodHints">
-         <set>Qt::ImhHiddenText|Qt::ImhNoAutoUppercase|Qt::ImhNoPredictiveText|Qt::ImhSensitiveData</set>
-        </property>
-        <property name="echoMode">
-         <enum>QLineEdit::Password</enum>
-        </property>
-       </widget>
+       <layout class="QHBoxLayout" name="horizontalLayout_4">
+        <item>
+         <widget class="QLineEdit" name="licenseLineEdit">
+          <property name="toolTip">
+           <string>There are a few TotalsSegmentator tasks that require a special license. Free academic licenses are available. If you have received a TotalSegmentator license number, enter it here and press &quot;Set License&quot;. The weights will be downloaded automatically. </string>
+          </property>
+          <property name="inputMethodHints">
+           <set>Qt::ImhHiddenText|Qt::ImhNoAutoUppercase|Qt::ImhNoPredictiveText|Qt::ImhSensitiveData</set>
+          </property>
+          <property name="echoMode">
+           <enum>QLineEdit::Password</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="setLicenseButton">
+          <property name="toolTip">
+           <string>If you have received a TotalSegmentator license, enter it in the text field above and press &quot;Set license&quot;. Weights will be downloaded automatically. </string>
+          </property>
+          <property name="text">
+           <string>Set</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
-      <item row="4" column="1">
-       <widget class="QPushButton" name="setLicenseButton">
-        <property name="toolTip">
-         <string>If you have received a TotalSegmentator license, enter it in the text field above and press &quot;Set license&quot;. Weights will be downloaded automatically. </string>
-        </property>
-        <property name="text">
-         <string>Set License</string>
-        </property>
-       </widget>
-      </item>
-      <item row="6" column="0" colspan="2">
+      <item row="4" column="0" colspan="2">
        <widget class="QPushButton" name="packageInfoUpdateButton">
         <property name="toolTip">
          <string>Update to latest version of TotalSegmentator Python package from GitHub</string>
@@ -257,7 +271,7 @@
         </property>
        </widget>
       </item>
-      <item row="8" column="0" colspan="2">
+      <item row="5" column="0" colspan="2">
        <widget class="ctkFittedTextBrowser" name="packageInfoTextBrowser">
         <property name="collapsed">
          <bool>false</bool>
@@ -266,16 +280,6 @@
          <string/>
         </property>
         <property name="hideDetailsText">
-         <string/>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QCheckBox" name="cpuCheckBox">
-        <property name="toolTip">
-         <string>Use CPU, even if GPU is available. Useful if the GPU does not have enough memory.</string>
-        </property>
-        <property name="text">
          <string/>
         </property>
        </widget>
