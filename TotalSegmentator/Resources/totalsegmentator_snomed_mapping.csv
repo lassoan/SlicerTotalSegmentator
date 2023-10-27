@@ -112,8 +112,8 @@
 110,common_carotid_artery_left,SCT,123037004,Anatomical Structure,SCT,32062004,Common carotid artery,SCT,7771000,Left,,,,,,
 111,brachiocephalic_vein_left,SCT,123037004,Anatomical Structure,SCT,8887007,Brachiocephalic vein,SCT,7771000,Left,,,,,,
 112,brachiocephalic_vein_right,SCT,123037004,Anatomical Structure,SCT,8887007,Brachiocephalic vein,SCT,24028007,Right,,,,,,
-113,atrial_appendage_left,SCT,123037004,Anatomical Structure,SCT,305223006,Entire atrial appendage,SCT,7771000,Left,,,,,,
-114,superior_vena_cava,SCT,123037004,Anatomical Structure,SCT,35532006,Vena cava,,264217000,Superior,,,,,,
+113,atrial_appendage_left,SCT,123037004,Anatomical Structure,SCT,68786006,Auricular appendage,SCT,7771000,Left,,,,,,
+114,superior_vena_cava,SCT,123037004,Anatomical Structure,SCT,48345005,Superior vena cava,,,,,,,,,
 115,kidney_cyst_left,SCT,49755003,Morphologically Altered Structure,SCT,367643001,Cyst,,,,SCT,64033007,Kidney,SCT,7771000,Left
 116,kidney_cyst_right,SCT,49755003,Morphologically Altered Structure,SCT,367643001,Cyst,,,,SCT,64033007,Kidney,SCT,24028007,Right
 117,prostate,SCT,123037004,Anatomical Structure,SCT,41216001,Prostate,,,,,,,,,
@@ -122,7 +122,7 @@
 120,tibia,SCT,123037004,Anatomical Structure,SCT,12611008,Tibia,,,,,,,,,
 121,fibula,SCT,123037004,Anatomical Structure,SCT,87342007,Fibula,,,,,,,,,
 122,tarsal,SCT,123037004,Anatomical Structure,SCT,108371006,Tarsal bones,,,,,,,,,
-123,metatarsal,SCT,123037004,Anatomical Structure,SCT,302532000,Entire metatarsal,,,,,,,,,
+123,metatarsal,SCT,123037004,Anatomical Structure,SCT,53884002,Metatarsal,,,,,,,,,
 124,phalanges_feet,SCT,123037004,Anatomical Structure,SCT,28641004,Phalanx structure,,,,,,,,,
 125,humerus,SCT,123037004,Anatomical Structure,SCT,85050009,Humerus,,,,,,,,,
 126,ulna,SCT,123037004,Anatomical Structure,SCT,23416004,Ulna,,,,,,,,,
@@ -166,4 +166,4 @@
 164,pericardial_effusion,SCT,49755003,Morphologically Altered Structure,SCT,41699000,Effusion,,,,SCT,25489000,Pericardial cavity,,,
 165,liver_vessels,SCT,123037004,Anatomical Structure,SCT,59820001,Blood vessel,,,,SCT,10200004,Liver,,,
 166,liver_tumor,SCT,49755003,Morphologically Altered Structure,SCT,108369006,Neoplasm,,,,SCT,10200004,Liver,,,
-167,costal_cartilages,SCT,123037004,Anatomical Structure,SCT,244703004,Entire costal cartilage,,,,,,,,,
+167,costal_cartilages,SCT,123037004,Anatomical Structure,SCT,50016007,Costal cartilage,,,,,,,,,
