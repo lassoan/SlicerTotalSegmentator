@@ -1008,7 +1008,6 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         rgba = [0, 0, 0, 0]
         # Get label descriptions
 
-        from totalsegmentator.map_to_binary import class_map
         # Get label descriptions if task is provided
         from totalsegmentator.map_to_binary import class_map
         labelValueToSegmentName = class_map[task] if task else {}
