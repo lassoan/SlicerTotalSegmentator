@@ -260,10 +260,27 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         """
         Run processing when user clicks "Apply" button.
         """
-        with slicer.util.tryWithErrorDisplay("Failed to compute results.", waitCursor=True):
+        self.ui.statusLabel.plainText = ''
 
-            self.ui.statusLabel.plainText = ''
+        import qt
+        try:
+            slicer.app.setOverrideCursor(qt.Qt.WaitCursor)
             self.logic.setupPythonRequirements()
+            slicer.app.restoreOverrideCursor()
+        except Exception as e:
+            slicer.app.restoreOverrideCursor()
+            import traceback
+            traceback.print_exc()
+            self.ui.statusLabel.appendPlainText("\nApplication restart required.")
+            if slicer.util.confirmOkCancelDisplay(
+                "Application is required to complete installation of required Python packages.\nPress OK to restart.",
+                "Confirm application restart"
+                ):
+                slicer.util.restart()
+            else:
+                return
+
+        with slicer.util.tryWithErrorDisplay("Failed to compute results.", waitCursor=True):
 
             # Create new segmentation node, if not selected yet
             if not self.ui.outputSegmentationSelector.currentNode():
@@ -639,8 +656,28 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         return skippedRequirements
 
     def setupPythonRequirements(self, upgrade=False):
-
+        import importlib.metadata
         import importlib.util
+        import packaging
+
+        # TotalSegmentator requires this, yet it is not listed among its dependencies
+        try:
+            import pandas
+        except ModuleNotFoundError as e:
+            slicer.util.pip_install("pandas")
+
+        # pillow version that is installed in Slicer (10.1.0) is too new,
+        # it is incompatible with several TotalSegmentator dependencies.
+        # Attempt to uninstall and install an older version before any of the packages import  it.
+        needToInstallPillow = True
+        try:
+            if packaging.version.parse(importlib.metadata.version("pillow")) < packaging.version.parse("10.1"):
+                # A suitable pillow version is already installed
+                needToInstallPillow = False
+        except Exception as e:
+            pass
+        if needToInstallPillow:
+            slicer.util.pip_install("pillow<10.1")
 
         # These packages come preinstalled with Slicer and should remain unchanged
         packagesToSkip = [
@@ -797,10 +834,10 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
 
         self.log('License has been successfully set.')
 
-        if not slicer.util.confirmOkCancelDisplay(f"This license update requires a 3D Slicer restart.","Press OK to restart."):
-            raise ValueError('Restart was cancelled.')
-        else:
+        if slicer.util.confirmOkCancelDisplay(f"This license update requires a 3D Slicer restart.","Press OK to restart."):
             slicer.util.restart()
+        else:
+            raise ValueError('Restart was cancelled.')
 
 
     def process(self, inputVolume, outputSegmentation, fast=True, cpu=False, task=None, subset=None):
