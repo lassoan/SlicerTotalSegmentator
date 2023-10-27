@@ -408,19 +408,15 @@
               141,
               226
             ],
-            "CodeMeaning": "Vena cava",
+            "CodeMeaning": "Superior vena cava",
             "CodingSchemeDesignator": "SCT",
-            "3dSlicerLabel": "vena cava",
-            "CodeValue": "35532006",
-            "paired": "U",
-            "Modifier": [
-              {
-                "CodeMeaning": "Superior",
-                "CodingSchemeDesignator": "SCT",
-                "CodeValue": "264217000",
-                "3dSlicerLabel": "superior vena cava"
-              }
-            ]
+            "3dSlicerLabel": "superior vena cava",
+            "cid": "3010,6117",
+            "UMLSConceptUID": "C0042459",
+            "CodeValue": "48345005",
+            "contextGroupName": "CardiovascularAnatomicLocations,VascularAnatomy",
+            "SNOMEDCTConceptID": "48345005",
+            "paired": "U"
           },
           {
             "recommendedDisplayRGBValue": [
@@ -1750,7 +1746,7 @@
             ]
           },
           {
-            "CodeMeaning": "Innominate artery",
+            "CodeMeaning": "Brachiocephalic artery",
             "CodingSchemeDesignator": "SCT",
             "cid": "3010,6117",
             "UMLSConceptUID": "C0006094",
@@ -1864,7 +1860,7 @@
             ]
           },
           {
-            "CodeMeaning": "Innominate vein",
+            "CodeMeaning": "Brachiocephalic vein",
             "CodingSchemeDesignator": "SCT",
             "cid": "3010,6117",
             "UMLSConceptUID": "C0006095",
@@ -1915,15 +1911,41 @@
             ]
           },
           {
-            "CodeMeaning": "Entire atrial appendage",
+            "CodeMeaning": "Auricular appendage",
             "CodingSchemeDesignator": "SCT",
-            "CodeValue": "305223006",
-            "paired": "N",
-            "3dSlicerLabel": "left atrial appendage",
-            "recommendedDisplayRGBValue": [
-              180,
-              151,
-              26
+            "CodeValue": "68786006",
+            "paired": "Y",
+            "Modifier": [
+              {
+                "CodeMeaning": "Right",
+                "CodingSchemeDesignator": "SCT",
+                "cid": "244",
+                "UMLSConceptUID": "C0205090",
+                "CodeValue": "24028007",
+                "contextGroupName": "Laterality",
+                "SNOMEDCTConceptID": "24028007",
+                "3dSlicerLabel": "right atrial appendage",
+                "recommendedDisplayRGBValue": [
+                  0,
+                  151,
+                  206
+                ]
+              },
+              {
+                "CodeMeaning": "Left",
+                "CodingSchemeDesignator": "SCT",
+                "cid": "244",
+                "UMLSConceptUID": "C0205091",
+                "CodeValue": "7771000",
+                "contextGroupName": "Laterality",
+                "SNOMEDCTConceptID": "7771000",
+                "3dSlicerLabel": "left atrial appendage",
+                "recommendedDisplayRGBValue": [
+                  0,
+                  161,
+                  196
+                ]
+              }
             ]
           },
           {
@@ -1935,7 +1957,11 @@
             "CodeMeaning": "Costal Cartilage",
             "CodingSchemeDesignator": "SCT",
             "3dSlicerLabel": "costal cartilage",
-            "CodeValue": "244703004",
+            "cid": "6113",
+            "UMLSConceptUID": "C0222787",
+            "CodeValue": "50016007",
+            "contextGroupName": "MediastinumAnatomyFindingorFeature",
+            "SNOMEDCTConceptID": "50016007",
             "paired": "Y",
             "Modifier": [
               {
