@@ -1454,6 +1454,19 @@
           {
             "recommendedDisplayRGBValue": [
               212,
+              208,
+              122
+            ],
+            "CodeMeaning": "S1 vertebra",
+            "CodingSchemeDesignator": "SCT",
+            "CodeValue": "65985001",
+            "contextGroupName": "OsseousAnatomyFindingorFeature",
+            "SNOMEDCTConceptID": "65985001",
+            "paired": "U"
+          },
+          {
+            "recommendedDisplayRGBValue": [
+              212,
               188,
               102
             ],
@@ -2067,6 +2080,21 @@
                 "SNOMEDCTConceptID": "51440002"
               }
             ]
+          },
+          {
+            "CodeValue": "69748006",
+            "cid": "6113",
+            "UMLSConceptUID": "C0040132",
+            "CodeMeaning": "Thyroid",
+            "contextGroupName": "Mediastinum Anatomy Finding or Feature",
+            "CodingSchemeDesignator": "SCT",
+            "SNOMEDCTConceptID": "69748006",
+            "recommendedDisplayRGBValue": [
+              220,
+              160,
+              30
+            ],
+            "3dSlicerLabel": "thyroid"
           }
         ]
       }
