@@ -620,6 +620,10 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         if ext.lower() != '.zip':
             raise ValueError(f"The selected file '{file_path}' is not a .zip file!")
 
+    @staticmethod
+    def executableName(name):
+        return name + ".exe" if os.name == "nt" else name
+
     def import_weights(self, filePath):
 
         """
@@ -638,7 +642,7 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
 
         self.log('Importing weights started ...')
         import sysconfig
-        totalseg_import_weights_Path = os.path.join(sysconfig.get_path('scripts'), "totalseg_import_weights")
+        totalseg_import_weights_Path = os.path.join(sysconfig.get_path('scripts'), TotalSegmentatorLogic.executableName("totalseg_import_weights"))
         # Get Python executable path
         import shutil
         pythonSlicerExecutablePath = shutil.which('PythonSlicer')
@@ -716,7 +720,7 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         # Get TotalSegmentator launcher command
         # TotalSegmentator (.py file, without extension) is installed in Python Scripts folder
         import sysconfig
-        totalSegmentatorPath = os.path.join(sysconfig.get_path('scripts'), "TotalSegmentator")
+        totalSegmentatorPath = os.path.join(sysconfig.get_path('scripts'), TotalSegmentatorLogic.executableName("TotalSegmentator"))
         # Get Python executable path
         import shutil
         pythonSlicerExecutablePath = shutil.which('PythonSlicer')
