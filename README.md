@@ -105,6 +105,11 @@ Model files are hosted on github.com or Zenodo.org and downloaded automatically 
 - retry later when the server may be less overloaded
 - talk to IT administrators or use a VPN to access the server
 - download the file manually and unzip it in the `.totalsegmentator` folder in the user's profile (for example in `c:\Users\(yourusername)\.totalsegmentator\nnunet\results\Dataset291_TotalSegmentator_part1_organs_1559subj`)
+
+## Contributing
+
+Contributions to this extensions are welcome. Please send a pull request with any suggested changes. [3D Slicer contribution guidelines](https://github.com/Slicer/Slicer/blob/main/CONTRIBUTING.md) apply.
+
 ## Contact
 
 Please post any questions to the [Slicer Forum](https://discourse.slicer.org).
