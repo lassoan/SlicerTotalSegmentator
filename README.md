@@ -64,11 +64,17 @@ If you have a powerful GPU is available then a full-quality segmentation can be 
 
 ### Failed to compute results error at the first run
 
-Problem: You may get an error popup on the first run: `Failed to compute results ... Command ... 'pip', 'install' ... returned non-zero exit status 1`
+#### Problem: Error popup on the first run: `Failed to compute results ... Command ... 'pip', 'install' ... returned non-zero exit status 1`
 
 Explanation: This happens because when TotalSegmentator is run for the first time, it needs to download and install PyTorch and TotalSegmentator Python packages. Since the application may have already loaded different versions of these packages, the packages need to be uninstalled first. This uninstallation may fail because some packages may be already in use. Restarting the application unloads these modules so they are no longer in use. Therefore after a restart, TotalSegmentator will be able to install all the necessary packages.
 
 Solution: Restart Slicer and run TotalSegmentator module again.
+
+#### Problem: Error popup on the first run: `Failed to compute results ... Command ... 'PythonSlicer', TotalSegmentator.exe ... returned non-zero exit status 120`
+
+Explanation: This typically happens when PyTorch is not installed correctly.
+
+Solution: Reinstall PyTorch as described in solution of `Segmentation fails while predicting` issue.
 
 ### Segmentation fails while predicting
 
