@@ -884,7 +884,7 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         # Recommend the user to switch to fast mode if no GPU or not enough memory is available
         import torch
 
-        cuda = torch.cuda if torch.has_cuda and torch.cuda.is_available() else None
+        cuda = torch.cuda if torch.backends.cuda.is_built() and torch.cuda.is_available() else None
 
         if not fast and not cuda:
 
