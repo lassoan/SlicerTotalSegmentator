@@ -750,6 +750,12 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
             self.log(f'nnunetv2 Python package is required. Installing {nnunetRequirement} ...')
             self.pipInstallSelective('nnunetv2', nnunetRequirement, packagesToSkip)
 
+            # Workaround: fix incompatibility of dynamic_network_architectures==0.4 with totalsegmentator==2.0.5.
+            # Revert to the last working version: dynamic_network_architectures==0.2
+            if packaging.version.parse(importlib.metadata.version("dynamic_network_architectures")) == packaging.version.parse("0.4"):
+                self.log(f'dynamic_network_architectures package version is incompatible. Installing working version...')
+                slicer.util.pip_install("dynamic_network_architectures==0.2.0")
+
             self.log('TotalSegmentator installation is completed successfully.')
 
 
