@@ -743,8 +743,8 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
             try:
                 nnunetRequirement = next(requirement for requirement in skippedRequirements if requirement.startswith('nnunetv2'))
             except StopIteration:
-                # nnunetv2 requiremen was not found in TotalSegmentator - this must be an error, so let's report it
-                raise ValueError("nnunetv2 requiremen was not found in TotalSegmentator")
+                # nnunetv2 requirement was not found in TotalSegmentator - this must be an error, so let's report it
+                raise ValueError("nnunetv2 requirement was not found in TotalSegmentator")
             # Remove spaces and parentheses from version requirement (convert from "nnunetv2 (==2.1)" to "nnunetv2==2.1")
             nnunetRequirement = re.sub('[ \(\)]', '', nnunetRequirement)
             self.log(f'nnunetv2 Python package is required. Installing {nnunetRequirement} ...')
@@ -756,7 +756,7 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
                 self.log(f'dynamic_network_architectures package version is incompatible. Installing working version...')
                 slicer.util.pip_install("dynamic_network_architectures==0.2.0")
 
-            self.log('TotalSegmentator installation is completed successfully.')
+            self.log('TotalSegmentator installation completed successfully.')
 
 
     def setDefaultParameters(self, parameterNode):
