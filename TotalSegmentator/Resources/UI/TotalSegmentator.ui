@@ -264,7 +264,7 @@
       <item row="4" column="0" colspan="2">
        <widget class="QPushButton" name="packageInfoUpdateButton">
         <property name="toolTip">
-         <string>Update to latest version of TotalSegmentator Python package from GitHub</string>
+         <string>Get metadata information for the TotalSegmentator package currently installed</string>
         </property>
         <property name="text">
          <string>Get TotalSegmentator package information</string>
