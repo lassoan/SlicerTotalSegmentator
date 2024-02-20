@@ -239,7 +239,7 @@
         <item>
          <widget class="QLineEdit" name="licenseLineEdit">
           <property name="toolTip">
-           <string>There are a few TotalsSegmentator tasks that require a special license. Free academic licenses are available. If you have received a TotalSegmentator license number, enter it here and press &quot;Set License&quot;. The weights will be downloaded automatically. </string>
+           <string>There are a few TotalSegmentator tasks that require a special license. Free academic licenses are available. If you have received a TotalSegmentator license number, enter it here and press &quot;Set License&quot;. The weights will be downloaded automatically. </string>
           </property>
           <property name="inputMethodHints">
            <set>Qt::ImhHiddenText|Qt::ImhNoAutoUppercase|Qt::ImhNoPredictiveText|Qt::ImhSensitiveData</set>
@@ -267,7 +267,7 @@
          <string>Update to latest version of TotalSegmentator Python package from GitHub</string>
         </property>
         <property name="text">
-         <string>Get TotalSegmenter package information</string>
+         <string>Get TotalSegmentator package information</string>
         </property>
        </widget>
       </item>
