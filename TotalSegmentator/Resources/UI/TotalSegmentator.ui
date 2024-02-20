@@ -239,7 +239,7 @@
         <item>
          <widget class="QLineEdit" name="licenseLineEdit">
           <property name="toolTip">
-           <string>There are a few TotalSegmentator tasks that require a special license. Free academic licenses are available. If you have received a TotalSegmentator license number, enter it here and press &quot;Set License&quot;. The weights will be downloaded automatically. </string>
+           <string>There are a few TotalSegmentator tasks that require a special license. Free academic licenses are available. If you have received a TotalSegmentator license number, enter it here and press the &quot;Apply&quot; button. The weights will be downloaded automatically.</string>
           </property>
           <property name="inputMethodHints">
            <set>Qt::ImhHiddenText|Qt::ImhNoAutoUppercase|Qt::ImhNoPredictiveText|Qt::ImhSensitiveData</set>
@@ -252,10 +252,10 @@
         <item>
          <widget class="QPushButton" name="setLicenseButton">
           <property name="toolTip">
-           <string>If you have received a TotalSegmentator license, enter it in the text field above and press &quot;Set license&quot;. Weights will be downloaded automatically. </string>
+           <string>If you have received a TotalSegmentator license, enter it in the input field and press &quot;Apply&quot;. Weights will be downloaded automatically. </string>
           </property>
           <property name="text">
-           <string>Set</string>
+           <string>Apply</string>
           </property>
          </widget>
         </item>
