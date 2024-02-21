@@ -752,7 +752,8 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
 
             # Workaround: fix incompatibility of dynamic_network_architectures==0.4 with totalsegmentator==2.0.5.
             # Revert to the last working version: dynamic_network_architectures==0.2
-            if packaging.version.parse(importlib.metadata.version("dynamic_network_architectures")) == packaging.version.parse("0.4"):
+            from packaging import version
+            if version.parse(importlib.metadata.version("dynamic_network_architectures")) == version.parse("0.4"):
                 self.log(f'dynamic_network_architectures package version is incompatible. Installing working version...')
                 slicer.util.pip_install("dynamic_network_architectures==0.2.0")
 
