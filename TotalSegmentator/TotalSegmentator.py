@@ -943,11 +943,11 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
             segmentationSequence = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLSequenceNode", outputSegmentation.GetName())
             browserNode.AddSynchronizedSequenceNode(segmentationSequence)
             browserNode.AddProxyNode(outputSegmentation, segmentationSequence, False)
+            browserNode.SelectFirstItem()
             browserNode.SetRecording(inputSequence, True)
             browserNode.SetSaveChanges(inputSequence, True)
             browserNode.SetRecording(segmentationSequence, True)
             browserNode.SetSaveChanges(segmentationSequence, True)
-            browserNode.SelectFirstItem()
             N_items = browserNode.GetNumberOfItems()
             for i in range(N_items):
                 self.log(f"Segmenting item {i+1}/{N_items} of sequence")
@@ -963,11 +963,6 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
                     totalSegmentatorCommand,
                     fast,
                 )
-                browserNode.SelectNextItem()
-            browserNode.SetRecording(inputSequence, False)
-            browserNode.SetSaveChanges(inputSequence, False)
-            browserNode.SetRecording(segmentationSequence, False)
-            browserNode.SetSaveChanges(segmentationSequence, False)
         else:
             self.runTotalSegmentator(
                 inputFile,
