@@ -847,6 +847,21 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         else:
             raise ValueError('Restart was cancelled.')
 
+    @staticmethod
+    def getSequenceOfNode(node):
+        """
+        If node is part of a sequence, return that sequence. Otherwise, return None.
+
+        :param node: Node to check
+        :return: Sequence node or None
+        """
+        if not node:
+            return None
+        sequenceNodes = slicer.mrmlScene.GetNodesByClass("vtkMRMLSequenceNode")
+        nodes = [sequenceNode for sequenceNode in sequenceNodes if sequenceNode.GetName() == node.GetName()]
+        if nodes:
+            return nodes[0]
+        return None
 
     def process(self, inputVolume, outputSegmentation, fast=True, cpu=False, task=None, subset=None):
 
@@ -905,6 +920,14 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
             if slicer.util.confirmYesNoDisplay("You have less than 7 GB of GPU memory available. Enable 'fast' mode to ensure segmentation can be completed successfully?"):
                 fast = True
 
+        # Check if volume is part of a sequence
+        inputSequence = TotalSegmentatorLogic.getSequenceOfNode(inputVolume)
+        if inputSequence is not None:
+            if not slicer.util.confirmYesNoDisplay(
+                "The input model you provided is part of a sequence. Do you want me to segment all frames of that sequence?"
+            ):
+                inputSequence = None
+
         # Get TotalSegmentator launcher command
         # TotalSegmentator (.py file, without extension) is installed in Python Scripts folder
         import sysconfig
@@ -915,7 +938,72 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         if not pythonSlicerExecutablePath:
             raise RuntimeError("Python was not found")
         totalSegmentatorCommand = [ pythonSlicerExecutablePath, totalSegmentatorExecutablePath]
+        if inputSequence is not None:
+            browserNode = slicer.modules.sequences.logic().GetFirstBrowserNodeForSequenceNode(inputSequence)
+            segmentationSequence = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLSequenceNode", outputSegmentation.GetName())
+            browserNode.AddSynchronizedSequenceNode(segmentationSequence)
+            browserNode.AddProxyNode(outputSegmentation, segmentationSequence, False)
+            browserNode.SetRecording(inputSequence, True)
+            browserNode.SetSaveChanges(inputSequence, True)
+            browserNode.SetRecording(segmentationSequence, True)
+            browserNode.SetSaveChanges(segmentationSequence, True)
+            browserNode.SelectFirstItem()
+            N_items = browserNode.GetNumberOfItems()
+            for i in range(N_items):
+                self.log(f"Segmenting item {i+1}/{N_items} of sequence")
+                self.runTotalSegmentator(
+                    inputFile,
+                    inputVolume,
+                    outputSegmentationFolder,
+                    outputSegmentation,
+                    outputSegmentationFile,
+                    task,
+                    subset,
+                    cpu,
+                    totalSegmentatorCommand,
+                    fast,
+                )
+                browserNode.SelectNextItem()
+            browserNode.SetRecording(inputSequence, False)
+            browserNode.SetSaveChanges(inputSequence, False)
+            browserNode.SetRecording(segmentationSequence, False)
+            browserNode.SetSaveChanges(segmentationSequence, False)
+        else:
+            self.runTotalSegmentator(
+                inputFile,
+                inputVolume,
+                outputSegmentationFolder,
+                outputSegmentation,
+                outputSegmentationFile,
+                task,
+                subset,
+                cpu,
+                totalSegmentatorCommand,
+                fast,
+            )
+        stopTime = time.time()
+        self.log(f"Processing completed in {stopTime-startTime:.2f} seconds")
 
+        if self.clearOutputFolder:
+            self.log("Cleaning up temporary folder...")
+            if os.path.isdir(tempFolder):
+                shutil.rmtree(tempFolder)
+        else:
+            self.log(f"Not cleaning up temporary folder: {tempFolder}")
+
+    def runTotalSegmentator(
+        self,
+        inputFile,
+        inputVolume,
+        outputSegmentationFolder,
+        outputSegmentation,
+        outputSegmentationFile,
+        task,
+        subset,
+        cpu,
+        totalSegmentatorCommand,
+        fast,
+    ):
         # Write input volume to file
         # TotalSegmentator requires NIFTI
         self.log(f"Writing input file to {inputFile}")
@@ -991,16 +1079,6 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         studyShItem = shNode.GetItemParent(inputVolumeShItem)
         segmentationShItem = shNode.GetItemByDataNode(outputSegmentation)
         shNode.SetItemParent(segmentationShItem, studyShItem)
-
-        if self.clearOutputFolder:
-            self.log("Cleaning up temporary folder...")
-            if os.path.isdir(tempFolder):
-                shutil.rmtree(tempFolder)
-        else:
-            self.log(f"Not cleaning up temporary folder: {tempFolder}")
-
-        stopTime = time.time()
-        self.log(f'Processing completed in {stopTime-startTime:.2f} seconds')
 
     def readSegmentationFolder(self, outputSegmentation, output_segmentation_dir, task, subset=None):
         """
