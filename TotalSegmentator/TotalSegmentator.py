@@ -963,6 +963,7 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
                     totalSegmentatorCommand,
                     fast,
                 )
+                browserNode.SelectNextItem()
         else:
             self.runTotalSegmentator(
                 inputFile,
