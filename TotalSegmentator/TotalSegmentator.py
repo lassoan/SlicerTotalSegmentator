@@ -263,6 +263,12 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         self.ui.statusLabel.plainText = ''
 
         import qt
+
+        sequenceBrowserNode = slicer.modules.sequences.logic().GetFirstBrowserNodeForProxyNode(self.ui.inputVolumeSelector.currentNode())
+        if sequenceBrowserNode:
+            if not slicer.util.confirmYesNoDisplay("The input volume you provided are part of a sequence. Do you want to segment all frames of that sequence?"):
+                sequenceBrowserNode = None
+
         try:
             slicer.app.setOverrideCursor(qt.Qt.WaitCursor)
             self.logic.setupPythonRequirements()
@@ -290,7 +296,7 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 
             # Compute output
             self.logic.process(self.ui.inputVolumeSelector.currentNode(), self.ui.outputSegmentationSelector.currentNode(),
-                self.ui.fastCheckBox.checked, self.ui.cpuCheckBox.checked, self.ui.taskComboBox.currentData, interactive = True)
+                self.ui.fastCheckBox.checked, self.ui.cpuCheckBox.checked, self.ui.taskComboBox.currentData, interactive = True, sequenceBrowserNode = sequenceBrowserNode)
 
         self.ui.statusLabel.appendPlainText("\nProcessing finished.")
 
@@ -854,10 +860,9 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
             raise ValueError('Restart was cancelled.')
 
 
-    def process(self, inputVolume, outputSegmentation, fast=True, cpu=False, task=None, subset=None, interactive=False):
-
+    def process(self, inputVolume, outputSegmentation, fast=True, cpu=False, task=None, subset=None, interactive=False, sequenceBrowserNode=None):
         """
-        Run the processing algorithm.
+        Run the processing algorithm on a volume or a sequence of volumes.
         Can be used without GUI widget.
         :param inputVolume: volume to be thresholded
         :param outputVolume: thresholding result
@@ -865,6 +870,8 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         :param task: one of self.tasks, default is "total"
         :param subset: a list of structures (TotalSegmentator classe names https://github.com/wasserth/TotalSegmentator#class-detailsTotalSegmentator) to segment.
           Default is None, which means that all available structures will be segmented."
+        :param interactive: set to True to enable warning popups to be shown to users
+        :param sequenceBrowserNode: if specified then all frames of the inputVolume sequence will be segmented
         """
 
         if not inputVolume:
@@ -921,6 +928,53 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         if not pythonSlicerExecutablePath:
             raise RuntimeError("Python was not found")
         totalSegmentatorCommand = [ pythonSlicerExecutablePath, totalSegmentatorExecutablePath]
+
+        inputVolumeSequence = None
+        if sequenceBrowserNode:
+            inputVolumeSequence = sequenceBrowserNode.GetSequenceNode(inputVolume)
+
+        if inputVolumeSequence is not None:
+
+            # If the volume already has a sequence in the current browser node then use that
+            segmentationSequence = sequenceBrowserNode.GetSequenceNode(outputSegmentation)
+            if not segmentationSequence:
+                segmentationSequence = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLSequenceNode", outputSegmentation.GetName())
+                sequenceBrowserNode.AddProxyNode(outputSegmentation, segmentationSequence, False)
+
+            selectedItemNumber = sequenceBrowserNode.GetSelectedItemNumber()
+            sequenceBrowserNode.PlaybackActiveOff()
+            sequenceBrowserNode.SelectFirstItem()
+            sequenceBrowserNode.SetRecording(segmentationSequence, True)
+            sequenceBrowserNode.SetSaveChanges(segmentationSequence, True)
+
+            numberOfItems = sequenceBrowserNode.GetNumberOfItems()
+            for i in range(numberOfItems):
+                self.log(f"Segmenting item {i+1}/{numberOfItems} of sequence")
+                self.processVolume(inputFile, inputVolume,
+                                   outputSegmentationFolder, outputSegmentation, outputSegmentationFile,
+                                   task, subset, cpu, totalSegmentatorCommand, fast)
+                sequenceBrowserNode.SelectNextItem()
+            sequenceBrowserNode.SetSelectedItemNumber(selectedItemNumber)
+
+        else:
+            # Segment a single volume
+            self.processVolume(inputFile, inputVolume,
+                               outputSegmentationFolder, outputSegmentation, outputSegmentationFile,
+                               task, subset, cpu, totalSegmentatorCommand, fast)
+
+        stopTime = time.time()
+        self.log(f"Processing completed in {stopTime-startTime:.2f} seconds")
+
+        if self.clearOutputFolder:
+            self.log("Cleaning up temporary folder...")
+            if os.path.isdir(tempFolder):
+                shutil.rmtree(tempFolder)
+        else:
+            self.log(f"Not cleaning up temporary folder: {tempFolder}")
+
+    def processVolume(self, inputFile, inputVolume, outputSegmentationFolder, outputSegmentation, outputSegmentationFile, task, subset, cpu, totalSegmentatorCommand, fast):
+        """Segment a single volume
+        """
 
         # Write input volume to file
         # TotalSegmentator requires NIFTI
@@ -997,16 +1051,6 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         studyShItem = shNode.GetItemParent(inputVolumeShItem)
         segmentationShItem = shNode.GetItemByDataNode(outputSegmentation)
         shNode.SetItemParent(segmentationShItem, studyShItem)
-
-        if self.clearOutputFolder:
-            self.log("Cleaning up temporary folder...")
-            if os.path.isdir(tempFolder):
-                shutil.rmtree(tempFolder)
-        else:
-            self.log(f"Not cleaning up temporary folder: {tempFolder}")
-
-        stopTime = time.time()
-        self.log(f'Processing completed in {stopTime-startTime:.2f} seconds')
 
     def readSegmentationFolder(self, outputSegmentation, output_segmentation_dir, task, subset=None):
         """
