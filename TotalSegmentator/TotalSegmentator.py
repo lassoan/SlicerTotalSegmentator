@@ -309,13 +309,19 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
             slicer.util.restart()
 
     def onSetLicense(self):
+        import qt
+        licenseText = qt.QInputDialog.getText(slicer.util.mainWindow(), "Set TotalSegmentator license key", "License key:")
+
+        success = False
         with slicer.util.tryWithErrorDisplay("Failed to set TotalSegmentator license.", waitCursor=True):
-            licenseText = self.ui.licenseLineEdit.text
             if not licenseText:
                 raise ValueError("License is not specified.")
-            self.ui.statusLabel.plainText = ''
             self.logic.setupPythonRequirements()
-            self.logic.setlicense(self.ui.licenseLineEdit.text)
+            self.logic.setLicense(licenseText)
+            success = True
+
+        if success:
+            slicer.util.infoDisplay("License key is set. You can now use TotalSegmentator tasks that require a license.")
 
 
 #
@@ -806,7 +812,7 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
     def executableName(name):
         return name + ".exe" if os.name == "nt" else name
 
-    def setlicense(self, licenseStr):
+    def setLicense(self, licenseStr):
 
         """
         Import weights.

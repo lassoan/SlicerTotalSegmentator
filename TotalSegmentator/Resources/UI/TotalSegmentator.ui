@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>421</width>
-    <height>676</height>
+    <width>230</width>
+    <height>441</height>
    </rect>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
@@ -230,38 +230,11 @@
       <item row="3" column="0">
        <widget class="QLabel" name="licenseLabel">
         <property name="text">
-         <string>TotalSegmentator license number: </string>
+         <string>TotalSegmentator license: </string>
         </property>
        </widget>
       </item>
-      <item row="3" column="1">
-       <layout class="QHBoxLayout" name="horizontalLayout_4">
-        <item>
-         <widget class="QLineEdit" name="licenseLineEdit">
-          <property name="toolTip">
-           <string>There are a few TotalSegmentator tasks that require a special license. Free academic licenses are available. If you have received a TotalSegmentator license number, enter it here and press the &quot;Apply&quot; button. The weights will be downloaded automatically.</string>
-          </property>
-          <property name="inputMethodHints">
-           <set>Qt::ImhHiddenText|Qt::ImhNoAutoUppercase|Qt::ImhNoPredictiveText|Qt::ImhSensitiveData</set>
-          </property>
-          <property name="echoMode">
-           <enum>QLineEdit::Password</enum>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="setLicenseButton">
-          <property name="toolTip">
-           <string>If you have received a TotalSegmentator license, enter it in the input field and press &quot;Apply&quot;. Weights will be downloaded automatically. </string>
-          </property>
-          <property name="text">
-           <string>Apply</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item row="4" column="0" colspan="2">
+      <item row="5" column="0" colspan="2">
        <widget class="QPushButton" name="packageInfoUpdateButton">
         <property name="toolTip">
          <string>Get metadata information for the TotalSegmentator package currently installed</string>
@@ -271,7 +244,7 @@
         </property>
        </widget>
       </item>
-      <item row="5" column="0" colspan="2">
+      <item row="6" column="0" colspan="2">
        <widget class="ctkFittedTextBrowser" name="packageInfoTextBrowser">
         <property name="collapsed">
          <bool>false</bool>
@@ -281,6 +254,16 @@
         </property>
         <property name="hideDetailsText">
          <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QPushButton" name="setLicenseButton">
+        <property name="toolTip">
+         <string>Set or update TotalSegmentator license key to allow running tasks that require a license. The registration has to be done only once, the license information is stored persistently in the TotalSegmentation configuration.</string>
+        </property>
+        <property name="text">
+         <string>Set license key</string>
         </property>
        </widget>
       </item>
