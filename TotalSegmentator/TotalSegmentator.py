@@ -290,7 +290,7 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 
             # Compute output
             self.logic.process(self.ui.inputVolumeSelector.currentNode(), self.ui.outputSegmentationSelector.currentNode(),
-                self.ui.fastCheckBox.checked, self.ui.cpuCheckBox.checked, self.ui.taskComboBox.currentData)
+                self.ui.fastCheckBox.checked, self.ui.cpuCheckBox.checked, self.ui.taskComboBox.currentData, interactive = True)
 
         self.ui.statusLabel.appendPlainText("\nProcessing finished.")
 
@@ -854,7 +854,7 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
             raise ValueError('Restart was cancelled.')
 
 
-    def process(self, inputVolume, outputSegmentation, fast=True, cpu=False, task=None, subset=None):
+    def process(self, inputVolume, outputSegmentation, fast=True, cpu=False, task=None, subset=None, interactive=False):
 
         """
         Run the processing algorithm.
@@ -893,21 +893,21 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
 
         cuda = torch.cuda if torch.backends.cuda.is_built() and torch.cuda.is_available() else None
 
-        if not fast and not cuda:
+        if not fast and not cuda and interactive:
 
             import ctk
             import qt
             mbox = ctk.ctkMessageBox(slicer.util.mainWindow())
-            mbox.text = "No GPU is detected. Switch to 'fast' mode to get low-resolution result in a few minutes or compute full-resolution result in about an hour?"
+            mbox.text = "No GPU is detected. Switch to 'fast' mode to get low-resolution result in a few minutes or compute full-resolution result in up to an hour?"
             mbox.addButton("Fast (~2 minutes)", qt.QMessageBox.AcceptRole)
-            mbox.addButton("Full-resolution (~50 minutes)", qt.QMessageBox.RejectRole)
+            mbox.addButton("Full-resolution (~5-50 minutes depending on volume and computer specs)", qt.QMessageBox.RejectRole)
             # Windows 10 peek feature in taskbar shows all hidden but not destroyed windows
             # (after creating and closing a messagebox, hovering over the mouse on Slicer icon, moving up the
             # mouse to the peek thumbnail would show it again).
             mbox.deleteLater()
             fast = (mbox.exec_() == qt.QMessageBox.AcceptRole)
 
-        if not fast and cuda and cuda.get_device_properties(cuda.current_device()).total_memory < 7e9:
+        if not fast and cuda and cuda.get_device_properties(cuda.current_device()).total_memory < 7e9 and interactive:
             if slicer.util.confirmYesNoDisplay("You have less than 7 GB of GPU memory available. Enable 'fast' mode to ensure segmentation can be completed successfully?"):
                 fast = True
 
