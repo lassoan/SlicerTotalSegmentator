@@ -352,7 +352,7 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
 
         ScriptedLoadableModuleLogic.__init__(self)
 
-        self.totalSegmentatorPythonPackageDownloadUrl = "https://github.com/wasserth/TotalSegmentator/archive/bbc1e7b3df64339e67acbebe2cf3c739098aabf4.zip"  # tag: 2.0.5
+        self.totalSegmentatorPythonPackageDownloadUrl = "https://github.com/wasserth/TotalSegmentator/archive/65d0859c893badaeedaf39600613b73bb0865efe.zip"  # tag: 2.2.1
 
         # Custom applications can set custom location for weights.
         # For example, it could be set to `sysconfig.get_path('scripts')` to have an independent copy of
@@ -387,6 +387,8 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
 
         # Main
         self.tasks['total'] = {'title': 'total', 'supportsFast': True, 'supportsMultiLabel': True}
+        self.tasks['total_mr'] = {'title': 'total_mr', 'supportsFast': True, 'supportsMultiLabel': True}
+
         self.tasks['body'] = {'title': 'body', 'supportsFast': True}
         self.tasks['vertebrae_body'] = {'title': 'vertebrae body'}
         self.tasks['lung_vessels'] = {'title': 'lung vessels', 'requiresPreSegmentation': True}
@@ -402,6 +404,8 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         self.tasks['tissue_types'] = {'title': 'tissue types', 'requiresPreSegmentation': True, 'supportsMultiLabel': True, 'requiresLicense': True}
         self.tasks['heartchambers_highres'] = {'title': 'heartchambers highres' , 'requiresPreSegmentation': True, 'supportsMultiLabel': True, 'requiresLicense': True}
         self.tasks['face'] = {'title': 'face', 'requiresPreSegmentation': True, 'supportsMultiLabel': True, 'requiresLicense': True}
+        self.tasks['tissue_types_mr'] = {'title': 'tissue_types_mr', 'supportsMultiLabel': True, 'requiresLicense': True}
+        self.tasks['face_mr'] = {'title': 'face_mr', 'supportsFast': False, 'supportsMultiLabel': True, 'requiresLicense': True}
 
         # Experimental
         # self.tasks['liver_vessels'] = {'title': 'liver vessels', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
