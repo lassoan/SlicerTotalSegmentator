@@ -72,9 +72,11 @@ Solution: Restart Slicer and run TotalSegmentator module again.
 
 #### Problem: Error popup on the first run: `Failed to compute results ... Command ... 'PythonSlicer', TotalSegmentator.exe ... returned non-zero exit status 120`
 
-Explanation: This typically happens when PyTorch is not installed correctly.
+Explanation: This typically happens when PyTorch is not installed correctly or your computer runs out of memory.
 
-Solution: Reinstall PyTorch as described in solution of `Segmentation fails while predicting` issue.
+Solution:
+- Check the message log (textbox under the Apply button). If you see a message like `RuntimeError: ... DefaultCPUAllocator: not enough memory: you tried to allocate ... bytes.` then it means that your computer has not enough memory to process the input image. You can use `Crop volume` module to crop the your image to the relevant region and/or resample it (with using a scaling factor >1) until the memory usage drops low enough so that your computer can handle it. Alternatively, you can install more physical RAM or configure your operating system to use  more virtual memory.
+- If the problem does not seem to be due to running out of memory then reinstall PyTorch as described in solution of `Segmentation fails while predicting` issue.
 
 ### Segmentation fails while predicting
 
