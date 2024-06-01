@@ -682,19 +682,6 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         except ModuleNotFoundError as e:
             slicer.util.pip_install("pandas")
 
-        # pillow version that is installed in Slicer (10.1.0) is too new,
-        # it is incompatible with several TotalSegmentator dependencies.
-        # Attempt to uninstall and install an older version before any of the packages import  it.
-        needToInstallPillow = True
-        try:
-            if packaging.version.parse(importlib.metadata.version("pillow")) < packaging.version.parse("10.1"):
-                # A suitable pillow version is already installed
-                needToInstallPillow = False
-        except Exception as e:
-            pass
-        if needToInstallPillow:
-            slicer.util.pip_install("pillow<10.1")
-
         # These packages come preinstalled with Slicer and should remain unchanged
         packagesToSkip = [
             'SimpleITK',  # Slicer's SimpleITK uses a special IO class, which should not be replaced
