@@ -620,8 +620,9 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         metadataPath.locate()
 
         # Remove line: `Requires-Dist: SimpleITK (==2.0.2)`
+        # User Latin-1 encoding to read the file, as it may contain non-ASCII characters and not necessarily in UTF-8 encoding.
         filteredMetadata = ""
-        with open(metadataPath.locate(), "r+") as file:
+        with open(metadataPath.locate(), "r+", encoding="latin1") as file:
             for line in file:
                 skipThisPackage = False
                 requirementPrefix = 'Requires-Dist: '
