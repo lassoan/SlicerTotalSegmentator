@@ -92,6 +92,17 @@ Solution: It is recommended to switch to use the CPU by the following steps:
 
 If your GPU has more than 7GB memory and you still get this error then the error message might indicate that the PyTorch CUDA version does not match the CUDA version installed on the system. Reinstall PyTorch with the correct CUDA version by following the instructions given below for [GPU is not found](#gpu-is-not-found).
 
+#### numpy.core._exceptions._ArrayMemoryError: Unable to allocate
+
+Problem: Segmentation fails while predicting and a message similar to this is found in the message log (textbox under the Apply button): `numpy.core._exceptions._ArrayMemoryError: Unable to allocate 6.85 GiB for an array with shape (287, 233, 233, 118) and data type float32`
+
+Explanation: This means that your computer has ran out of memory (RAM) while performing the segmentation.
+
+Solution: It is recommended to reduce the image size or increase avaialable memory size by one of the following options:
+- A. Crop and/or resample the input image using `Crop volume` module. Cropping the image to a smaller size will reduce memory need without decreasing the segmentation quality. Setting "Spacing scale" to value larger than 1 (for example 2 or 3) will preserve the extents of the image but small details may be lost (this should not be an issue when the object of interest is a large structure with a smooth surface).
+- B. Increase the available "virtual memory" (also known as "swap") size in your computer. On Windows and Linux, you can configure the virtual memory size in your system settings. On macOS, virtual memory is automatically allocated if there is sufficient free disk space. Increasing virtual memory size can avoid issues cause by short memory usage peaks, but can severely slow down the segmentation. To avoid slowdown, add more physical RAM to your computer.
+- C. Upgrade your computer hardware. Add physical RAM to your computer, or if it is not upgradeable then get a new computer or rent a virtual machine from a cloud computing provider. If you have more physical RAM then you can process larger images without making the segmentation take significantly longer time.
+
 #### AttributeError: 'DummyFile' object has no attribute 'flush'
 
 Problem: Segmentation fails while predicting and the `'DummyFile' object has no attribute 'flush'` message is found in the message log (textbox under the Apply button).
