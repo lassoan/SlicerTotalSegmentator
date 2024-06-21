@@ -80,6 +80,8 @@ Solution:
 
 ### Segmentation fails while predicting
 
+#### RuntimeError: CUDA out of memory
+
 Problem: Segmentation fails while predicting and the `RuntimeError: CUDA out of memory.` message is found in the message log (textbox under the Apply button).
 
 Explanation: This means that a CUDA-capable GPU is available, but it is not powerful enough to be used by TotalSegmentator.
@@ -89,6 +91,14 @@ Solution: It is recommended to switch to use the CPU by the following steps:
 - Go to `PyTorch Util` module, select `cpu` as `Computation backend`, and click `Install PyTorch`.
 
 If your GPU has more than 7GB memory and you still get this error then the error message might indicate that the PyTorch CUDA version does not match the CUDA version installed on the system. Reinstall PyTorch with the correct CUDA version by following the instructions given below for [GPU is not found](#gpu-is-not-found).
+
+#### AttributeError: 'DummyFile' object has no attribute 'flush'
+
+Problem: Segmentation fails while predicting and the `'DummyFile' object has no attribute 'flush'` message is found in the message log (textbox under the Apply button).
+
+Explanation: This error message can be safely ignored (it is just a small bug in the implementation of the helper class that suppresses nnunet output). If segmentation failed then it is due to another error in the output.
+
+Solution: Look for other messages in the output.
 
 ### GPU is not found
 
