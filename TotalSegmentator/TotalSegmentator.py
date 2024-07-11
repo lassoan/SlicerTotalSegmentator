@@ -352,7 +352,7 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
 
         ScriptedLoadableModuleLogic.__init__(self)
 
-        self.totalSegmentatorPythonPackageDownloadUrl = "https://github.com/wasserth/TotalSegmentator/archive/65d0859c893badaeedaf39600613b73bb0865efe.zip"  # tag: 2.2.1
+        self.totalSegmentatorPythonPackageDownloadUrl = "https://github.com/wasserth/TotalSegmentator/archive/d16263d43d74f14d9f4581da4e0fdef7f5ec4ccc.zip"  # tag: 2.3.0
 
         # Custom applications can set custom location for weights.
         # For example, it could be set to `sysconfig.get_path('scripts')` to have an independent copy of
@@ -392,6 +392,11 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         self.tasks['body'] = {'title': 'body', 'supportsFast': True}
         self.tasks['vertebrae_body'] = {'title': 'vertebrae body'}
         self.tasks['lung_vessels'] = {'title': 'lung vessels', 'requiresPreSegmentation': True}
+
+        self.tasks['head_glands_cavities'] = {'title': 'head: glands and cavities', 'supportsFast': False, 'supportsMultiLabel': True}
+        self.tasks['head_muscles'] = {'title': 'head: muscles', 'supportsFast': False, 'supportsMultiLabel': True}
+        self.tasks['headneck_bones_vessels'] = {'title': 'head and neck: bones and vessels', 'supportsFast': False, 'supportsMultiLabel': True}
+        self.tasks['headneck_muscles'] = {'title': 'head and neck: muscles', 'supportsFast': False, 'supportsMultiLabel': True}
 
         # Trained on reduced data set
         self.tasks['cerebral_bleed'] = {'title': 'cerebral bleed', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
