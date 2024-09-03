@@ -84,7 +84,7 @@
            <string>fast mode is not available for this task</string>
           </property>
           <property name="text">
-           <string>N/A</string>
+           <string>not available</string>
           </property>
          </widget>
         </item>

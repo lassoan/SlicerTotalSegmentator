@@ -277,13 +277,22 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
             slicer.app.restoreOverrideCursor()
             import traceback
             traceback.print_exc()
-            self.ui.statusLabel.appendPlainText("\nApplication restart required.")
-            if slicer.util.confirmOkCancelDisplay(
-                "Application is required to complete installation of required Python packages.\nPress OK to restart.",
-                "Confirm application restart"
-                ):
-                slicer.util.restart()
+            self.ui.statusLabel.appendPlainText(f"Failed to install Python dependencies:\n{e}\n")
+            restartRequired = False
+            if isinstance(e, InstallError):
+                restartRequired = e.restartRequired
+            if restartRequired:
+                self.ui.statusLabel.appendPlainText("\nApplication restart required.")
+                if slicer.util.confirmOkCancelDisplay(
+                    "Application is required to complete installation of required Python packages.\nPress OK to restart.",
+                    "Confirm application restart",
+                    detailedText=str(e)
+                    ):
+                    slicer.util.restart()
+                else:
+                    return
             else:
+                slicer.util.errorDisplay(f"Failed to install required packages.\n\n{e}")
                 return
 
         with slicer.util.tryWithErrorDisplay("Failed to compute results.", waitCursor=True):
@@ -334,6 +343,15 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 # TotalSegmentatorLogic
 #
 
+class InstallError(Exception):
+    def __init__(self, message, restartRequired=False):
+        # Call the base class constructor with the parameters it needs
+        super().__init__(message)
+        self.message = message
+        self.restartRequired = restartRequired
+    def __str__(self):
+        return self.message
+
 class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
     """This class should implement all the actual
     computation done by your module.  The interface
@@ -352,7 +370,7 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
 
         ScriptedLoadableModuleLogic.__init__(self)
 
-        self.totalSegmentatorPythonPackageDownloadUrl = "https://github.com/wasserth/TotalSegmentator/archive/d16263d43d74f14d9f4581da4e0fdef7f5ec4ccc.zip"  # tag: 2.3.0
+        self.totalSegmentatorPythonPackageDownloadUrl = "https://github.com/wasserth/TotalSegmentator/archive/7274faac4673298d17b63a5a8335006f02e6d426.zip"  # latest master as of 2024-09-03
 
         # Custom applications can set custom location for weights.
         # For example, it could be set to `sysconfig.get_path('scripts')` to have an independent copy of
@@ -392,6 +410,7 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         self.tasks['body'] = {'title': 'body', 'supportsFast': True}
         self.tasks['vertebrae_body'] = {'title': 'vertebrae body'}
         self.tasks['lung_vessels'] = {'title': 'lung vessels', 'requiresPreSegmentation': True}
+        self.tasks['liver_vessels'] = {'title': 'liver vessels', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
 
         self.tasks['head_glands_cavities'] = {'title': 'head: glands and cavities', 'supportsFast': False, 'supportsMultiLabel': True}
         self.tasks['head_muscles'] = {'title': 'head: muscles', 'supportsFast': False, 'supportsMultiLabel': True}
@@ -409,11 +428,11 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         self.tasks['tissue_types'] = {'title': 'tissue types', 'requiresPreSegmentation': True, 'supportsMultiLabel': True, 'requiresLicense': True}
         self.tasks['heartchambers_highres'] = {'title': 'heartchambers highres' , 'requiresPreSegmentation': True, 'supportsMultiLabel': True, 'requiresLicense': True}
         self.tasks['face'] = {'title': 'face', 'requiresPreSegmentation': True, 'supportsMultiLabel': True, 'requiresLicense': True}
+        self.tasks['brain_structures'] = {'title': 'brain_structures', 'supportsFast': True, 'supportsMultiLabel': True, 'requiresLicense': True}
         self.tasks['tissue_types_mr'] = {'title': 'tissue_types_mr', 'supportsMultiLabel': True, 'requiresLicense': True}
         self.tasks['face_mr'] = {'title': 'face_mr', 'supportsFast': False, 'supportsMultiLabel': True, 'requiresLicense': True}
 
         # Experimental
-        # self.tasks['liver_vessels'] = {'title': 'liver vessels', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
         # self.tasks['aortic_branches'] = {'title': 'aortic branches', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
         # self.tasks['head'] = {'title': 'head', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
         # self.tasks['covid'] = {'title': 'covid', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
@@ -447,12 +466,23 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
                 # Found the (123037004, SCT, "Anatomical Structure") category within DICOM master list
                 break
 
+        alteredStructureCategory = slicer.vtkSlicerTerminologyCategory()
+        for i in range(numberOfCategories):
+            terminologiesLogic.GetNthCategoryInTerminology(totalSegmentatorTerminologyName, i, alteredStructureCategory)
+            if alteredStructureCategory.GetCodingSchemeDesignator() == 'SCT' and alteredStructureCategory.GetCodeValue() == '49755003':
+                # Found the (49755003, SCT, "Morphologically Altered Structure") category within DICOM master list
+                break
+
         # Retrieve all property type codes from the TotalSegmentator terminology
         self.totalSegmentatorTerminologyPropertyTypes = []
         terminologyType = slicer.vtkSlicerTerminologyType()
         numberOfTypes = terminologiesLogic.GetNumberOfTypesInTerminologyCategory(totalSegmentatorTerminologyName, anatomicalStructureCategory)
         for i in range(numberOfTypes):
             if terminologiesLogic.GetNthTypeInTerminologyCategory(totalSegmentatorTerminologyName, anatomicalStructureCategory, i, terminologyType):
+                self.totalSegmentatorTerminologyPropertyTypes.append(terminologyType.GetCodingSchemeDesignator() + "^" + terminologyType.GetCodeValue())
+        numberOfTypes = terminologiesLogic.GetNumberOfTypesInTerminologyCategory(totalSegmentatorTerminologyName, alteredStructureCategory)
+        for i in range(numberOfTypes):
+            if terminologiesLogic.GetNthTypeInTerminologyCategory(totalSegmentatorTerminologyName, alteredStructureCategory, i, terminologyType):
                 self.totalSegmentatorTerminologyPropertyTypes.append(terminologyType.GetCodingSchemeDesignator() + "^" + terminologyType.GetCodeValue())
 
         # Helper function to get code string from CSV file row
@@ -712,7 +742,7 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         try:
           import PyTorchUtils
         except ModuleNotFoundError as e:
-          raise RuntimeError("This module requires PyTorch extension. Install it from the Extensions Manager.")
+          raise InstallError("This module requires PyTorch extension. Install it from the Extensions Manager.")
 
         minimumTorchVersion = "1.12"
         torchLogic = PyTorchUtils.PyTorchUtilsLogic()
@@ -720,12 +750,12 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
             self.log('PyTorch Python package is required. Installing... (it may take several minutes)')
             torch = torchLogic.installTorch(askConfirmation=True, torchVersionRequirement = f">={minimumTorchVersion}")
             if torch is None:
-                raise ValueError('PyTorch extension needs to be installed to use this module.')
+                raise InstallError("This module requires PyTorch extension. Install it from the Extensions Manager.")
         else:
             # torch is installed, check version
             from packaging import version
             if version.parse(torchLogic.torch.__version__) < version.parse(minimumTorchVersion):
-                raise ValueError(f'PyTorch version {torchLogic.torch.__version__} is not compatible with this module.'
+                raise InstallError(f'PyTorch version {torchLogic.torch.__version__} is not compatible with this module.'
                                  + f' Minimum required version is {minimumTorchVersion}. You can use "PyTorch Util" module to install PyTorch'
                                  + f' with version requirement set to: >={minimumTorchVersion}')
 

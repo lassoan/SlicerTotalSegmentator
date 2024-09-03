@@ -2095,6 +2095,42 @@
               30
             ],
             "3dSlicerLabel": "thyroid"
+          },
+          {
+            "CodingSchemeDesignator": "SCT",
+            "CodeValue": "28294002",
+            "CodeMeaning": "Central sulcus",
+            "recommendedDisplayRGBValue": [
+              220,
+              160,
+              30
+            ],
+            "3dSlicerLabel": "central sulcus"
+          }
+        ]
+      },
+      {
+        "CodeMeaning": "Morphologically Altered Structure",
+        "CodingSchemeDesignator": "SCT",
+        "showAnatomy": true,
+        "cid": "7150",
+        "CodeValue": "49755003",
+        "contextGroupName": "SegmentationPropertyCategories",
+        "Type": [
+          {
+            "CodingSchemeDesignator": "SCT",
+            "CodeValue": "108369006",
+            "CodeMeaning": "Neoplasm",
+            "recommendedDisplayRGBValue": [
+              144,
+              238,
+              144
+            ],
+            "3dSlicerLabel": "neoplasm",
+            "cid": "7159",
+            "UMLSConceptUID": "C0027651",
+            "contextGroupName": "LesionSegmentationTypes",
+            "SNOMEDCTConceptID": "108369006"
           }
         ]
       }
