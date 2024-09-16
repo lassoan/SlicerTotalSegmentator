@@ -66,9 +66,9 @@ If you have a powerful GPU is available then a full-quality segmentation can be 
 
 #### Problem: Error popup on the first run: `Failed to compute results ... Command ... 'pip', 'install' ... returned non-zero exit status 1`
 
-Explanation: This happens because when TotalSegmentator is run for the first time, it needs to download and install PyTorch and TotalSegmentator Python packages. Since the application may have already loaded different versions of these packages, the packages need to be uninstalled first. This uninstallation may fail because some packages may be already in use. Restarting the application unloads these modules so they are no longer in use. Therefore after a restart, TotalSegmentator will be able to install all the necessary packages.
+Explanation: This happens because when TotalSegmentator is run for the first time, it needs to download and install PyTorch and TotalSegmentator Python packages. The module instructs you to restart Slicer and try again. If this does not help then make sure you have enough memory space (physical RAM and virtual memory in total should be at least 32GB) and you have enough disk space (at least 20GB free disk space is required). If you still run into issues then report the problem on the [3D Slicer forum](https://discourse.slicer.org). In your forum post, include the full application log of the failed attempt (you can get the application log in menu: Help / Report a bug).
 
-Solution: Restart Slicer and run TotalSegmentator module again.
+Solution: Make sure you have at least 32 GB free memory space, 20 GB free disk space, and retry. If issues persists then report the issue to developers.
 
 #### Problem: Error popup on the first run: `Failed to compute results ... Command ... 'PythonSlicer', TotalSegmentator.exe ... returned non-zero exit status 120`
 
