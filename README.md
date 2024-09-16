@@ -62,13 +62,16 @@ If you have a powerful GPU is available then a full-quality segmentation can be 
 
 ## Troubleshooting
 
-### Failed to compute results error at the first run
+### Failed to compute results error the first time trying to use this Slicer module
 
-#### Problem: Error popup on the first run: `Failed to compute results ... Command ... 'pip', 'install' ... returned non-zero exit status 1`
+#### Problem: Error popup appears: `Failed to compute results ... Command ... 'pip', 'install' ... returned non-zero exit status 1`
 
-Explanation: This happens because when TotalSegmentator is run for the first time, it needs to download and install PyTorch and TotalSegmentator Python packages. The module instructs you to restart Slicer and try again. If this does not help then make sure you have enough memory space (physical RAM and virtual memory in total should be at least 32GB) and you have enough disk space (at least 20GB free disk space is required). If you still run into issues then report the problem on the [3D Slicer forum](https://discourse.slicer.org). In your forum post, include the full application log of the failed attempt (you can get the application log in menu: Help / Report a bug).
+Explanation: This happens because when the tool has to download and install PyTorch and other required Python packages.
 
-Solution: Make sure you have at least 32 GB free memory space, 20 GB free disk space, and retry. If issues persists then report the issue to developers.
+Solution:
+- The module instructs you to restart Slicer and try again if an error occurs. Please try this first.
+- If this does not help then make sure you have enough memory space (physical RAM and virtual memory in total should be at least 32GB) and you have enough disk space (at least 20GB free disk space is required) and try again.
+- If you still run into issues then report the problem on the [3D Slicer forum](https://discourse.slicer.org). In your forum post, include the full application log of the failed attempt (you can get the application log in menu: Help / Report a bug).
 
 #### Problem: Error popup on the first run: `Failed to compute results ... Command ... 'PythonSlicer', TotalSegmentator.exe ... returned non-zero exit status 120`
 
