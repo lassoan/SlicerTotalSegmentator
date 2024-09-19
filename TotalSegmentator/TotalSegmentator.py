@@ -736,6 +736,7 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
             'SimpleITK',  # Slicer's SimpleITK uses a special IO class, which should not be replaced
             'torch',  # needs special installation using SlicerPyTorch
             'requests',  # TotalSegmentator would want to force a specific version of requests, which would require a restart of Slicer and it is unnecessary
+            'rt_utils',  # Only needed for RTSTRUCT export, which is not needed in Slicer; rt_utils depends on opencv-python which is hard to build
             ]
 
         # Install PyTorch
