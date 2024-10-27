@@ -138,6 +138,12 @@ Model files are hosted on github.com or Zenodo.org and downloaded automatically 
 - talk to IT administrators or use a VPN to access the server
 - download the file manually and unzip it in the `.totalsegmentator` folder in the user's profile (for example in `c:\Users\(yourusername)\.totalsegmentator\nnunet\results\Dataset291_TotalSegmentator_part1_organs_1559subj`)
 
+### json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+Problem: Your TotalSegmentator config.json file was corrupted or was not created correctly.
+
+Solution: Delete your `.totalsegmentator` folder in the user's profile (for example in `c:\Users\(yourusername)\.totalsegmentator`). The folder will be recreated with the correct content.
+
 ## Contributing
 
 Contributions to this extensions are welcome. Please send a pull request with any suggested changes. [3D Slicer contribution guidelines](https://github.com/Slicer/Slicer/blob/main/CONTRIBUTING.md) apply.
