@@ -689,10 +689,12 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
 
             match = False
             if not match:
-                # ruff ; extra == 'dev' -> rewrite to: ruff[extra]
-                match = re.match(r"([\S]+)[\s]*; extra == '([^']+)'", requirement)
+                # Rewrite optional depdendencies info returned by importlib.metadata.requires to be valid for pip_install:
+                # Requirement Original: ruff; extra == "dev"
+                # Requirement Rewritten: ruff
+                match = re.match(r"([\S]+)[\s]*; extra == \"([^\"]+)\"", requirement)
                 if match:
-                    requirement = f"{match.group(1)}[{match.group(2)}]"
+                    requirement = f"{match.group(1)}"
             if not match:
                 # nibabel >=2.3.0 -> rewrite to: nibabel>=2.3.0
                 match = re.match("([\S]+)[\s](.+)", requirement)
