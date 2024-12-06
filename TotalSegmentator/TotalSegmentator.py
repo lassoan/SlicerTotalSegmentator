@@ -739,21 +739,6 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
             'rt_utils',  # Only needed for RTSTRUCT export, which is not needed in Slicer; rt_utils depends on opencv-python which is hard to build
             ]
 
-        # acvl_utils workaround - start
-        # Recent versions of acvl_utils are broken (https://github.com/MIC-DKFZ/acvl_utils/issues/2).
-        # As a workaround, we install an older version manually. This workaround can be removed after acvl_utils is fixed.
-        packagesToSkip.append("acvl_utils")
-        needToInstallAcvlUtils = True
-        try:
-            if packaging.version.parse(importlib.metadata.version("acvl_utils")) == packaging.version.parse("0.2"):
-                # A suitable version is already installed
-                needToInstallAcvlUtils = False
-        except Exception as e:
-            pass
-        if needToInstallAcvlUtils:
-            slicer.util.pip_install("acvl_utils==0.2")
-        # acvl_utils workaround - end
-
         # Install PyTorch
         try:
           import PyTorchUtils
@@ -774,6 +759,21 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
                 raise InstallError(f'PyTorch version {torchLogic.torch.__version__} is not compatible with this module.'
                                  + f' Minimum required version is {minimumTorchVersion}. You can use "PyTorch Util" module to install PyTorch'
                                  + f' with version requirement set to: >={minimumTorchVersion}')
+
+        # acvl_utils workaround - start
+        # Recent versions of acvl_utils are broken (https://github.com/MIC-DKFZ/acvl_utils/issues/2).
+        # As a workaround, we install an older version manually. This workaround can be removed after acvl_utils is fixed.
+        packagesToSkip.append("acvl_utils")
+        needToInstallAcvlUtils = True
+        try:
+            if packaging.version.parse(importlib.metadata.version("acvl_utils")) == packaging.version.parse("0.2"):
+                # A suitable version is already installed
+                needToInstallAcvlUtils = False
+        except Exception as e:
+            pass
+        if needToInstallAcvlUtils:
+            slicer.util.pip_install("acvl_utils==0.2")
+        # acvl_utils workaround - end
 
         # Install TotalSegmentator with selected dependencies only
         # (it would replace Slicer's "requests")
