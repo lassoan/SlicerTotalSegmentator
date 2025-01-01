@@ -720,23 +720,11 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         except ModuleNotFoundError as e:
             slicer.util.pip_install("pandas")
 
-        # pillow version that is installed in Slicer (10.1.0) is too new,
-        # it is incompatible with several TotalSegmentator dependencies.
-        # Attempt to uninstall and install an older version before any of the packages import  it.
-        needToInstallPillow = True
-        try:
-            if packaging.version.parse(importlib.metadata.version("pillow")) < packaging.version.parse("10.1"):
-                # A suitable pillow version is already installed
-                needToInstallPillow = False
-        except Exception as e:
-            pass
-        if needToInstallPillow:
-            slicer.util.pip_install("pillow<10.1")
-
         # These packages come preinstalled with Slicer and should remain unchanged
         packagesToSkip = [
             'SimpleITK',  # Slicer's SimpleITK uses a special IO class, which should not be replaced
             'torch',  # needs special installation using SlicerPyTorch
+            'nnunetv2',  # needs special installation using SlicerNNUNet
             'requests',  # TotalSegmentator would want to force a specific version of requests, which would require a restart of Slicer and it is unnecessary
             'rt_utils',  # Only needed for RTSTRUCT export, which is not needed in Slicer; rt_utils depends on opencv-python which is hard to build
             ]
@@ -762,20 +750,27 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
                                  + f' Minimum required version is {minimumTorchVersion}. You can use "PyTorch Util" module to install PyTorch'
                                  + f' with version requirement set to: >={minimumTorchVersion}')
 
-        # acvl_utils workaround - start
-        # Recent versions of acvl_utils are broken (https://github.com/MIC-DKFZ/acvl_utils/issues/2).
-        # As a workaround, we install an older version manually. This workaround can be removed after acvl_utils is fixed.
-        packagesToSkip.append("acvl_utils")
-        needToInstallAcvlUtils = True
+        # Install nnUNet
         try:
-            if packaging.version.parse(importlib.metadata.version("acvl_utils")) == packaging.version.parse("0.2"):
-                # A suitable version is already installed
-                needToInstallAcvlUtils = False
-        except Exception as e:
-            pass
-        if needToInstallAcvlUtils:
-            slicer.util.pip_install("acvl_utils==0.2")
-        # acvl_utils workaround - end
+            import SlicerNNUNetLib
+        except ModuleNotFoundError as e:
+            raise InstallError("This module requires SlicerNNUNet extension. Install it from the Extensions Manager.")
+
+        minimumNNUNetVersion = "2.2.1"  # per https://github.com/wasserth/TotalSegmentator/blob/7274faac4673298d17b63a5a8335006f02e6d426/setup.py#L26
+        nnunetlogic = SlicerNNUNetLib.InstallLogic()
+        nnunetlogic.getInstalledNNUnetVersion()
+        from packaging.requirements import Requirement
+        if not nnunetlogic.isPackageInstalled(Requirement("nnunetv2")):
+            self.log('nnunetv2 package is required. Installing... (it may take several minutes)')
+            nnunet = nnunetlogic.setupPythonRequirements(f"nnunetv2>={minimumNNUNetVersion}")
+            if not nnunet:
+                raise InstallError("This module requires SlicerNNUNet extension. Install it from the Extensions Manager.")
+        else:
+            installed_nnunet_version = nnunetlogic.getInstalledNNUnetVersion()
+            if installed_nnunet_version < version.parse(minimumNNUNetVersion):
+                raise InstallError(f'nnUNetv2 version {installed_nnunet_version} is not compatible with this module.'
+                                 + f' Minimum required version is {minimumNNUNetVersion}. You can use "nnUNet" module to install nnUNet'
+                                 + f' with version requirement set to: >={minimumNNUNetVersion}')
 
         # Install TotalSegmentator with selected dependencies only
         # (it would replace Slicer's "requests")
@@ -803,29 +798,10 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
                 slicer.util.pip_uninstall("TotalSegmentator")
 
             # Update TotalSegmentator and all its dependencies
-            skippedRequirements = self.pipInstallSelective(
+            self.pipInstallSelective(
                 "TotalSegmentator",
                 self.totalSegmentatorPythonPackageDownloadUrl + (" --upgrade" if upgrade else ""),
-                packagesToSkip + ["nnunetv2"])
-
-            # Install nnunetv2 with selected dependencies only
-            # (it would replace Slicer's "SimpleITK")
-            try:
-                nnunetRequirement = next(requirement for requirement in skippedRequirements if requirement.startswith('nnunetv2'))
-            except StopIteration:
-                # nnunetv2 requirement was not found in TotalSegmentator - this must be an error, so let's report it
-                raise ValueError("nnunetv2 requirement was not found in TotalSegmentator")
-            # Remove spaces and parentheses from version requirement (convert from "nnunetv2 (==2.1)" to "nnunetv2==2.1")
-            nnunetRequirement = re.sub('[ \(\)]', '', nnunetRequirement)
-            self.log(f'nnunetv2 Python package is required. Installing {nnunetRequirement} ...')
-            self.pipInstallSelective('nnunetv2', nnunetRequirement, packagesToSkip)
-
-            # Workaround: fix incompatibility of dynamic_network_architectures==0.4 with totalsegmentator==2.0.5.
-            # Revert to the last working version: dynamic_network_architectures==0.2
-            from packaging import version
-            if version.parse(importlib.metadata.version("dynamic_network_architectures")) == version.parse("0.4"):
-                self.log(f'dynamic_network_architectures package version is incompatible. Installing working version...')
-                slicer.util.pip_install("dynamic_network_architectures==0.2.0")
+                packagesToSkip)
 
             self.log('TotalSegmentator installation completed successfully.')
 
