@@ -735,7 +735,7 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         except ModuleNotFoundError as e:
           raise InstallError("This module requires PyTorch extension. Install it from the Extensions Manager.")
 
-        minimumTorchVersion = "1.12"
+        minimumTorchVersion = "2.0.0"  # per https://github.com/wasserth/TotalSegmentator/blob/7274faac4673298d17b63a5a8335006f02e6d426/setup.py#L19
         torchLogic = PyTorchUtils.PyTorchUtilsLogic()
         if not torchLogic.torchInstalled():
             self.log('PyTorch Python package is required. Installing... (it may take several minutes)')
