@@ -729,7 +729,9 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
             'rt_utils',  # Only needed for RTSTRUCT export, which is not needed in Slicer; rt_utils depends on opencv-python which is hard to build
             ]
 
-        # Install PyTorch
+        # Ask for confirmation before installing PyTorch and nnUNet
+        confirmPackagesToInstall = []
+
         try:
           import PyTorchUtils
         except ModuleNotFoundError as e:
@@ -738,8 +740,32 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         minimumTorchVersion = "2.0.0"  # per https://github.com/wasserth/TotalSegmentator/blob/7274faac4673298d17b63a5a8335006f02e6d426/setup.py#L19
         torchLogic = PyTorchUtils.PyTorchUtilsLogic()
         if not torchLogic.torchInstalled():
+            confirmPackagesToInstall.append("PyTorch")
+
+        try:
+            import SlicerNNUNetLib
+        except ModuleNotFoundError as e:
+            raise InstallError("This module requires SlicerNNUNet extension. Install it from the Extensions Manager.")
+
+        minimumNNUNetVersion = "2.2.1"  # per https://github.com/wasserth/TotalSegmentator/blob/7274faac4673298d17b63a5a8335006f02e6d426/setup.py#L26
+        nnunetlogic = SlicerNNUNetLib.InstallLogic(doAskConfirmation=False)
+        nnunetlogic.getInstalledNNUnetVersion()
+        from packaging.requirements import Requirement
+        if not nnunetlogic.isPackageInstalled(Requirement("nnunetv2")):
+            confirmPackagesToInstall.append("nnunetv2")
+
+        if confirmPackagesToInstall:
+            if not slicer.util.confirmOkCancelDisplay(
+                f"This module requires installation of additional Python packages. Installation needs network connection and may take several minutes. Click OK to proceed.",
+                "Confirm Python package installation",
+                detailedText=f"Python packages that will be installed: {', '.join(confirmPackagesToInstall)}"
+                ):
+                raise InstallError("User cancelled.")
+
+        # Install PyTorch
+        if "PyTorch" in confirmPackagesToInstall:
             self.log('PyTorch Python package is required. Installing... (it may take several minutes)')
-            torch = torchLogic.installTorch(askConfirmation=True, torchVersionRequirement = f">={minimumTorchVersion}")
+            torch = torchLogic.installTorch(askConfirmation=False, torchVersionRequirement = f">={minimumTorchVersion}")
             if torch is None:
                 raise InstallError("This module requires PyTorch extension. Install it from the Extensions Manager.")
         else:
@@ -751,16 +777,7 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
                                  + f' with version requirement set to: >={minimumTorchVersion}')
 
         # Install nnUNet
-        try:
-            import SlicerNNUNetLib
-        except ModuleNotFoundError as e:
-            raise InstallError("This module requires SlicerNNUNet extension. Install it from the Extensions Manager.")
-
-        minimumNNUNetVersion = "2.2.1"  # per https://github.com/wasserth/TotalSegmentator/blob/7274faac4673298d17b63a5a8335006f02e6d426/setup.py#L26
-        nnunetlogic = SlicerNNUNetLib.InstallLogic()
-        nnunetlogic.getInstalledNNUnetVersion()
-        from packaging.requirements import Requirement
-        if not nnunetlogic.isPackageInstalled(Requirement("nnunetv2")):
+        if "nnunetv2" in confirmPackagesToInstall:
             self.log('nnunetv2 package is required. Installing... (it may take several minutes)')
             nnunet = nnunetlogic.setupPythonRequirements(f"nnunetv2>={minimumNNUNetVersion}")
             if not nnunet:
