@@ -370,7 +370,7 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
 
         ScriptedLoadableModuleLogic.__init__(self)
 
-        self.totalSegmentatorPythonPackageDownloadUrl = "https://github.com/wasserth/TotalSegmentator/archive/7274faac4673298d17b63a5a8335006f02e6d426.zip"  # latest master as of 2024-09-03
+        self.totalSegmentatorPythonPackageDownloadUrl = "https://github.com/wasserth/TotalSegmentator/archive/25a858672cf9400e34c7421e9635dca23770344b.zip"  # latest version (post 2.6.0) as of 2025-02-16
 
         # Custom applications can set custom location for weights.
         # For example, it could be set to `sysconfig.get_path('scripts')` to have an independent copy of
@@ -404,46 +404,51 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         self.tasks = OrderedDict()
 
         # Main
-        self.tasks['total'] = {'title': 'total', 'supportsFast': True, 'supportsMultiLabel': True}
-        self.tasks['total_mr'] = {'title': 'total_mr', 'supportsFast': True, 'supportsMultiLabel': True}
+        self.tasks['total'] = {'title': 'total', 'modalities': ['CT'], 'supportsFast': True, 'supportsFastest': True, 'supportsMultiLabel': True}
+        self.tasks['total_mr'] = {'title': 'total (MR)', 'modalities': ['MR'], 'supportsFast': True, 'supportsFastest': True, 'supportsMultiLabel': True}
+        self.tasks['vertebrae_mr'] = {'title': 'vertebrae (MR)',  'modalities': ['MR'], 'description:': 'acrum, vertebrae L1-5, vertebrae T1-12, vertebrae C1-7 (for CT this is part of the `total` task)', 'supportsMultiLabel': True}
+        self.tasks['lung_nodules'] = {'title': 'lung: nodules', 'modalities': ['CT'], 'description': 'lung, lung_nodules (provided by [BLUEMIND AI](https://bluemind.co/): Fitzjalen R., Aladin M., Nanyan G.) (trained on 1353 subjects, partly from LIDC-IDRI)', 'supportsMultiLabel': True}
+        self.tasks['lung_vessels'] = {'title': 'lung: vessels'}
+
+        self.tasks['kidney_cysts'] = {'title': 'kidney: cysts', 'modalities': ['CT'], 'description': 'kidney_cyst_left, kidney_cyst_right (strongly improved accuracy compared to kidney_cysts inside of `total` task)', 'supportsMultiLabel': True}
+        self.tasks['breasts'] = {'title': 'breasts', 'modalities': ['CT'], 'supportsMultiLabel': True}
+        self.tasks['liver_segments'] = {'title': 'liver: segments', 'modalities': ['CT'], 'description': 'liver_segment_1, liver_segment_2, liver_segment_3, liver_segment_4, liver_segment_5, liver_segment_6, liver_segment_7, liver_segment_8 (Couinaud segments)', 'supportsMultiLabel': True}
+        self.tasks['liver_segments_mr'] = {'title': 'liver: segments (MR)', 'modalities': ['MR'], 'description': 'liver_segment_1, liver_segment_2, liver_segment_3, liver_segment_4, liver_segment_5, liver_segment_6, liver_segment_7, liver_segment_8 (for MR images) (Couinaud segments)', 'supportsMultiLabel': True}
+        self.tasks['liver_vessels'] = {'title': 'liver: vessels', 'supportsMultiLabel': True}
 
         self.tasks['body'] = {'title': 'body', 'supportsFast': True}
-        self.tasks['vertebrae_body'] = {'title': 'vertebrae body'}
-        self.tasks['lung_vessels'] = {'title': 'lung vessels', 'requiresPreSegmentation': True}
-        self.tasks['liver_vessels'] = {'title': 'liver vessels', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
+        self.tasks['body_mr'] = {'title': 'body (MR)',  'modalities': ['MR'], 'description:': 'body_trunc, body_extremities (for MR images)', 'supportsFast': True, 'supportsMultiLabel': True}
 
-        self.tasks['head_glands_cavities'] = {'title': 'head: glands and cavities', 'supportsFast': False, 'supportsMultiLabel': True}
-        self.tasks['head_muscles'] = {'title': 'head: muscles', 'supportsFast': False, 'supportsMultiLabel': True}
-        self.tasks['headneck_bones_vessels'] = {'title': 'head and neck: bones and vessels', 'supportsFast': False, 'supportsMultiLabel': True}
-        self.tasks['headneck_muscles'] = {'title': 'head and neck: muscles', 'supportsFast': False, 'supportsMultiLabel': True}
+        self.tasks['head_glands_cavities'] = {'title': 'head: glands and cavities', 'supportsMultiLabel': True}
+        self.tasks['head_muscles'] = {'title': 'head: muscles', 'supportsMultiLabel': True}
+        self.tasks['oculomotor_muscles'] = {'title': 'head: oculomotor muscles', 'modalities': ['CT'], 'description': 'skull, eyeball_right, lateral_rectus_muscle_right, superior_oblique_muscle_right, levator_palpebrae_superioris_right, superior_rectus_muscle_right, medial_rectus_muscle_left, inferior_oblique_muscle_right, inferior_rectus_muscle_right, optic_nerve_left, eyeball_left, lateral_rectus_muscle_left, superior_oblique_muscle_left, levator_palpebrae_superioris_left, superior_rectus_muscle_left, medial_rectus_muscle_right, inferior_oblique_muscle_left, inferior_rectus_muscle_left, optic_nerve_right', 'supportsMultiLabel': True}
+        self.tasks['headneck_bones_vessels'] = {'title': 'head and neck: bones and vessels', 'supportsMultiLabel': True}
+        self.tasks['headneck_muscles'] = {'title': 'head and neck: muscles', 'supportsMultiLabel': True}
 
         # Trained on reduced data set
-        self.tasks['cerebral_bleed'] = {'title': 'cerebral bleed', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
-        self.tasks['hip_implant'] = {'title': 'hip implant', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
-        self.tasks['coronary_arteries'] = {'title': 'coronary arteries', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
-        self.tasks['pleural_pericard_effusion'] = {'title': 'pleural and pericardial effusion', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
+        self.tasks['cerebral_bleed'] = {'title': 'brain: cerebral bleed', 'supportsMultiLabel': True}
+        self.tasks['hip_implant'] = {'title': 'hip implant', 'supportsMultiLabel': True}
+        self.tasks['coronary_arteries'] = {'title': 'heart: coronary arteries', 'description': 'coronary_arteries (also works on non-contrast images)', 'supportsMultiLabel': True}
+        self.tasks['pleural_pericard_effusion'] = {'title': 'heart: pleural and pericardial effusion', 'supportsMultiLabel': True}
 
         # Requires license
-        self.tasks['appendicular_bones'] = {'title': 'appendicular bones', 'requiresPreSegmentation': True, 'supportsMultiLabel': True, 'requiresLicense': True}
-        self.tasks['tissue_types'] = {'title': 'tissue types', 'requiresPreSegmentation': True, 'supportsMultiLabel': True, 'requiresLicense': True}
-        self.tasks['heartchambers_highres'] = {'title': 'heartchambers highres' , 'requiresPreSegmentation': True, 'supportsMultiLabel': True, 'requiresLicense': True}
-        self.tasks['face'] = {'title': 'face', 'requiresPreSegmentation': True, 'supportsMultiLabel': True, 'requiresLicense': True}
-        self.tasks['brain_structures'] = {'title': 'brain_structures', 'supportsFast': True, 'supportsMultiLabel': True, 'requiresLicense': True}
-        self.tasks['tissue_types_mr'] = {'title': 'tissue_types_mr', 'supportsMultiLabel': True, 'requiresLicense': True}
-        self.tasks['face_mr'] = {'title': 'face_mr', 'supportsFast': False, 'supportsMultiLabel': True, 'requiresLicense': True}
+        self.tasks['vertebrae_body'] = {'title': 'vertebrae body', 'requiresLicense': True}
+        self.tasks['appendicular_bones'] = {'title': 'appendicular bones', 'supportsMultiLabel': True, 'requiresLicense': True}
+        self.tasks['appendicular_bones_mr'] = {'title': 'appendicular bones (MR)', 'modalities': ['MR'], 'description': 'patella, tibia, fibula, tarsal, metatarsal, phalanges_feet, ulna, radius (for MR images)', 'supportsMultiLabel': True, 'requiresLicense': True}
+        self.tasks['tissue_types'] = {'title': 'tissue types', 'supportsMultiLabel': True, 'requiresLicense': True}
+        self.tasks['tissue_4_types'] = {'title': 'tissue 4 types', 'description': 'subcutaneous_fat, torso_fat, skeletal_muscle, intermuscular_fat (in contrast to `tissue_types` skeletal_muscle is split into two classes: muscle and fat)', 'supportsMultiLabel': True, 'requiresLicense': True}
+        self.tasks['tissue_types_mr'] = {'title': 'tissue types (MR)', 'modalities': ['MR'], 'supportsMultiLabel': True, 'requiresLicense': True}
+        self.tasks['heartchambers_highres'] = {'title': 'heart: chambers highres' , 'supportsMultiLabel': True, 'requiresLicense': True}
+        self.tasks['face'] = {'title': 'face', 'supportsMultiLabel': True, 'requiresLicense': True}
+        self.tasks['face_mr'] = {'title': 'face (MR)', 'modalities': ['MR'], 'description': 'face_region (for anonymization)', 'supportsMultiLabel': True, 'requiresLicense': True}
+        self.tasks['brain_structures'] = {'title': 'brain: structures', 'supportsMultiLabel': True, 'requiresLicense': True}
+
+        self.tasks['thigh_shoulder_muscles'] = {'title': 'thigh and shoulder: muscles', 'description': 'quadriceps_femoris_left, quadriceps_femoris_right, thigh_medial_compartment_left, thigh_medial_compartment_right, thigh_posterior_compartment_left, thigh_posterior_compartment_right, sartorius_left, sartorius_right, deltoid, supraspinatus, infraspinatus, subscapularis, coracobrachial, trapezius, pectoralis_minor, serratus_anterior, teres_major, triceps_brachi', 'supportsMultiLabel': True, 'requiresLicense': True}
+        self.tasks['thigh_shoulder_muscles_mr'] = {'title': 'thigh and shoulder: muscles (MR)', 'description': 'quadriceps_femoris_left, quadriceps_femoris_right, thigh_medial_compartment_left, thigh_medial_compartment_right, thigh_posterior_compartment_left, thigh_posterior_compartment_right, sartorius_left, sartorius_right, deltoid, supraspinatus, infraspinatus, subscapularis, coracobrachial, trapezius, pectoralis_minor, serratus_anterior, teres_major, triceps_brachi (for MR images)', 'supportsMultiLabel': True, 'requiresLicense': True}
 
         # Experimental
-        # self.tasks['aortic_branches'] = {'title': 'aortic branches', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
-        # self.tasks['head'] = {'title': 'head', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
-        # self.tasks['covid'] = {'title': 'covid', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
-
-        # Testing
-        # self.tasks['heartchambers_test'] = {'title': 'heartchambers test', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
-        # self.tasks['aortic_branches_test'] = {'title': 'aortic branches test', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
-        # self.tasks['bones_tissue_test'] = {'title': 'bones tissue test', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
-        # self.tasks['test'] = {'title': 'test', 'requiresPreSegmentation': True, 'supportsMultiLabel': True}
-
-        # self.tasks['covid'] = {'title': 'pleural and pericardial effusion'}
+        # self.tasks['ventricle_parts'] = {'title': 'ventricle_parts', 'supportsFast': False, 'supportsMultiLabel': True, 'requiresLicense': False}
+        # self.tasks['aortic_sinuses'] = {'title': 'aortic_sinuses', 'supportsFast': False, 'supportsMultiLabel': True, 'requiresLicense': True}
 
         self.loadTotalSegmentatorLabelTerminology()
 
@@ -473,6 +478,13 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
                 # Found the (49755003, SCT, "Morphologically Altered Structure") category within DICOM master list
                 break
 
+        bodySubstanceCategory = slicer.vtkSlicerTerminologyCategory()
+        for i in range(numberOfCategories):
+            terminologiesLogic.GetNthCategoryInTerminology(totalSegmentatorTerminologyName, i, bodySubstanceCategory)
+            if bodySubstanceCategory.GetCodingSchemeDesignator() == 'SCT' and bodySubstanceCategory.GetCodeValue() == '91720002':
+                # Found the (91720002, SCT, "Body Substance") category within DICOM master list
+                break
+
         # Retrieve all property type codes from the TotalSegmentator terminology
         self.totalSegmentatorTerminologyPropertyTypes = []
         terminologyType = slicer.vtkSlicerTerminologyType()
@@ -484,12 +496,16 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         for i in range(numberOfTypes):
             if terminologiesLogic.GetNthTypeInTerminologyCategory(totalSegmentatorTerminologyName, alteredStructureCategory, i, terminologyType):
                 self.totalSegmentatorTerminologyPropertyTypes.append(terminologyType.GetCodingSchemeDesignator() + "^" + terminologyType.GetCodeValue())
+        numberOfTypes = terminologiesLogic.GetNumberOfTypesInTerminologyCategory(totalSegmentatorTerminologyName, bodySubstanceCategory)
+        for i in range(numberOfTypes):
+            if terminologiesLogic.GetNthTypeInTerminologyCategory(totalSegmentatorTerminologyName, bodySubstanceCategory, i, terminologyType):
+                self.totalSegmentatorTerminologyPropertyTypes.append(terminologyType.GetCodingSchemeDesignator() + "^" + terminologyType.GetCodeValue())
 
         # Helper function to get code string from CSV file row
         def getCodeString(field, columnNames, row):
             columnValues = []
-            for fieldName in ["CodingSchemeDesignator", "CodeValue", "CodeMeaning"]:
-                columnIndex = columnNames.index(f"{field}.{fieldName}")
+            for fieldName in ["CodingScheme", "CodeValue", "CodeMeaning"]:
+                columnIndex = columnNames.index(f"{field}_{fieldName}")
                 try:
                     columnValue = row[columnIndex]
                 except IndexError:
@@ -510,32 +526,32 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
                 terminologyEntryStrWithoutCategoryName = (
                     "~"
                     # Property category: "SCT^123037004^Anatomical Structure" or "SCT^49755003^Morphologically Altered Structure"
-                    + '^'.join(getCodeString("SegmentedPropertyCategoryCodeSequence", columnNames, row))
+                    + '^'.join(getCodeString("Category", columnNames, row))
                     + '~'
                     # Property type: "SCT^23451007^Adrenal gland", "SCT^367643001^Cyst", ...
-                    + '^'.join(getCodeString("SegmentedPropertyTypeCodeSequence", columnNames, row))
+                    + '^'.join(getCodeString("Type", columnNames, row))
                     + '~'
                     # Property type modifier: "SCT^7771000^Left", ...
-                    + '^'.join(getCodeString("SegmentedPropertyTypeModifierCodeSequence", columnNames, row))
+                    + '^'.join(getCodeString("TypeModifier", columnNames, row))
                     + '~Anatomic codes - DICOM master list'
                     + '~'
                     # Anatomic region (set if category is not anatomical structure): "SCT^64033007^Kidney", ...
-                    + '^'.join(getCodeString("AnatomicRegionSequence", columnNames, row))
+                    + '^'.join(getCodeString("Region", columnNames, row))
                     + '~'
                     # Anatomic region modifier: "SCT^7771000^Left", ...
-                    + '^'.join(getCodeString("AnatomicRegionModifierSequence", columnNames, row))
+                    + '^'.join(getCodeString("RegionModifier", columnNames, row))
                     + '|')
                 terminologyEntry = slicer.vtkSlicerTerminologyEntry()
                 terminologyPropertyTypeStr = (  # Example: SCT^23451007
-                    row[columnNames.index("SegmentedPropertyTypeCodeSequence.CodingSchemeDesignator")]
-                    + "^" + row[columnNames.index("SegmentedPropertyTypeCodeSequence.CodeValue")])
+                    row[columnNames.index("Type_CodingScheme")]
+                    + "^" + row[columnNames.index("Type_CodeValue")])
                 if terminologyPropertyTypeStr in self.totalSegmentatorTerminologyPropertyTypes:
                     terminologyEntryStr = "Segmentation category and type - Total Segmentator" + terminologyEntryStrWithoutCategoryName
                 else:
                     terminologyEntryStr = "Segmentation category and type - DICOM master list" + terminologyEntryStrWithoutCategoryName
 
                 # Store the terminology string for this structure
-                totalSegmentatorStructureName = row[columnNames.index("Structure")]  # TotalSegmentator structure name, such as "adrenal_gland_left"
+                totalSegmentatorStructureName = row[columnNames.index("Name")]  # TotalSegmentator structure name, such as "adrenal_gland_left"
                 self.totalSegmentatorLabelTerminology[totalSegmentatorStructureName] = terminologyEntryStr
 
 
@@ -545,17 +561,26 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
     def isMultiLabelSupportedForTask(self, task):
         return (task in self.tasks) and ('supportsMultiLabel' in self.tasks[task]) and self.tasks[task]['supportsMultiLabel']
 
-    def isPreSegmentationRequiredForTask(self, task):
-        return (task in self.tasks) and ('requiresPreSegmentation' in self.tasks[task]) and self.tasks[task]['requiresPreSegmentation']
-
     def isLicenseRequiredForTask(self, task):
         return (task in self.tasks) and ('requiresLicense' in self.tasks[task]) and self.tasks[task]['requiresLicense']
 
     def getSegmentLabelColor(self, terminologyEntryStr):
         """Get segment label and color from terminology"""
 
-        def labelColorFromTypeObject(typeObject):
-            """typeObject is a terminology type or type modifier"""
+        def labelColorFromTypeObject(typeObject, typeModifierObject=None):
+            if typeModifierObject is not None:
+                if typeModifierObject.GetSlicerLabel():
+                    # Slicer label is specified for the modifier that includes the full name, use that
+                    label = typeModifierObject.GetSlicerLabel()
+                else:
+                    # Slicer label is not specified, assemble label from type and modifier
+                    typeLabel = typeObject.GetSlicerLabel() if typeObject.GetSlicerLabel() else typeObject.GetCodeMeaning()
+                    label = f"{typeLabel} {typeModifierObject.GetCodeMeaning()}"
+                rgb = typeModifierObject.GetRecommendedDisplayRGBValue()
+                if rgb[0] == 127 and rgb[1] == 127 and rgb[2] == 127:
+                    # Type modifier did not have color specified, try to use the color of the type
+                    rgb = typeObject.GetRecommendedDisplayRGBValue()
+                return label, (rgb[0]/255.0, rgb[1]/255.0, rgb[2]/255.0)
             label = typeObject.GetSlicerLabel() if typeObject.GetSlicerLabel() else typeObject.GetCodeMeaning()
             rgb = typeObject.GetRecommendedDisplayRGBValue()
             return label, (rgb[0]/255.0, rgb[1]/255.0, rgb[2]/255.0)
@@ -585,7 +610,7 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
                         continue
                     if terminologyEntry.GetTypeModifierObject().GetCodeValue() != foundTerminologyEntry.GetTypeModifierObject().GetCodeValue():
                         continue
-                    return labelColorFromTypeObject(foundTerminologyEntry.GetTypeModifierObject())
+                    return labelColorFromTypeObject(foundTerminologyEntry.GetTypeObject(), foundTerminologyEntry.GetTypeModifierObject())
                 continue
             return labelColorFromTypeObject(foundTerminologyEntry.GetTypeObject())
 
@@ -1044,13 +1069,6 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         #options.extend(["--nr_thr_saving", "1"])
         #options.append("--force_split")
 
-        if self.isPreSegmentationRequiredForTask(task):
-            preOptions = options + ["--fast"]
-            self.log('Creating segmentations with TotalSegmentator AI (pre-run)...')
-            self.log(f"Total Segmentator arguments: {preOptions}")
-            proc = slicer.util.launchConsoleProcess(totalSegmentatorCommand + preOptions)
-            self.logProcessOutput(proc)
-
         # Launch TotalSegmentator
 
         # When there are many segments then reading each segment from a separate file would be too slow,
@@ -1203,9 +1221,15 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
                 label, color = self.getSegmentLabelColor(terminologyEntryStr)
                 if self.useStandardSegmentNames:
                     segment.SetName(label)
-                segment.SetColor(color)
+                # Compare color to default gray (127.0/255.0) to avoid using undefined color
+                if not TotalSegmentatorLogic.isDefaultColor(color):
+                    segment.SetColor(color)
             except RuntimeError as e:
                 self.log(str(e))
+
+    @staticmethod
+    def isDefaultColor(color):
+        return all(abs(colorComponent - 127.0/255.0) < 0.01 for colorComponent in color)
 
 #
 # TotalSegmentatorTest
