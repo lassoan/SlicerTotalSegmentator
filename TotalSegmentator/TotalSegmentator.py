@@ -428,10 +428,10 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         # Trained on reduced data set
         self.tasks['cerebral_bleed'] = {'title': 'brain: cerebral bleed', 'supportsMultiLabel': True}
         self.tasks['hip_implant'] = {'title': 'hip implant', 'supportsMultiLabel': True}
-        self.tasks['coronary_arteries'] = {'title': 'heart: coronary arteries', 'description': 'coronary_arteries (also works on non-contrast images)', 'supportsMultiLabel': True}
         self.tasks['pleural_pericard_effusion'] = {'title': 'heart: pleural and pericardial effusion', 'supportsMultiLabel': True}
 
         # Requires license
+        self.tasks['coronary_arteries'] = {'title': 'heart: coronary arteries', 'description': 'coronary_arteries (also works on non-contrast images)', 'supportsMultiLabel': True, 'requiresLicense': True}
         self.tasks['vertebrae_body'] = {'title': 'vertebrae body', 'requiresLicense': True}
         self.tasks['appendicular_bones'] = {'title': 'appendicular bones', 'supportsMultiLabel': True, 'requiresLicense': True}
         self.tasks['appendicular_bones_mr'] = {'title': 'appendicular bones (MR)', 'modalities': ['MR'], 'description': 'patella, tibia, fibula, tarsal, metatarsal, phalanges_feet, ulna, radius (for MR images)', 'supportsMultiLabel': True, 'requiresLicense': True}
