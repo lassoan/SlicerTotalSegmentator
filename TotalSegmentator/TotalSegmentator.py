@@ -745,6 +745,14 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         except ModuleNotFoundError as e:
             slicer.util.pip_install("pandas")
 
+        # TotalSegmentator requires dicom2nifti (we don't use any DICOM features in Slicer but DICOM support is not optional in TotalSegmentator)
+        # but latest dicom2nifti is broken on Python-3.9. We need to install an older version.
+        # (dicom2nifti was recently updated to version 2.6. This version needs pydicom >= 3.0.0, which requires python >= 3.10)
+        try:
+            import dicom2nifti
+        except ModuleNotFoundError as e:
+            slicer.util.pip_install("dicom2nifti<=2.5.1")
+
         # These packages come preinstalled with Slicer and should remain unchanged
         packagesToSkip = [
             'SimpleITK',  # Slicer's SimpleITK uses a special IO class, which should not be replaced
@@ -752,6 +760,7 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
             'nnunetv2',  # needs special installation using SlicerNNUNet
             'requests',  # TotalSegmentator would want to force a specific version of requests, which would require a restart of Slicer and it is unnecessary
             'rt_utils',  # Only needed for RTSTRUCT export, which is not needed in Slicer; rt_utils depends on opencv-python which is hard to build
+            'dicom2nifti', # We already installed a known working version, do not let TotalSegmentator to upgrade to a newer version that may not work on Python-3.9
             ]
 
         # Ask for confirmation before installing PyTorch and nnUNet
