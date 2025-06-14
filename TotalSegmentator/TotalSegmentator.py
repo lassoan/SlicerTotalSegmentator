@@ -722,7 +722,7 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
                     requirement = f"{match.group(1)}"
             if not match:
                 # nibabel >=2.3.0 -> rewrite to: nibabel>=2.3.0
-                match = re.match("([\S]+)[\s](.+)", requirement)
+                match = re.match(r"([\S]+)[\s](.+)", requirement)
                 if match:
                     requirement = f"{match.group(1)}{match.group(2)}"
 
