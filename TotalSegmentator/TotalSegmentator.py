@@ -91,7 +91,7 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         for task in self.logic.tasks:
             taskTitle = self.logic.tasks[task]['title']
             if self.logic.isLicenseRequiredForTask(task):
-                taskTitle += _(" [license required]")
+                taskTitle = _("{task_title} [license required]").format(task_title=taskTitle)
             self.ui.taskComboBox.addItem(taskTitle, task)
 
         # Connections
@@ -223,7 +223,7 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
             self.ui.applyButton.enabled = False
 
         if inputVolume:
-            self.ui.outputSegmentationSelector.baseName = inputVolume.GetName() + _(" segmentation")
+            self.ui.outputSegmentationSelector.baseName = _("{volume_name} segmentation").format(volume_name=inputVolume.GetName())
 
         fastModeSupported = self.logic.isFastModeSupportedForTask(task)
         self.ui.fastCheckBox.visible = fastModeSupported
@@ -284,7 +284,7 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
             if isinstance(e, InstallError):
                 restartRequired = e.restartRequired
             if restartRequired:
-                self.ui.statusLabel.appendPlainText(_("\nApplication restart required."))
+                self.ui.statusLabel.appendPlainText("\n" + _("Application restart required."))
                 if slicer.util.confirmOkCancelDisplay(
                     _("Application is required to complete installation of required Python packages.\nPress OK to restart."),
                     _("Confirm application restart"),
@@ -309,7 +309,7 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
             self.logic.process(self.ui.inputVolumeSelector.currentNode(), self.ui.outputSegmentationSelector.currentNode(),
                 self.ui.fastCheckBox.checked, self.ui.cpuCheckBox.checked, self.ui.taskComboBox.currentData, interactive = True, sequenceBrowserNode = sequenceBrowserNode)
 
-        self.ui.statusLabel.appendPlainText(_("\nProcessing finished."))
+        self.ui.statusLabel.appendPlainText("\n" + _("Processing finished."))
 
     def onPackageInfoUpdate(self):
         self.ui.packageInfoTextBrowser.plainText = ''
@@ -332,7 +332,7 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         success = False
         with slicer.util.tryWithErrorDisplay(_("Failed to set TotalSegmentator license."), waitCursor=True):
             if not licenseText:
-                raise ValueError("License is not specified.")
+                raise ValueError(_("License is not specified."))
             self.logic.setupPythonRequirements()
             self.logic.setLicense(licenseText)
             success = True
