@@ -321,7 +321,7 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
             self.logic.setupPythonRequirements(upgrade=True)
         self.onPackageInfoUpdate()
         if not slicer.util.confirmOkCancelDisplay(_("This TotalSegmentator update requires a 3D Slicer restart."),_("Press OK to restart.")):
-            raise ValueError('Restart was cancelled.')
+            raise ValueError(_("Restart was cancelled."))
         else:
             slicer.util.restart()
 
