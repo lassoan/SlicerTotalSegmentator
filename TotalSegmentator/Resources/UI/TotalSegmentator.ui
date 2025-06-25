@@ -30,7 +30,7 @@
          <string>Input abdominal, chest, or whole body CT.</string>
         </property>
         <property name="nodeTypes">
-         <stringlist>
+         <stringlist notr="true">
           <string>vtkMRMLScalarVolumeNode</string>
          </stringlist>
         </property>
@@ -112,15 +112,12 @@
          <string>This will store the segmentation result.</string>
         </property>
         <property name="nodeTypes">
-         <stringlist>
+         <stringlist notr="true">
           <string>vtkMRMLSegmentationNode</string>
          </stringlist>
         </property>
         <property name="showChildNodeTypes">
          <bool>false</bool>
-        </property>
-        <property name="baseName">
-         <string>Brain</string>
         </property>
         <property name="noneEnabled">
          <bool>true</bool>
