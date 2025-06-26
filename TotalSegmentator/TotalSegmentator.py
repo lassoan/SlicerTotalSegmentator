@@ -1116,7 +1116,7 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
                     raise ValueError("'" + item + "' is not a valid TotalSegmentator label terminology.")
 
         self.log(_('Creating segmentations with TotalSegmentator AI...'))
-        self.log(_("Total Segmentator arguments: {options}").format(options))
+        self.log(_("Total Segmentator arguments: {opts}").format(opts=", ".join(options)))
         proc = slicer.util.launchConsoleProcess(totalSegmentatorCommand + options)
         self.logProcessOutput(proc)
 
