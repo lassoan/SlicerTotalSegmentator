@@ -735,9 +735,9 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
                     requirement = f"{match.group(1)}{match.group(2)}"
 
             if skipThisPackage:
-                self.log(_('- Skip {requirement}').format(requirement))
+                self.log(_('- Skip {requirement}').format(requirement=requirement))
             else:
-                self.log(_('- Installing {requirement}...').format(requirement))
+                self.log(_('- Installing {requirement}...').format(requirement=requirement))
                 slicer.util.pip_install(requirement)
 
         return skippedRequirements
@@ -843,7 +843,7 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
                     # TotalSegmentator have been already installed from GitHub, from a different URL that this module needs
                     if not slicer.util.confirmOkCancelDisplay(
                         _("This module requires TotalSegmentator Python package update."),
-                        detailedText=_("Currently installed: {downloadUrl}\n\nRequired: {requiredUrl}").format(downloadUrl, requiredUrl=self.totalSegmentatorPythonPackageDownloadUrl)):
+                        detailedText=_("Currently installed: {downloadUrl}\n\nRequired: {requiredUrl}").format(downloadUrl=downloadUrl, requiredUrl=self.totalSegmentatorPythonPackageDownloadUrl)):
                       raise ValueError('TotalSegmentator update was cancelled.')
                     upgrade = True
         except ModuleNotFoundError as e:
@@ -1116,7 +1116,7 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
                     raise ValueError("'" + item + "' is not a valid TotalSegmentator label terminology.")
 
         self.log(_('Creating segmentations with TotalSegmentator AI...'))
-        self.log(_("Total Segmentator arguments: {options}").format(options))
+        self.log(_("Total Segmentator arguments: {options}").format(options=options))
         proc = slicer.util.launchConsoleProcess(totalSegmentatorCommand + options)
         self.logProcessOutput(proc)
 
