@@ -320,7 +320,7 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         with slicer.util.tryWithErrorDisplay(_("Failed to upgrade TotalSegmentator"), waitCursor=True):
             self.logic.setupPythonRequirements(upgrade=True)
         self.onPackageInfoUpdate()
-        if not slicer.util.confirmOkCancelDisplay(_("This TotalSegmentator update requires a 3D Slicer restart."),_("Press OK to restart.")):
+        if not slicer.util.confirmOkCancelDisplay(_("This TotalSegmentator update requires a 3D Slicer restart. Press OK to restart.")):
             raise ValueError(_("Restart was cancelled."))
         else:
             slicer.util.restart()
@@ -947,7 +947,7 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
 
         self.log(_('License has been successfully set.'))
 
-        if slicer.util.confirmOkCancelDisplay(_("This license update requires a 3D Slicer restart.","Press OK to restart.")):
+        if slicer.util.confirmOkCancelDisplay(_("This license update requires a 3D Slicer restart. Press OK to restart.")):
             slicer.util.restart()
         else:
             raise ValueError('Restart was cancelled.')
