@@ -93,6 +93,12 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
             if self.logic.isLicenseRequiredForTask(task):
                 taskTitle = _("{task_title} [license required]").format(task_title=taskTitle)
             self.ui.taskComboBox.addItem(taskTitle, task)
+            
+            # Set tooltip with model description if available
+            taskInfo = self.logic.tasks[task]
+            if 'description' in taskInfo:
+                itemIndex = self.ui.taskComboBox.count - 1
+                self.ui.taskComboBox.setItemData(itemIndex, taskInfo['description'], 3)  # 3 = Qt.ToolTipRole
 
         # Connections
 
@@ -103,9 +109,14 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         # These connections ensure that whenever user changes some settings on the GUI, that is saved in the MRML scene
         # (in the selected parameter node).
         self.ui.inputVolumeSelector.connect("currentNodeChanged(vtkMRMLNode*)", self.updateParameterNodeFromGUI)
-        self.ui.fastCheckBox.connect('toggled(bool)', self.updateParameterNodeFromGUI)
+        self.ui.normalRadioButton.connect('toggled(bool)', self.updateParameterNodeFromGUI)
+        self.ui.fastRadioButton.connect('toggled(bool)', self.updateParameterNodeFromGUI)
+        self.ui.fasterRadioButton.connect('toggled(bool)', self.updateParameterNodeFromGUI)
         self.ui.cpuCheckBox.connect('toggled(bool)', self.updateParameterNodeFromGUI)
         self.ui.useStandardSegmentNamesCheckBox.connect('toggled(bool)', self.updateParameterNodeFromGUI)
+        self.ui.robustCropCheckBox.connect('toggled(bool)', self.updateParameterNodeFromGUI)
+        self.ui.removeSmallBlobsCheckBox.connect('toggled(bool)', self.updateParameterNodeFromGUI)
+        self.ui.higherOrderResamplingCheckBox.connect('toggled(bool)', self.updateParameterNodeFromGUI)
 
 
         self.ui.taskComboBox.currentTextChanged.connect(self.updateParameterNodeFromGUI)
@@ -208,9 +219,27 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         self.ui.inputVolumeSelector.setCurrentNode(self._parameterNode.GetNodeReference("InputVolume"))
         task = self._parameterNode.GetParameter("Task")
         self.ui.taskComboBox.setCurrentIndex(self.ui.taskComboBox.findData(task))
-        self.ui.fastCheckBox.checked = self._parameterNode.GetParameter("Fast") == "true"
+        fastModeSupported = self.logic.isFastModeSupportedForTask(task)
+        fastestModeSupported = self.logic.isFastestModeSupportedForTask(task)
+
+        fastSelected = self._parameterNode.GetParameter("Fast") == "true"
+        fasterSelected = self._parameterNode.GetParameter("Fastest") == "true"
+        if not fastestModeSupported:
+            fasterSelected = False
+        if not fastModeSupported:
+            fastSelected = False
+
+        if fasterSelected:
+            self.ui.fasterRadioButton.checked = True
+        elif fastSelected:
+            self.ui.fastRadioButton.checked = True
+        else:
+            self.ui.normalRadioButton.checked = True
         self.ui.cpuCheckBox.checked = self._parameterNode.GetParameter("CPU") == "true"
         self.ui.useStandardSegmentNamesCheckBox.checked = self._parameterNode.GetParameter("UseStandardSegmentNames") == "true"
+        self.ui.robustCropCheckBox.checked = self._parameterNode.GetParameter("RobustCrop") == "true"
+        self.ui.removeSmallBlobsCheckBox.checked = self._parameterNode.GetParameter("RemoveSmallBlobs") == "true"
+        self.ui.higherOrderResamplingCheckBox.checked = self._parameterNode.GetParameter("HigherOrderResampling") == "true"
         self.ui.outputSegmentationSelector.setCurrentNode(self._parameterNode.GetNodeReference("OutputSegmentation"))
 
         # Update buttons states and tooltips
@@ -225,9 +254,8 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         if inputVolume:
             self.ui.outputSegmentationSelector.baseName = _("{volume_name} segmentation").format(volume_name=inputVolume.GetName())
 
-        fastModeSupported = self.logic.isFastModeSupportedForTask(task)
-        self.ui.fastCheckBox.visible = fastModeSupported
-        self.ui.fastNotAvailableLabel.visible = not fastModeSupported
+        self.ui.fastRadioButton.visible = fastModeSupported
+        self.ui.fasterRadioButton.visible = fastestModeSupported
 
         # All the GUI updates are done
         self._updatingGUIFromParameterNode = False
@@ -244,10 +272,22 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         wasModified = self._parameterNode.StartModify()  # Modify all properties in a single batch
 
         self._parameterNode.SetNodeReferenceID("InputVolume", self.ui.inputVolumeSelector.currentNodeID)
-        self._parameterNode.SetParameter("Task", self.ui.taskComboBox.currentData)
-        self._parameterNode.SetParameter("Fast", "true" if self.ui.fastCheckBox.checked else "false")
+        task = self.ui.taskComboBox.currentData
+        self._parameterNode.SetParameter("Task", task)
+
+        fastModeSupported = self.logic.isFastModeSupportedForTask(task)
+        fastestModeSupported = self.logic.isFastestModeSupportedForTask(task)
+
+        fasterSelected = self.ui.fasterRadioButton.checked and fastestModeSupported
+        fastSelected = self.ui.fastRadioButton.checked and fastModeSupported and not fasterSelected
+
+        self._parameterNode.SetParameter("Fast", "true" if fastSelected else "false")
+        self._parameterNode.SetParameter("Fastest", "true" if fasterSelected else "false")
         self._parameterNode.SetParameter("CPU", "true" if self.ui.cpuCheckBox.checked else "false")
         self._parameterNode.SetParameter("UseStandardSegmentNames", "true" if self.ui.useStandardSegmentNamesCheckBox.checked else "false")
+        self._parameterNode.SetParameter("RobustCrop", "true" if self.ui.robustCropCheckBox.checked else "false")
+        self._parameterNode.SetParameter("RemoveSmallBlobs", "true" if self.ui.removeSmallBlobsCheckBox.checked else "false")
+        self._parameterNode.SetParameter("HigherOrderResampling", "true" if self.ui.higherOrderResamplingCheckBox.checked else "false")
         self._parameterNode.SetNodeReferenceID("OutputSegmentation", self.ui.outputSegmentationSelector.currentNodeID)
 
         self._parameterNode.EndModify(wasModified)
@@ -307,7 +347,12 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 
             # Compute output
             self.logic.process(self.ui.inputVolumeSelector.currentNode(), self.ui.outputSegmentationSelector.currentNode(),
-                self.ui.fastCheckBox.checked, self.ui.cpuCheckBox.checked, self.ui.taskComboBox.currentData, interactive = True, sequenceBrowserNode = sequenceBrowserNode)
+                fast=self.ui.fastRadioButton.checked, fastest=self.ui.fasterRadioButton.checked,
+                cpu=self.ui.cpuCheckBox.checked, task=self.ui.taskComboBox.currentData,
+                interactive=True, sequenceBrowserNode=sequenceBrowserNode,
+                robustCrop=self.ui.robustCropCheckBox.checked,
+                removeSmallBlobs=self.ui.removeSmallBlobsCheckBox.checked,
+                higherOrderResampling=self.ui.higherOrderResamplingCheckBox.checked)
 
         self.ui.statusLabel.appendPlainText("\n" + _("Processing finished."))
 
@@ -372,13 +417,7 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
 
         ScriptedLoadableModuleLogic.__init__(self)
 
-        import sys
-        if sys.version_info < (3, 12):
-            # Python 3.9 (Slicer-5.8 and earlier)
-            self.totalSegmentatorPythonPackageDownloadUrl = "https://github.com/wasserth/TotalSegmentator/archive/25a858672cf9400e34c7421e9635dca23770344b.zip"  # latest version (post 2.6.0) as of 2025-02-16
-        else:
-            # Python >= 3.12 (Slicer-5.9 and later)
-            self.totalSegmentatorPythonPackageDownloadUrl = "https://github.com/wasserth/TotalSegmentator/archive/0a1c3c31588487e64ba1d43996f3934afd0e4bb9.zip"  # latest version (post 2.9.0) as of 2025-06-20
+        self.totalSegmentatorPythonPackageDownloadUrl = "https://github.com/wasserth/TotalSegmentator/archive/a4a9060012a4b7c39d15fe93772af3f7c1239fbf.zip"  # v2.12.0
 
         # Custom applications can set custom location for weights.
         # For example, it could be set to `sysconfig.get_path('scripts')` to have an independent copy of
@@ -414,7 +453,7 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         # Main
         self.tasks['total'] = {'title': 'total', 'modalities': ['CT'], 'supportsFast': True, 'supportsFastest': True, 'supportsMultiLabel': True}
         self.tasks['total_mr'] = {'title': 'total (MR)', 'modalities': ['MR'], 'supportsFast': True, 'supportsFastest': True, 'supportsMultiLabel': True}
-        self.tasks['vertebrae_mr'] = {'title': 'vertebrae (MR)',  'modalities': ['MR'], 'description:': 'acrum, vertebrae L1-5, vertebrae T1-12, vertebrae C1-7 (for CT this is part of the `total` task)', 'supportsMultiLabel': True}
+        self.tasks['vertebrae_mr'] = {'title': 'vertebrae (MR)',  'modalities': ['MR'], 'description': 'sacrum, vertebrae L1-5, vertebrae T1-12, vertebrae C1-7 (for CT this is part of the `total` task)', 'supportsMultiLabel': True}
         self.tasks['lung_nodules'] = {'title': 'lung: nodules', 'modalities': ['CT'], 'description': 'lung, lung_nodules (provided by [BLUEMIND AI](https://bluemind.co/): Fitzjalen R., Aladin M., Nanyan G.) (trained on 1353 subjects, partly from LIDC-IDRI)', 'supportsMultiLabel': True}
         self.tasks['lung_vessels'] = {'title': 'lung: vessels'}
 
@@ -424,17 +463,24 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         self.tasks['liver_segments_mr'] = {'title': 'liver: segments (MR)', 'modalities': ['MR'], 'description': 'liver_segment_1, liver_segment_2, liver_segment_3, liver_segment_4, liver_segment_5, liver_segment_6, liver_segment_7, liver_segment_8 (for MR images) (Couinaud segments)', 'supportsMultiLabel': True}
         self.tasks['liver_vessels'] = {'title': 'liver: vessels', 'supportsMultiLabel': True}
 
+        self.tasks['abdominal_muscles'] = {'title': 'abdominal muscles', 'modalities': ['CT'], 'description': 'pectoralis_major, rectus_abdominis, serratus_anterior, latissimus_dorsi, trapezius, external_oblique, internal_oblique, erector_spinae, transversospinalis, psoas_major, quadratus_lumborum (left/right)', 'supportsMultiLabel': True}
+        self.tasks['trunk_cavities'] = {'title': 'trunk cavities', 'modalities': ['CT'], 'description': 'abdominal_cavity, thoracic_cavity, pericardium, mediastinum', 'supportsMultiLabel': True}
+
+
         self.tasks['body'] = {'title': 'body', 'supportsFast': True}
-        self.tasks['body_mr'] = {'title': 'body (MR)',  'modalities': ['MR'], 'description:': 'body_trunc, body_extremities (for MR images)', 'supportsFast': True, 'supportsMultiLabel': True}
+        self.tasks['body_mr'] = {'title': 'body (MR)',  'modalities': ['MR'], 'description': 'body_trunc, body_extremities (for MR images)', 'supportsFast': True, 'supportsMultiLabel': True}
 
         self.tasks['head_glands_cavities'] = {'title': 'head: glands and cavities', 'supportsMultiLabel': True}
         self.tasks['head_muscles'] = {'title': 'head: muscles', 'supportsMultiLabel': True}
         self.tasks['oculomotor_muscles'] = {'title': 'head: oculomotor muscles', 'modalities': ['CT'], 'description': 'skull, eyeball_right, lateral_rectus_muscle_right, superior_oblique_muscle_right, levator_palpebrae_superioris_right, superior_rectus_muscle_right, medial_rectus_muscle_left, inferior_oblique_muscle_right, inferior_rectus_muscle_right, optic_nerve_left, eyeball_left, lateral_rectus_muscle_left, superior_oblique_muscle_left, levator_palpebrae_superioris_left, superior_rectus_muscle_left, medial_rectus_muscle_right, inferior_oblique_muscle_left, inferior_rectus_muscle_left, optic_nerve_right', 'supportsMultiLabel': True}
+        self.tasks['craniofacial_structures'] = {'title': 'head: craniofacial structures', 'modalities': ['CT'], 'description': 'mandible, teeth_lower, skull, head, sinus_maxillary, sinus_frontal, teeth_upper', 'supportsMultiLabel': True}
+        self.tasks['teeth'] = {'title': 'head: teeth', 'modalities': ['CT'], 'description': '77 classes: individual teeth (FDI numbering), jawbones, canals, sinuses, pulp chambers', 'supportsMultiLabel': True}
         self.tasks['headneck_bones_vessels'] = {'title': 'head and neck: bones and vessels', 'supportsMultiLabel': True}
         self.tasks['headneck_muscles'] = {'title': 'head and neck: muscles', 'supportsMultiLabel': True}
 
         # Trained on reduced data set
         self.tasks['cerebral_bleed'] = {'title': 'brain: cerebral bleed', 'supportsMultiLabel': True}
+        self.tasks['brain_aneurysm'] = {'title': 'brain: aneurysm (TOF MRI)', 'modalities': ['MR'], 'description': 'brain_aneurysm (only works with TOF MRI images)', 'supportsMultiLabel': True}
         self.tasks['hip_implant'] = {'title': 'hip implant', 'supportsMultiLabel': True}
         self.tasks['pleural_pericard_effusion'] = {'title': 'heart: pleural and pericardial effusion', 'supportsMultiLabel': True}
 
@@ -565,6 +611,9 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
 
     def isFastModeSupportedForTask(self, task):
         return (task in self.tasks) and ('supportsFast' in self.tasks[task]) and self.tasks[task]['supportsFast']
+
+    def isFastestModeSupportedForTask(self, task):
+        return (task in self.tasks) and ('supportsFastest' in self.tasks[task]) and self.tasks[task]['supportsFastest']
 
     def isMultiLabelSupportedForTask(self, task):
         return (task in self.tasks) and ('supportsMultiLabel' in self.tasks[task]) and self.tasks[task]['supportsMultiLabel']
@@ -779,7 +828,7 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         except ModuleNotFoundError as e:
           raise InstallError("This module requires PyTorch extension. Install it from the Extensions Manager.")
 
-        minimumTorchVersion = "2.0.0"  # per https://github.com/wasserth/TotalSegmentator/blob/7274faac4673298d17b63a5a8335006f02e6d426/setup.py#L19
+        minimumTorchVersion = "2.1.2"  # match the requirements of TotalSegmentator v2.12.0.
         torchLogic = PyTorchUtils.PyTorchUtilsLogic()
         if not torchLogic.torchInstalled():
             confirmPackagesToInstall.append("PyTorch")
@@ -789,7 +838,7 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         except ModuleNotFoundError as e:
             raise InstallError("This module requires SlicerNNUNet extension. Install it from the Extensions Manager.")
 
-        minimumNNUNetVersion = "2.2.1"  # per https://github.com/wasserth/TotalSegmentator/blob/7274faac4673298d17b63a5a8335006f02e6d426/setup.py#L26
+        minimumNNUNetVersion = "2.3.1"  # match the requirements of TotalSegmentator v2.12.0.
         nnunetlogic = SlicerNNUNetLib.InstallLogic(doAskConfirmation=False)
         nnunetlogic.getInstalledNNUnetVersion()
         from packaging.requirements import Requirement
@@ -870,7 +919,7 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         Initialize parameter node with default settings.
         """
         if not parameterNode.GetParameter("Fast"):
-            parameterNode.SetParameter("Fast", "True")
+            parameterNode.SetParameter("Fast", "true")
         if not parameterNode.GetParameter("Task"):
             parameterNode.SetParameter("Task", "total")
         if not parameterNode.GetParameter("UseStandardSegmentNames"):
@@ -953,18 +1002,24 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
             raise ValueError('Restart was cancelled.')
 
 
-    def process(self, inputVolume, outputSegmentation, fast=True, cpu=False, task=None, subset=None, interactive=False, sequenceBrowserNode=None):
+    def process(self, inputVolume, outputSegmentation, fast=True, fastest=False, cpu=False, task=None, subset=None,
+                interactive=False, sequenceBrowserNode=None, robustCrop=False, removeSmallBlobs=False,
+                higherOrderResampling=False):
         """
         Run the processing algorithm on a volume or a sequence of volumes.
         Can be used without GUI widget.
-        :param inputVolume: volume to be thresholded
-        :param outputVolume: thresholding result
-        :param fast: faster and less accurate output
+        :param inputVolume: volume to be segmented
+        :param outputSegmentation: segmentation result
+        :param fast: faster and less accurate output (3mm)
+        :param fastest: very fast low resolution output (6mm)
         :param task: one of self.tasks, default is "total"
-        :param subset: a list of structures (TotalSegmentator classe names https://github.com/wasserth/TotalSegmentator#class-detailsTotalSegmentator) to segment.
-          Default is None, which means that all available structures will be segmented."
+        :param subset: a list of structures (TotalSegmentator class names) to segment.
+          Default is None, which means that all available structures will be segmented.
         :param interactive: set to True to enable warning popups to be shown to users
         :param sequenceBrowserNode: if specified then all frames of the inputVolume sequence will be segmented
+        :param robustCrop: use 3mm model for cropping instead of 6mm
+        :param removeSmallBlobs: remove small disconnected regions (<0.2 ml)
+        :param higherOrderResampling: use higher order resampling (smoother, more memory)
         """
 
         if not inputVolume:
@@ -992,8 +1047,10 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         import torch
 
         cuda = torch.cuda if torch.backends.cuda.is_built() and torch.cuda.is_available() else None
+        mps = hasattr(torch.backends, 'mps') and torch.backends.mps.is_available()
+        hasGPU = cuda is not None or mps
 
-        if not fast and not cuda and interactive:
+        if not fast and not fastest and not hasGPU and interactive:
 
             import ctk
             import qt
@@ -1007,9 +1064,17 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
             mbox.deleteLater()
             fast = (mbox.exec_() == qt.QMessageBox.AcceptRole)
 
-        if not fast and cuda and cuda.get_device_properties(cuda.current_device()).total_memory < 7e9 and interactive:
+        if not fast and not fastest and cuda and cuda.get_device_properties(cuda.current_device()).total_memory < 7e9 and interactive:
             if slicer.util.confirmYesNoDisplay(_("You have less than 7 GB of GPU memory available. Enable 'fast' mode to ensure segmentation can be completed successfully?")):
                 fast = True
+
+        # Determine device type
+        if cpu:
+            device = "cpu"
+        elif mps:
+            device = "mps"
+        else:
+            device = "gpu"
 
         # Get TotalSegmentator launcher command
         # TotalSegmentator (.py file, without extension) is installed in Python Scripts folder
@@ -1045,7 +1110,8 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
                 self.log(f"Segmenting item {i+1}/{numberOfItems} of sequence")
                 self.processVolume(inputFile, inputVolume,
                                    outputSegmentationFolder, outputSegmentation, outputSegmentationFile,
-                                   task, subset, cpu, totalSegmentatorCommand, fast)
+                                   task, subset, device, totalSegmentatorCommand, fast, fastest,
+                                   robustCrop, removeSmallBlobs, higherOrderResampling)
                 sequenceBrowserNode.SelectNextItem()
             sequenceBrowserNode.SetSelectedItemNumber(selectedItemNumber)
 
@@ -1053,7 +1119,8 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
             # Segment a single volume
             self.processVolume(inputFile, inputVolume,
                                outputSegmentationFolder, outputSegmentation, outputSegmentationFile,
-                               task, subset, cpu, totalSegmentatorCommand, fast)
+                               task, subset, device, totalSegmentatorCommand, fast, fastest,
+                               robustCrop, removeSmallBlobs, higherOrderResampling)
 
         stopTime = time.time()
         self.log(_("Processing completed in {time_elapsed:.2f} seconds").format(time_elapsed=stopTime-startTime))
@@ -1065,7 +1132,9 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         else:
             self.log(_("Not cleaning up temporary folder: {temp_folder}").format(temp_folder=tempFolder))
 
-    def processVolume(self, inputFile, inputVolume, outputSegmentationFolder, outputSegmentation, outputSegmentationFile, task, subset, cpu, totalSegmentatorCommand, fast):
+    def processVolume(self, inputFile, inputVolume, outputSegmentationFolder, outputSegmentation, outputSegmentationFile,
+                       task, subset, device, totalSegmentatorCommand, fast, fastest=False,
+                       robustCrop=False, removeSmallBlobs=False, higherOrderResampling=False):
         """Segment a single volume
         """
 
@@ -1092,18 +1161,28 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         # but we need to do it for some specialized models.
         multilabel = self.isMultiLabelSupportedForTask(task)
 
-        # some tasks do not support fast mode
+        # some tasks do not support fast/fastest mode
         if not self.isFastModeSupportedForTask(task):
             fast = False
+        if not self.isFastestModeSupportedForTask(task):
+            fastest = False
 
         if multilabel:
             options.append("--ml")
         if task:
             options.extend(["--task", task])
-        if fast:
+        if fastest:
+            options.append("--fastest")
+        elif fast:
             options.append("--fast")
-        if cpu:
-            options.extend(["--device", "cpu"])
+        if device != "gpu":
+            options.extend(["--device", device])
+        if robustCrop:
+            options.append("--robust_crop")
+        if removeSmallBlobs:
+            options.append("--remove_small_blobs")
+        if higherOrderResampling:
+            options.append("--higher_order_resampling")
         if subset:
             options.append("--roi_subset")
             # append each item of the subset

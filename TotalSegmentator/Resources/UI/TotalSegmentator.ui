@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>230</width>
-    <height>441</height>
+    <width>305</width>
+    <height>611</height>
    </rect>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
@@ -62,29 +62,39 @@
       <item row="2" column="0">
        <widget class="QLabel" name="label_6">
         <property name="text">
-         <string>Fast:</string>
+         <string>Speed:</string>
         </property>
        </widget>
       </item>
       <item row="2" column="1">
-       <layout class="QHBoxLayout" name="horizontalLayout">
+       <layout class="QHBoxLayout" name="speedHorizontalLayout">
         <item>
-         <widget class="QCheckBox" name="fastCheckBox">
+         <widget class="QRadioButton" name="normalRadioButton">
           <property name="toolTip">
-           <string>Enable fast option to get less accurate results, faster.</string>
+           <string>Full resolution output.</string>
           </property>
           <property name="text">
-           <string/>
+           <string>Normal</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="fastNotAvailableLabel">
+         <widget class="QRadioButton" name="fastRadioButton">
           <property name="toolTip">
-           <string>fast mode is not available for this task</string>
+           <string>Enable fast option to get less accurate results, faster (3mm resolution).</string>
           </property>
           <property name="text">
-           <string>not available</string>
+           <string>Fast</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="fasterRadioButton">
+          <property name="toolTip">
+           <string>Enable faster option for very low resolution (6mm) but very fast results. Only available for total and total_mr tasks.</string>
+          </property>
+          <property name="text">
+           <string>Faster</string>
           </property>
          </widget>
         </item>
@@ -208,13 +218,64 @@
        </widget>
       </item>
       <item row="2" column="0">
+       <widget class="QLabel" name="robustCropLabel">
+        <property name="text">
+         <string>Robust cropping:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QCheckBox" name="robustCropCheckBox">
+        <property name="toolTip">
+         <string>Use 3mm model for cropping instead of default 6mm. More robust but slightly slower.</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="removeSmallBlobsLabel">
+        <property name="text">
+         <string>Remove small blobs:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QCheckBox" name="removeSmallBlobsCheckBox">
+        <property name="toolTip">
+         <string>Remove small disconnected regions (less than 0.2 ml) from final segmentations.</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="higherOrderResamplingLabel">
+        <property name="text">
+         <string>Higher-order resampling:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="1">
+       <widget class="QCheckBox" name="higherOrderResamplingCheckBox">
+        <property name="toolTip">
+         <string>Use higher order resampling for segmentations. Smoother results but more runtime and memory.</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="0">
        <widget class="QLabel" name="label_8">
         <property name="text">
          <string>TotalSegmentator Python package:</string>
         </property>
        </widget>
       </item>
-      <item row="2" column="1">
+      <item row="5" column="1">
        <widget class="QPushButton" name="packageUpgradeButton">
         <property name="toolTip">
          <string>Force upgrade of TotalSegmentator Python package to the version required by this module.</string>
@@ -224,14 +285,24 @@
         </property>
        </widget>
       </item>
-      <item row="3" column="0">
+      <item row="6" column="0">
        <widget class="QLabel" name="licenseLabel">
         <property name="text">
          <string>TotalSegmentator license: </string>
         </property>
        </widget>
       </item>
-      <item row="5" column="0" colspan="2">
+      <item row="6" column="1">
+       <widget class="QPushButton" name="setLicenseButton">
+        <property name="toolTip">
+         <string>Set or update TotalSegmentator license key to allow running tasks that require a license. The registration has to be done only once, the license information is stored persistently in the TotalSegmentation configuration.</string>
+        </property>
+        <property name="text">
+         <string>Set license key</string>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="0" colspan="2">
        <widget class="QPushButton" name="packageInfoUpdateButton">
         <property name="toolTip">
          <string>Get metadata information for the TotalSegmentator package currently installed</string>
@@ -241,7 +312,7 @@
         </property>
        </widget>
       </item>
-      <item row="6" column="0" colspan="2">
+      <item row="8" column="0" colspan="2">
        <widget class="ctkFittedTextBrowser" name="packageInfoTextBrowser">
         <property name="collapsed">
          <bool>false</bool>
@@ -251,16 +322,6 @@
         </property>
         <property name="hideDetailsText">
          <string/>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="1">
-       <widget class="QPushButton" name="setLicenseButton">
-        <property name="toolTip">
-         <string>Set or update TotalSegmentator license key to allow running tasks that require a license. The registration has to be done only once, the license information is stored persistently in the TotalSegmentation configuration.</string>
-        </property>
-        <property name="text">
-         <string>Set license key</string>
         </property>
        </widget>
       </item>
