@@ -2106,6 +2106,663 @@
               30
             ],
             "3dSlicerLabel": "central sulcus"
+          },
+          {
+            "CodingSchemeDesignator": "SCT",
+            "CodeValue": "91609006",
+            "CodeMeaning": "Mandible",
+            "SNOMEDCTConceptID": "91609006",
+            "recommendedDisplayRGBValue": [255, 220, 180],
+            "3dSlicerLabel": "mandible",
+            "paired": "U"
+          },
+          {
+            "CodingSchemeDesignator": "SCT",
+            "CodeValue": "22457002",
+            "CodeMeaning": "Maxilla",
+            "SNOMEDCTConceptID": "22457002",
+            "recommendedDisplayRGBValue": [255, 225, 190],
+            "3dSlicerLabel": "upper jawbone",
+            "paired": "U"
+          },
+          {
+            "CodingSchemeDesignator": "SCT",
+            "CodeValue": "15924003",
+            "CodeMeaning": "Maxillary sinus",
+            "SNOMEDCTConceptID": "15924003",
+            "paired": "Y",
+            "Modifier": [
+              {
+                "recommendedDisplayRGBValue": [180, 210, 230],
+                "CodeMeaning": "Right",
+                "CodingSchemeDesignator": "SCT",
+                "cid": "244",
+                "3dSlicerLabel": "right maxillary sinus",
+                "CodeValue": "24028007",
+                "contextGroupName": "Laterality",
+                "SNOMEDCTConceptID": "24028007"
+              },
+              {
+                "recommendedDisplayRGBValue": [180, 210, 230],
+                "CodeMeaning": "Left",
+                "CodingSchemeDesignator": "SCT",
+                "cid": "244",
+                "3dSlicerLabel": "left maxillary sinus",
+                "CodeValue": "7771000",
+                "contextGroupName": "Laterality",
+                "SNOMEDCTConceptID": "7771000"
+              }
+            ]
+          },
+          {
+            "CodingSchemeDesignator": "SCT",
+            "CodeValue": "55060009",
+            "CodeMeaning": "Frontal sinus",
+            "SNOMEDCTConceptID": "55060009",
+            "recommendedDisplayRGBValue": [170, 200, 220],
+            "3dSlicerLabel": "frontal sinus",
+            "paired": "U"
+          },
+          {
+            "CodingSchemeDesignator": "SCT",
+            "CodeValue": "69536005",
+            "CodeMeaning": "Head",
+            "SNOMEDCTConceptID": "69536005",
+            "recommendedDisplayRGBValue": [255, 218, 185],
+            "3dSlicerLabel": "head",
+            "paired": "U"
+          },
+          {
+            "CodingSchemeDesignator": "SCT",
+            "CodeValue": "38199008",
+            "CodeMeaning": "Lower teeth",
+            "SNOMEDCTConceptID": "38199008",
+            "recommendedDisplayRGBValue": [255, 255, 210],
+            "3dSlicerLabel": "lower teeth",
+            "paired": "U"
+          },
+          {
+            "CodingSchemeDesignator": "SCT",
+            "CodeValue": "38090009",
+            "CodeMeaning": "Upper teeth",
+            "SNOMEDCTConceptID": "38090009",
+            "recommendedDisplayRGBValue": [255, 250, 200],
+            "3dSlicerLabel": "upper teeth",
+            "paired": "U"
+          },
+          {
+            "CodingSchemeDesignator": "SCT",
+            "CodeValue": "75070003",
+            "CodeMeaning": "Pectoralis major muscle",
+            "SNOMEDCTConceptID": "75070003",
+            "paired": "Y",
+            "Modifier": [
+              {
+                "recommendedDisplayRGBValue": [200, 120, 100],
+                "CodeMeaning": "Right",
+                "CodingSchemeDesignator": "SCT",
+                "cid": "244",
+                "3dSlicerLabel": "right pectoralis major",
+                "CodeValue": "24028007",
+                "contextGroupName": "Laterality",
+                "SNOMEDCTConceptID": "24028007"
+              },
+              {
+                "recommendedDisplayRGBValue": [200, 120, 100],
+                "CodeMeaning": "Left",
+                "CodingSchemeDesignator": "SCT",
+                "cid": "244",
+                "3dSlicerLabel": "left pectoralis major",
+                "CodeValue": "7771000",
+                "contextGroupName": "Laterality",
+                "SNOMEDCTConceptID": "7771000"
+              }
+            ]
+          },
+          {
+            "CodingSchemeDesignator": "SCT",
+            "CodeValue": "77634003",
+            "CodeMeaning": "Rectus abdominis muscle",
+            "SNOMEDCTConceptID": "77634003",
+            "paired": "Y",
+            "Modifier": [
+              {
+                "recommendedDisplayRGBValue": [180, 100, 90],
+                "CodeMeaning": "Right",
+                "CodingSchemeDesignator": "SCT",
+                "cid": "244",
+                "3dSlicerLabel": "right rectus abdominis",
+                "CodeValue": "24028007",
+                "contextGroupName": "Laterality",
+                "SNOMEDCTConceptID": "24028007"
+              },
+              {
+                "recommendedDisplayRGBValue": [180, 100, 90],
+                "CodeMeaning": "Left",
+                "CodingSchemeDesignator": "SCT",
+                "cid": "244",
+                "3dSlicerLabel": "left rectus abdominis",
+                "CodeValue": "7771000",
+                "contextGroupName": "Laterality",
+                "SNOMEDCTConceptID": "7771000"
+              }
+            ]
+          },
+          {
+            "CodingSchemeDesignator": "SCT",
+            "CodeValue": "76862009",
+            "CodeMeaning": "Latissimus dorsi muscle",
+            "SNOMEDCTConceptID": "76862009",
+            "paired": "Y",
+            "Modifier": [
+              {
+                "recommendedDisplayRGBValue": [175, 95, 85],
+                "CodeMeaning": "Right",
+                "CodingSchemeDesignator": "SCT",
+                "cid": "244",
+                "3dSlicerLabel": "right latissimus dorsi",
+                "CodeValue": "24028007",
+                "contextGroupName": "Laterality",
+                "SNOMEDCTConceptID": "24028007"
+              },
+              {
+                "recommendedDisplayRGBValue": [175, 95, 85],
+                "CodeMeaning": "Left",
+                "CodingSchemeDesignator": "SCT",
+                "cid": "244",
+                "3dSlicerLabel": "left latissimus dorsi",
+                "CodeValue": "7771000",
+                "contextGroupName": "Laterality",
+                "SNOMEDCTConceptID": "7771000"
+              }
+            ]
+          },
+          {
+            "CodingSchemeDesignator": "SCT",
+            "CodeValue": "44530005",
+            "CodeMeaning": "External oblique muscle",
+            "SNOMEDCTConceptID": "44530005",
+            "paired": "Y",
+            "Modifier": [
+              {
+                "recommendedDisplayRGBValue": [170, 90, 80],
+                "CodeMeaning": "Right",
+                "CodingSchemeDesignator": "SCT",
+                "cid": "244",
+                "3dSlicerLabel": "right external oblique",
+                "CodeValue": "24028007",
+                "contextGroupName": "Laterality",
+                "SNOMEDCTConceptID": "24028007"
+              },
+              {
+                "recommendedDisplayRGBValue": [170, 90, 80],
+                "CodeMeaning": "Left",
+                "CodingSchemeDesignator": "SCT",
+                "cid": "244",
+                "3dSlicerLabel": "left external oblique",
+                "CodeValue": "7771000",
+                "contextGroupName": "Laterality",
+                "SNOMEDCTConceptID": "7771000"
+              }
+            ]
+          },
+          {
+            "CodingSchemeDesignator": "SCT",
+            "CodeValue": "33147005",
+            "CodeMeaning": "Internal oblique muscle",
+            "SNOMEDCTConceptID": "33147005",
+            "paired": "Y",
+            "Modifier": [
+              {
+                "recommendedDisplayRGBValue": [165, 85, 75],
+                "CodeMeaning": "Right",
+                "CodingSchemeDesignator": "SCT",
+                "cid": "244",
+                "3dSlicerLabel": "right internal oblique",
+                "CodeValue": "24028007",
+                "contextGroupName": "Laterality",
+                "SNOMEDCTConceptID": "24028007"
+              },
+              {
+                "recommendedDisplayRGBValue": [165, 85, 75],
+                "CodeMeaning": "Left",
+                "CodingSchemeDesignator": "SCT",
+                "cid": "244",
+                "3dSlicerLabel": "left internal oblique",
+                "CodeValue": "7771000",
+                "contextGroupName": "Laterality",
+                "SNOMEDCTConceptID": "7771000"
+              }
+            ]
+          },
+          {
+            "CodingSchemeDesignator": "SCT",
+            "CodeValue": "49975005",
+            "CodeMeaning": "Transversospinalis muscle",
+            "SNOMEDCTConceptID": "49975005",
+            "paired": "Y",
+            "Modifier": [
+              {
+                "recommendedDisplayRGBValue": [160, 80, 70],
+                "CodeMeaning": "Right",
+                "CodingSchemeDesignator": "SCT",
+                "cid": "244",
+                "3dSlicerLabel": "right transversospinalis",
+                "CodeValue": "24028007",
+                "contextGroupName": "Laterality",
+                "SNOMEDCTConceptID": "24028007"
+              },
+              {
+                "recommendedDisplayRGBValue": [160, 80, 70],
+                "CodeMeaning": "Left",
+                "CodingSchemeDesignator": "SCT",
+                "cid": "244",
+                "3dSlicerLabel": "left transversospinalis",
+                "CodeValue": "7771000",
+                "contextGroupName": "Laterality",
+                "SNOMEDCTConceptID": "7771000"
+              }
+            ]
+          },
+          {
+            "CodingSchemeDesignator": "SCT",
+            "CodeValue": "64038003",
+            "CodeMeaning": "Psoas major muscle",
+            "SNOMEDCTConceptID": "64038003",
+            "paired": "Y",
+            "Modifier": [
+              {
+                "recommendedDisplayRGBValue": [192, 104, 88],
+                "CodeMeaning": "Right",
+                "CodingSchemeDesignator": "SCT",
+                "cid": "244",
+                "3dSlicerLabel": "right psoas major",
+                "CodeValue": "24028007",
+                "contextGroupName": "Laterality",
+                "SNOMEDCTConceptID": "24028007"
+              },
+              {
+                "recommendedDisplayRGBValue": [192, 104, 88],
+                "CodeMeaning": "Left",
+                "CodingSchemeDesignator": "SCT",
+                "cid": "244",
+                "3dSlicerLabel": "left psoas major",
+                "CodeValue": "7771000",
+                "contextGroupName": "Laterality",
+                "SNOMEDCTConceptID": "7771000"
+              }
+            ]
+          },
+          {
+            "CodingSchemeDesignator": "SCT",
+            "CodeValue": "47560002",
+            "CodeMeaning": "Quadratus lumborum muscle",
+            "SNOMEDCTConceptID": "47560002",
+            "paired": "Y",
+            "Modifier": [
+              {
+                "recommendedDisplayRGBValue": [155, 78, 65],
+                "CodeMeaning": "Right",
+                "CodingSchemeDesignator": "SCT",
+                "cid": "244",
+                "3dSlicerLabel": "right quadratus lumborum",
+                "CodeValue": "24028007",
+                "contextGroupName": "Laterality",
+                "SNOMEDCTConceptID": "24028007"
+              },
+              {
+                "recommendedDisplayRGBValue": [155, 78, 65],
+                "CodeMeaning": "Left",
+                "CodingSchemeDesignator": "SCT",
+                "cid": "244",
+                "3dSlicerLabel": "left quadratus lumborum",
+                "CodeValue": "7771000",
+                "contextGroupName": "Laterality",
+                "SNOMEDCTConceptID": "7771000"
+              }
+            ]
+          },
+          {
+            "CodingSchemeDesignator": "SCT",
+            "CodeValue": "245576003",
+            "CodeMeaning": "Central incisor tooth",
+            "SNOMEDCTConceptID": "245576003",
+            "paired": "Y",
+            "Modifier": [
+              {
+                "recommendedDisplayRGBValue": [255, 255, 240],
+                "CodeMeaning": "Right",
+                "CodingSchemeDesignator": "SCT",
+                "cid": "244",
+                "3dSlicerLabel": "right central incisor",
+                "CodeValue": "24028007",
+                "contextGroupName": "Laterality",
+                "SNOMEDCTConceptID": "24028007"
+              },
+              {
+                "recommendedDisplayRGBValue": [255, 255, 240],
+                "CodeMeaning": "Left",
+                "CodingSchemeDesignator": "SCT",
+                "cid": "244",
+                "3dSlicerLabel": "left central incisor",
+                "CodeValue": "7771000",
+                "contextGroupName": "Laterality",
+                "SNOMEDCTConceptID": "7771000"
+              }
+            ]
+          },
+          {
+            "CodingSchemeDesignator": "SCT",
+            "CodeValue": "245577007",
+            "CodeMeaning": "Lateral incisor tooth",
+            "SNOMEDCTConceptID": "245577007",
+            "paired": "Y",
+            "Modifier": [
+              {
+                "recommendedDisplayRGBValue": [255, 250, 235],
+                "CodeMeaning": "Right",
+                "CodingSchemeDesignator": "SCT",
+                "cid": "244",
+                "3dSlicerLabel": "right lateral incisor",
+                "CodeValue": "24028007",
+                "contextGroupName": "Laterality",
+                "SNOMEDCTConceptID": "24028007"
+              },
+              {
+                "recommendedDisplayRGBValue": [255, 250, 235],
+                "CodeMeaning": "Left",
+                "CodingSchemeDesignator": "SCT",
+                "cid": "244",
+                "3dSlicerLabel": "left lateral incisor",
+                "CodeValue": "7771000",
+                "contextGroupName": "Laterality",
+                "SNOMEDCTConceptID": "7771000"
+              }
+            ]
+          },
+          {
+            "CodingSchemeDesignator": "SCT",
+            "CodeValue": "17505006",
+            "CodeMeaning": "Canine tooth",
+            "SNOMEDCTConceptID": "17505006",
+            "paired": "Y",
+            "Modifier": [
+              {
+                "recommendedDisplayRGBValue": [255, 245, 220],
+                "CodeMeaning": "Right",
+                "CodingSchemeDesignator": "SCT",
+                "cid": "244",
+                "3dSlicerLabel": "right canine tooth",
+                "CodeValue": "24028007",
+                "contextGroupName": "Laterality",
+                "SNOMEDCTConceptID": "24028007"
+              },
+              {
+                "recommendedDisplayRGBValue": [255, 245, 220],
+                "CodeMeaning": "Left",
+                "CodingSchemeDesignator": "SCT",
+                "cid": "244",
+                "3dSlicerLabel": "left canine tooth",
+                "CodeValue": "7771000",
+                "contextGroupName": "Laterality",
+                "SNOMEDCTConceptID": "7771000"
+              }
+            ]
+          },
+          {
+            "CodingSchemeDesignator": "SCT",
+            "CodeValue": "421456005",
+            "CodeMeaning": "First premolar tooth",
+            "SNOMEDCTConceptID": "421456005",
+            "paired": "Y",
+            "Modifier": [
+              {
+                "recommendedDisplayRGBValue": [255, 240, 210],
+                "CodeMeaning": "Right",
+                "CodingSchemeDesignator": "SCT",
+                "cid": "244",
+                "3dSlicerLabel": "right first premolar",
+                "CodeValue": "24028007",
+                "contextGroupName": "Laterality",
+                "SNOMEDCTConceptID": "24028007"
+              },
+              {
+                "recommendedDisplayRGBValue": [255, 240, 210],
+                "CodeMeaning": "Left",
+                "CodingSchemeDesignator": "SCT",
+                "cid": "244",
+                "3dSlicerLabel": "left first premolar",
+                "CodeValue": "7771000",
+                "contextGroupName": "Laterality",
+                "SNOMEDCTConceptID": "7771000"
+              }
+            ]
+          },
+          {
+            "CodingSchemeDesignator": "SCT",
+            "CodeValue": "421004003",
+            "CodeMeaning": "Second premolar tooth",
+            "SNOMEDCTConceptID": "421004003",
+            "paired": "Y",
+            "Modifier": [
+              {
+                "recommendedDisplayRGBValue": [255, 235, 200],
+                "CodeMeaning": "Right",
+                "CodingSchemeDesignator": "SCT",
+                "cid": "244",
+                "3dSlicerLabel": "right second premolar",
+                "CodeValue": "24028007",
+                "contextGroupName": "Laterality",
+                "SNOMEDCTConceptID": "24028007"
+              },
+              {
+                "recommendedDisplayRGBValue": [255, 235, 200],
+                "CodeMeaning": "Left",
+                "CodingSchemeDesignator": "SCT",
+                "cid": "244",
+                "3dSlicerLabel": "left second premolar",
+                "CodeValue": "7771000",
+                "contextGroupName": "Laterality",
+                "SNOMEDCTConceptID": "7771000"
+              }
+            ]
+          },
+          {
+            "CodingSchemeDesignator": "SCT",
+            "CodeValue": "421532009",
+            "CodeMeaning": "First molar tooth",
+            "SNOMEDCTConceptID": "421532009",
+            "paired": "Y",
+            "Modifier": [
+              {
+                "recommendedDisplayRGBValue": [255, 230, 190],
+                "CodeMeaning": "Right",
+                "CodingSchemeDesignator": "SCT",
+                "cid": "244",
+                "3dSlicerLabel": "right first molar",
+                "CodeValue": "24028007",
+                "contextGroupName": "Laterality",
+                "SNOMEDCTConceptID": "24028007"
+              },
+              {
+                "recommendedDisplayRGBValue": [255, 230, 190],
+                "CodeMeaning": "Left",
+                "CodingSchemeDesignator": "SCT",
+                "cid": "244",
+                "3dSlicerLabel": "left first molar",
+                "CodeValue": "7771000",
+                "contextGroupName": "Laterality",
+                "SNOMEDCTConceptID": "7771000"
+              }
+            ]
+          },
+          {
+            "CodingSchemeDesignator": "SCT",
+            "CodeValue": "421053003",
+            "CodeMeaning": "Second molar tooth",
+            "SNOMEDCTConceptID": "421053003",
+            "paired": "Y",
+            "Modifier": [
+              {
+                "recommendedDisplayRGBValue": [255, 225, 180],
+                "CodeMeaning": "Right",
+                "CodingSchemeDesignator": "SCT",
+                "cid": "244",
+                "3dSlicerLabel": "right second molar",
+                "CodeValue": "24028007",
+                "contextGroupName": "Laterality",
+                "SNOMEDCTConceptID": "24028007"
+              },
+              {
+                "recommendedDisplayRGBValue": [255, 225, 180],
+                "CodeMeaning": "Left",
+                "CodingSchemeDesignator": "SCT",
+                "cid": "244",
+                "3dSlicerLabel": "left second molar",
+                "CodeValue": "7771000",
+                "contextGroupName": "Laterality",
+                "SNOMEDCTConceptID": "7771000"
+              }
+            ]
+          },
+          {
+            "CodingSchemeDesignator": "SCT",
+            "CodeValue": "422005005",
+            "CodeMeaning": "Third molar tooth",
+            "SNOMEDCTConceptID": "422005005",
+            "paired": "Y",
+            "Modifier": [
+              {
+                "recommendedDisplayRGBValue": [255, 220, 170],
+                "CodeMeaning": "Right",
+                "CodingSchemeDesignator": "SCT",
+                "cid": "244",
+                "3dSlicerLabel": "right third molar",
+                "CodeValue": "24028007",
+                "contextGroupName": "Laterality",
+                "SNOMEDCTConceptID": "24028007"
+              },
+              {
+                "recommendedDisplayRGBValue": [255, 220, 170],
+                "CodeMeaning": "Left",
+                "CodingSchemeDesignator": "SCT",
+                "cid": "244",
+                "3dSlicerLabel": "left third molar",
+                "CodeValue": "7771000",
+                "contextGroupName": "Laterality",
+                "SNOMEDCTConceptID": "7771000"
+              }
+            ]
+          },
+          {
+            "CodingSchemeDesignator": "SCT",
+            "CodeValue": "55636003",
+            "CodeMeaning": "Inferior alveolar nerve",
+            "SNOMEDCTConceptID": "55636003",
+            "paired": "Y",
+            "Modifier": [
+              {
+                "recommendedDisplayRGBValue": [200, 180, 160],
+                "CodeMeaning": "Right",
+                "CodingSchemeDesignator": "SCT",
+                "cid": "244",
+                "3dSlicerLabel": "right inferior alveolar canal",
+                "CodeValue": "24028007",
+                "contextGroupName": "Laterality",
+                "SNOMEDCTConceptID": "24028007"
+              },
+              {
+                "recommendedDisplayRGBValue": [200, 180, 160],
+                "CodeMeaning": "Left",
+                "CodingSchemeDesignator": "SCT",
+                "cid": "244",
+                "3dSlicerLabel": "left inferior alveolar canal",
+                "CodeValue": "7771000",
+                "contextGroupName": "Laterality",
+                "SNOMEDCTConceptID": "7771000"
+              }
+            ]
+          },
+          {
+            "CodingSchemeDesignator": "SCT",
+            "CodeValue": "54066008",
+            "CodeMeaning": "Pharynx",
+            "SNOMEDCTConceptID": "54066008",
+            "recommendedDisplayRGBValue": [210, 180, 170],
+            "3dSlicerLabel": "pharynx",
+            "paired": "U"
+          },
+          {
+            "CodingSchemeDesignator": "SCT",
+            "CodeValue": "272680005",
+            "CodeMeaning": "Dental prosthesis",
+            "SNOMEDCTConceptID": "272680005",
+            "recommendedDisplayRGBValue": [200, 200, 200],
+            "3dSlicerLabel": "bridge",
+            "paired": "U"
+          },
+          {
+            "CodingSchemeDesignator": "SCT",
+            "CodeValue": "75142005",
+            "CodeMeaning": "Dental crown",
+            "SNOMEDCTConceptID": "75142005",
+            "recommendedDisplayRGBValue": [220, 220, 220],
+            "3dSlicerLabel": "crown",
+            "paired": "U"
+          },
+          {
+            "CodingSchemeDesignator": "SCT",
+            "CodeValue": "245615006",
+            "CodeMeaning": "Lingual canal",
+            "SNOMEDCTConceptID": "245615006",
+            "recommendedDisplayRGBValue": [195, 175, 155],
+            "3dSlicerLabel": "lingual canal",
+            "paired": "U"
+          },
+          {
+            "CodingSchemeDesignator": "SCT",
+            "CodeValue": "26671002",
+            "CodeMeaning": "Dental pulp",
+            "SNOMEDCTConceptID": "26671002",
+            "recommendedDisplayRGBValue": [220, 175, 175],
+            "3dSlicerLabel": "dental pulp",
+            "paired": "U"
+          },
+          {
+            "CodingSchemeDesignator": "SCT",
+            "CodeValue": "52731004",
+            "CodeMeaning": "Abdominal cavity",
+            "SNOMEDCTConceptID": "52731004",
+            "recommendedDisplayRGBValue": [255, 228, 196],
+            "3dSlicerLabel": "abdominal cavity",
+            "paired": "U"
+          },
+          {
+            "CodingSchemeDesignator": "SCT",
+            "CodeValue": "43799004",
+            "CodeMeaning": "Thoracic cavity",
+            "SNOMEDCTConceptID": "43799004",
+            "recommendedDisplayRGBValue": [200, 220, 240],
+            "3dSlicerLabel": "thoracic cavity",
+            "paired": "U"
+          },
+          {
+            "CodingSchemeDesignator": "SCT",
+            "CodeValue": "76848001",
+            "CodeMeaning": "Pericardium",
+            "SNOMEDCTConceptID": "76848001",
+            "recommendedDisplayRGBValue": [255, 200, 200],
+            "3dSlicerLabel": "pericardium",
+            "paired": "U"
+          },
+          {
+            "CodingSchemeDesignator": "SCT",
+            "CodeValue": "72410000",
+            "CodeMeaning": "Mediastinum",
+            "SNOMEDCTConceptID": "72410000",
+            "recommendedDisplayRGBValue": [220, 210, 230],
+            "3dSlicerLabel": "mediastinum",
+            "paired": "U"
           }
         ]
       },
@@ -2131,6 +2788,14 @@
             "UMLSConceptUID": "C0027651",
             "contextGroupName": "LesionSegmentationTypes",
             "SNOMEDCTConceptID": "108369006"
+          },
+          {
+            "CodingSchemeDesignator": "SCT",
+            "CodeValue": "128059003",
+            "CodeMeaning": "Cerebral aneurysm",
+            "SNOMEDCTConceptID": "128059003",
+            "recommendedDisplayRGBValue": [255, 50, 50],
+            "3dSlicerLabel": "brain aneurysm"
           }
         ]
       }
