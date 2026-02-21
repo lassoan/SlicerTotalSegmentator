@@ -93,7 +93,7 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
             if self.logic.isLicenseRequiredForTask(task):
                 taskTitle = _("{task_title} [license required]").format(task_title=taskTitle)
             self.ui.taskComboBox.addItem(taskTitle, task)
-            
+
             # Set tooltip with model description if available
             taskInfo = self.logic.tasks[task]
             if 'description' in taskInfo:
@@ -216,25 +216,24 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         self._updatingGUIFromParameterNode = True
 
         # Update node selectors and sliders
+
         self.ui.inputVolumeSelector.setCurrentNode(self._parameterNode.GetNodeReference("InputVolume"))
         task = self._parameterNode.GetParameter("Task")
         self.ui.taskComboBox.setCurrentIndex(self.ui.taskComboBox.findData(task))
-        fastModeSupported = self.logic.isFastModeSupportedForTask(task)
-        fastestModeSupported = self.logic.isFastestModeSupportedForTask(task)
 
-        fastSelected = self._parameterNode.GetParameter("Fast") == "true"
-        fasterSelected = self._parameterNode.GetParameter("Fastest") == "true"
-        if not fastestModeSupported:
-            fasterSelected = False
-        if not fastModeSupported:
-            fastSelected = False
-
-        if fasterSelected:
+        supportedQualityModes = self.logic.getSupportedQualityModesForTask(task)
+        currentQuality = self._parameterNode.GetParameter("Quality")
+        if currentQuality not in supportedQualityModes:
+            currentQuality = supportedQualityModes[0]  # Default to first supported mode
+        if currentQuality == 'faster':
             self.ui.fasterRadioButton.checked = True
-        elif fastSelected:
+        elif currentQuality == 'fast':
             self.ui.fastRadioButton.checked = True
         else:
             self.ui.normalRadioButton.checked = True
+        self.ui.fastRadioButton.visible = 'fast' in supportedQualityModes
+        self.ui.fasterRadioButton.visible = 'faster' in supportedQualityModes
+
         self.ui.cpuCheckBox.checked = self._parameterNode.GetParameter("CPU") == "true"
         self.ui.useStandardSegmentNamesCheckBox.checked = self._parameterNode.GetParameter("UseStandardSegmentNames") == "true"
         self.ui.robustCropCheckBox.checked = self._parameterNode.GetParameter("RobustCrop") == "true"
@@ -254,9 +253,6 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         if inputVolume:
             self.ui.outputSegmentationSelector.baseName = _("{volume_name} segmentation").format(volume_name=inputVolume.GetName())
 
-        self.ui.fastRadioButton.visible = fastModeSupported
-        self.ui.fasterRadioButton.visible = fastestModeSupported
-
         # All the GUI updates are done
         self._updatingGUIFromParameterNode = False
 
@@ -275,14 +271,17 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         task = self.ui.taskComboBox.currentData
         self._parameterNode.SetParameter("Task", task)
 
-        fastModeSupported = self.logic.isFastModeSupportedForTask(task)
-        fastestModeSupported = self.logic.isFastestModeSupportedForTask(task)
+        supportedQualityModes = self.logic.getSupportedQualityModesForTask(task)
 
-        fasterSelected = self.ui.fasterRadioButton.checked and fastestModeSupported
-        fastSelected = self.ui.fastRadioButton.checked and fastModeSupported and not fasterSelected
+        # Determine selected quality mode based on radio button states
+        if self.ui.fasterRadioButton.checked and 'faster' in supportedQualityModes:
+            quality = 'faster'
+        elif self.ui.fastRadioButton.checked and 'fast' in supportedQualityModes:
+            quality = 'fast'
+        else:
+            quality = 'normal'
 
-        self._parameterNode.SetParameter("Fast", "true" if fastSelected else "false")
-        self._parameterNode.SetParameter("Fastest", "true" if fasterSelected else "false")
+        self._parameterNode.SetParameter("Quality", quality)
         self._parameterNode.SetParameter("CPU", "true" if self.ui.cpuCheckBox.checked else "false")
         self._parameterNode.SetParameter("UseStandardSegmentNames", "true" if self.ui.useStandardSegmentNamesCheckBox.checked else "false")
         self._parameterNode.SetParameter("RobustCrop", "true" if self.ui.robustCropCheckBox.checked else "false")
@@ -343,16 +342,22 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
             if not self.ui.outputSegmentationSelector.currentNode():
                 self.ui.outputSegmentationSelector.addNode()
 
+            # Determine selected quality mode based on radio button states
+            if self.ui.fasterRadioButton.checked:
+                quality = 'faster'
+            elif self.ui.fastRadioButton.checked:
+                quality = 'fast'
+            else:
+                quality = 'normal'
+
             self.logic.useStandardSegmentNames = self.ui.useStandardSegmentNamesCheckBox.checked
+            self.logic.robustCrop = self.ui.robustCropCheckBox.checked
+            self.logic.removeSmallBlobs = self.ui.removeSmallBlobsCheckBox.checked
+            self.logic.higherOrderResampling = self.ui.higherOrderResamplingCheckBox.checked
 
             # Compute output
             self.logic.process(self.ui.inputVolumeSelector.currentNode(), self.ui.outputSegmentationSelector.currentNode(),
-                fast=self.ui.fastRadioButton.checked, fastest=self.ui.fasterRadioButton.checked,
-                cpu=self.ui.cpuCheckBox.checked, task=self.ui.taskComboBox.currentData,
-                interactive=True, sequenceBrowserNode=sequenceBrowserNode,
-                robustCrop=self.ui.robustCropCheckBox.checked,
-                removeSmallBlobs=self.ui.removeSmallBlobsCheckBox.checked,
-                higherOrderResampling=self.ui.higherOrderResamplingCheckBox.checked)
+                quality, self.ui.cpuCheckBox.checked, self.ui.taskComboBox.currentData, interactive=True, sequenceBrowserNode=sequenceBrowserNode)
 
         self.ui.statusLabel.appendPlainText("\n" + _("Processing finished."))
 
@@ -428,6 +433,9 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         self.logCallback = None
         self.clearOutputFolder = True
         self.useStandardSegmentNames = True
+        self.robustCrop = False
+        self.removeSmallBlobs = False
+        self.higherOrderResampling = False
         self.pullMaster = False
 
         # List of property type codes that are specified by in the TotalSegmentator terminology.
@@ -451,8 +459,8 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         self.tasks = OrderedDict()
 
         # Main
-        self.tasks['total'] = {'title': 'total', 'modalities': ['CT'], 'supportsFast': True, 'supportsFastest': True, 'supportsMultiLabel': True}
-        self.tasks['total_mr'] = {'title': 'total (MR)', 'modalities': ['MR'], 'supportsFast': True, 'supportsFastest': True, 'supportsMultiLabel': True}
+        self.tasks['total'] = {'title': 'total', 'modalities': ['CT'], 'qualityModes': ['normal', 'fast', 'faster'], 'supportsMultiLabel': True}
+        self.tasks['total_mr'] = {'title': 'total (MR)', 'modalities': ['MR'], 'qualityModes': ['normal', 'fast', 'faster'], 'supportsMultiLabel': True}
         self.tasks['vertebrae_mr'] = {'title': 'vertebrae (MR)',  'modalities': ['MR'], 'description': 'sacrum, vertebrae L1-5, vertebrae T1-12, vertebrae C1-7 (for CT this is part of the `total` task)', 'supportsMultiLabel': True}
         self.tasks['lung_nodules'] = {'title': 'lung: nodules', 'modalities': ['CT'], 'description': 'lung, lung_nodules (provided by [BLUEMIND AI](https://bluemind.co/): Fitzjalen R., Aladin M., Nanyan G.) (trained on 1353 subjects, partly from LIDC-IDRI)', 'supportsMultiLabel': True}
         self.tasks['lung_vessels'] = {'title': 'lung: vessels'}
@@ -466,9 +474,8 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         self.tasks['abdominal_muscles'] = {'title': 'abdominal muscles', 'modalities': ['CT'], 'description': 'pectoralis_major, rectus_abdominis, serratus_anterior, latissimus_dorsi, trapezius, external_oblique, internal_oblique, erector_spinae, transversospinalis, psoas_major, quadratus_lumborum (left/right)', 'supportsMultiLabel': True}
         self.tasks['trunk_cavities'] = {'title': 'trunk cavities', 'modalities': ['CT'], 'description': 'abdominal_cavity, thoracic_cavity, pericardium, mediastinum', 'supportsMultiLabel': True}
 
-
-        self.tasks['body'] = {'title': 'body', 'supportsFast': True}
-        self.tasks['body_mr'] = {'title': 'body (MR)',  'modalities': ['MR'], 'description': 'body_trunc, body_extremities (for MR images)', 'supportsFast': True, 'supportsMultiLabel': True}
+        self.tasks['body'] = {'title': 'body', 'qualityModes': ['normal', 'fast']}
+        self.tasks['body_mr'] = {'title': 'body (MR)',  'modalities': ['MR'], 'description': 'body_trunc, body_extremities (for MR images)', 'qualityModes': ['normal', 'fast'], 'supportsMultiLabel': True}
 
         self.tasks['head_glands_cavities'] = {'title': 'head: glands and cavities', 'supportsMultiLabel': True}
         self.tasks['head_muscles'] = {'title': 'head: muscles', 'supportsMultiLabel': True}
@@ -609,11 +616,11 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
                 self.totalSegmentatorLabelTerminology[totalSegmentatorStructureName] = terminologyEntryStr
 
 
-    def isFastModeSupportedForTask(self, task):
-        return (task in self.tasks) and ('supportsFast' in self.tasks[task]) and self.tasks[task]['supportsFast']
-
-    def isFastestModeSupportedForTask(self, task):
-        return (task in self.tasks) and ('supportsFastest' in self.tasks[task]) and self.tasks[task]['supportsFastest']
+    def getSupportedQualityModesForTask(self, task):
+        """Get list of supported quality modes for a task. Default is ['normal']."""
+        if task in self.tasks and 'qualityModes' in self.tasks[task]:
+            return self.tasks[task]['qualityModes']
+        return ['normal']
 
     def isMultiLabelSupportedForTask(self, task):
         return (task in self.tasks) and ('supportsMultiLabel' in self.tasks[task]) and self.tasks[task]['supportsMultiLabel']
@@ -918,8 +925,8 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         """
         Initialize parameter node with default settings.
         """
-        if not parameterNode.GetParameter("Fast"):
-            parameterNode.SetParameter("Fast", "true")
+        if not parameterNode.GetParameter("Quality"):
+            parameterNode.SetParameter("Quality", "normal")
         if not parameterNode.GetParameter("Task"):
             parameterNode.SetParameter("Task", "total")
         if not parameterNode.GetParameter("UseStandardSegmentNames"):
@@ -1002,28 +1009,31 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
             raise ValueError('Restart was cancelled.')
 
 
-    def process(self, inputVolume, outputSegmentation, fast=True, fastest=False, cpu=False, task=None, subset=None,
-                interactive=False, sequenceBrowserNode=None, robustCrop=False, removeSmallBlobs=False,
-                higherOrderResampling=False):
+    def process(self, inputVolume, outputSegmentation, quality=None, cpu=False, task=None, subset=None, interactive=False, sequenceBrowserNode=None):
         """
         Run the processing algorithm on a volume or a sequence of volumes.
         Can be used without GUI widget.
         :param inputVolume: volume to be segmented
         :param outputSegmentation: segmentation result
-        :param fast: faster and less accurate output (3mm)
-        :param fastest: very fast low resolution output (6mm)
+        :param quality: "normal", "fast", or "faster"; for backward compatibility it also accepts a bool flag, indicating if fast mode should be used (True -> "fast", False -> "normal")
+        :param cpu: set to True to force use of CPU instead of GPU (even if GPU is available)
         :param task: one of self.tasks, default is "total"
         :param subset: a list of structures (TotalSegmentator class names) to segment.
           Default is None, which means that all available structures will be segmented.
         :param interactive: set to True to enable warning popups to be shown to users
         :param sequenceBrowserNode: if specified then all frames of the inputVolume sequence will be segmented
-        :param robustCrop: use 3mm model for cropping instead of 6mm
-        :param removeSmallBlobs: remove small disconnected regions (<0.2 ml)
-        :param higherOrderResampling: use higher order resampling (smoother, more memory)
         """
 
         if not inputVolume:
             raise ValueError("Input or output volume is invalid")
+
+        # For backward compatibility, if quality is passed as a boolean value, convert it to "fast" or "normal"
+        # (quality parameter was originally added as a boolean flag to enable fast mode, but later it was extended
+        # to support multiple quality modes, therefore we need to support both boolean and string values for backward compatibility)
+        if quality == True:
+            quality = "fast"
+        elif quality == False:
+            quality = "normal"
 
         if task == None and not subset:
             task = "total"
@@ -1046,11 +1056,13 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         # Recommend the user to switch to fast mode if no GPU or not enough memory is available
         import torch
 
+        supportedQualityModes = self.getSupportedQualityModesForTask(task)
+
         cuda = torch.cuda if torch.backends.cuda.is_built() and torch.cuda.is_available() else None
         mps = hasattr(torch.backends, 'mps') and torch.backends.mps.is_available()
         hasGPU = cuda is not None or mps
 
-        if not fast and not fastest and not hasGPU and interactive:
+        if ("fast" in supportedQualityModes) and quality == 'normal' and not hasGPU and interactive:
 
             import ctk
             import qt
@@ -1062,19 +1074,12 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
             # (after creating and closing a messagebox, hovering over the mouse on Slicer icon, moving up the
             # mouse to the peek thumbnail would show it again).
             mbox.deleteLater()
-            fast = (mbox.exec_() == qt.QMessageBox.AcceptRole)
+            if mbox.exec_() == qt.QMessageBox.AcceptRole:
+                quality = 'fast'
 
-        if not fast and not fastest and cuda and cuda.get_device_properties(cuda.current_device()).total_memory < 7e9 and interactive:
+        if ("fast" in supportedQualityModes) and quality == 'normal' and cuda and cuda.get_device_properties(cuda.current_device()).total_memory < 7e9 and interactive:
             if slicer.util.confirmYesNoDisplay(_("You have less than 7 GB of GPU memory available. Enable 'fast' mode to ensure segmentation can be completed successfully?")):
-                fast = True
-
-        # Determine device type
-        if cpu:
-            device = "cpu"
-        elif mps:
-            device = "mps"
-        else:
-            device = "gpu"
+                quality = 'fast'
 
         # Get TotalSegmentator launcher command
         # TotalSegmentator (.py file, without extension) is installed in Python Scripts folder
@@ -1110,8 +1115,7 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
                 self.log(f"Segmenting item {i+1}/{numberOfItems} of sequence")
                 self.processVolume(inputFile, inputVolume,
                                    outputSegmentationFolder, outputSegmentation, outputSegmentationFile,
-                                   task, subset, device, totalSegmentatorCommand, fast, fastest,
-                                   robustCrop, removeSmallBlobs, higherOrderResampling)
+                                   task, subset, cpu, totalSegmentatorCommand, quality)
                 sequenceBrowserNode.SelectNextItem()
             sequenceBrowserNode.SetSelectedItemNumber(selectedItemNumber)
 
@@ -1119,8 +1123,7 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
             # Segment a single volume
             self.processVolume(inputFile, inputVolume,
                                outputSegmentationFolder, outputSegmentation, outputSegmentationFile,
-                               task, subset, device, totalSegmentatorCommand, fast, fastest,
-                               robustCrop, removeSmallBlobs, higherOrderResampling)
+                               task, subset, cpu, totalSegmentatorCommand, quality)
 
         stopTime = time.time()
         self.log(_("Processing completed in {time_elapsed:.2f} seconds").format(time_elapsed=stopTime-startTime))
@@ -1128,14 +1131,13 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         if self.clearOutputFolder:
             self.log(_("Cleaning up temporary folder..."))
             if os.path.isdir(tempFolder):
+                import shutil
                 shutil.rmtree(tempFolder)
         else:
             self.log(_("Not cleaning up temporary folder: {temp_folder}").format(temp_folder=tempFolder))
 
-    def processVolume(self, inputFile, inputVolume, outputSegmentationFolder, outputSegmentation, outputSegmentationFile,
-                       task, subset, device, totalSegmentatorCommand, fast, fastest=False,
-                       robustCrop=False, removeSmallBlobs=False, higherOrderResampling=False):
-        """Segment a single volume
+    def processVolume(self, inputFile, inputVolume, outputSegmentationFolder, outputSegmentation, outputSegmentationFile, task, subset, cpu, totalSegmentatorCommand, quality):
+        """Segment a single volume.
         """
 
         # Write input volume to file
@@ -1161,27 +1163,33 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         # but we need to do it for some specialized models.
         multilabel = self.isMultiLabelSupportedForTask(task)
 
-        # some tasks do not support fast/fastest mode
-        if not self.isFastModeSupportedForTask(task):
-            fast = False
-        if not self.isFastestModeSupportedForTask(task):
-            fastest = False
+        # make sure we only pass valid quality mode
+        supportedQualityModes = self.getSupportedQualityModesForTask(task)
+        if quality not in supportedQualityModes:
+            quality = supportedQualityModes[0]  # Default to first supported mode
+
+        device = "cpu"
+        if not cpu:
+            import torch
+            if torch.backends.cuda.is_built() and torch.cuda.is_available():
+                device = "gpu"
+            elif hasattr(torch.backends, 'mps') and torch.backends.mps.is_available():
+                device = "mps"
+        options.extend(["--device", device])
 
         if multilabel:
             options.append("--ml")
         if task:
             options.extend(["--task", task])
-        if fastest:
+        if quality == 'faster':
             options.append("--fastest")
-        elif fast:
+        elif quality == 'fast':
             options.append("--fast")
-        if device != "gpu":
-            options.extend(["--device", device])
-        if robustCrop:
+        if self.robustCrop:
             options.append("--robust_crop")
-        if removeSmallBlobs:
+        if self.removeSmallBlobs:
             options.append("--remove_small_blobs")
-        if higherOrderResampling:
+        if self.higherOrderResampling:
             options.append("--higher_order_resampling")
         if subset:
             options.append("--roi_subset")
@@ -1387,7 +1395,7 @@ class TotalSegmentatorTest(ScriptedLoadableModuleTest):
             logic.setupPythonRequirements()
 
             self.delayDisplay('Compute output')
-            logic.process(inputVolume, outputSegmentation, fast=False)
+            logic.process(inputVolume, outputSegmentation, quality='normal')
 
         else:
             logging.warning("test_TotalSegmentator1 logic testing was skipped")
@@ -1434,9 +1442,9 @@ class TotalSegmentatorTest(ScriptedLoadableModuleTest):
 
             self.delayDisplay('Compute output')
             _subset = ["lung_upper_lobe_left","lung_lower_lobe_right","trachea"]
-            logic.process(inputVolume, outputSegmentation, fast = False, subset = _subset)
+            logic.process(inputVolume, outputSegmentation, quality="normal", subset = _subset)
 
         else:
-            logging.warning("test_TotalSegmentator1 logic testing was skipped")
+            logging.warning("test_TotalSegmentatorSubset logic testing was skipped")
 
         self.delayDisplay('Test passed')
