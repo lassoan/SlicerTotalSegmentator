@@ -422,7 +422,7 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
 
         ScriptedLoadableModuleLogic.__init__(self)
 
-        self.totalSegmentatorPythonPackageDownloadUrl = "https://github.com/wasserth/TotalSegmentator/archive/a4a9060012a4b7c39d15fe93772af3f7c1239fbf.zip"  # v2.12.0
+        self.totalSegmentatorPythonPackageDownloadUrl = "https://github.com/wasserth/TotalSegmentator/archive/98d57a19400703dd87fa07483d15b8e85b4cf4ed.zip"  # v2.13.0
 
         # Custom applications can set custom location for weights.
         # For example, it could be set to `sysconfig.get_path('scripts')` to have an independent copy of
@@ -463,13 +463,15 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         self.tasks['total_mr'] = {'title': 'total (MR)', 'modalities': ['MR'], 'qualityModes': ['normal', 'fast', 'faster'], 'supportsMultiLabel': True}
         self.tasks['vertebrae_mr'] = {'title': 'vertebrae (MR)',  'modalities': ['MR'], 'description': 'sacrum, vertebrae L1-5, vertebrae T1-12, vertebrae C1-7 (for CT this is part of the `total` task)', 'supportsMultiLabel': True}
         self.tasks['lung_nodules'] = {'title': 'lung: nodules', 'modalities': ['CT'], 'description': 'lung, lung_nodules (provided by [BLUEMIND AI](https://bluemind.co/): Fitzjalen R., Aladin M., Nanyan G.) (trained on 1353 subjects, partly from LIDC-IDRI)', 'supportsMultiLabel': True}
-        self.tasks['lung_vessels'] = {'title': 'lung: vessels'}
+        self.tasks['lung_vessels'] = {'title': 'lung: vessels and airways', 'modalities': ['CT'], 'description': 'lung_airways, lung_airways_wall, lung_arteries, lung_veins', 'supportsMultiLabel': True}
 
         self.tasks['kidney_cysts'] = {'title': 'kidney: cysts', 'modalities': ['CT'], 'description': 'kidney_cyst_left, kidney_cyst_right (strongly improved accuracy compared to kidney_cysts inside of `total` task)', 'supportsMultiLabel': True}
         self.tasks['breasts'] = {'title': 'breasts', 'modalities': ['CT'], 'supportsMultiLabel': True}
         self.tasks['liver_segments'] = {'title': 'liver: segments', 'modalities': ['CT'], 'description': 'liver_segment_1, liver_segment_2, liver_segment_3, liver_segment_4, liver_segment_5, liver_segment_6, liver_segment_7, liver_segment_8 (Couinaud segments)', 'supportsMultiLabel': True}
         self.tasks['liver_segments_mr'] = {'title': 'liver: segments (MR)', 'modalities': ['MR'], 'description': 'liver_segment_1, liver_segment_2, liver_segment_3, liver_segment_4, liver_segment_5, liver_segment_6, liver_segment_7, liver_segment_8 (for MR images) (Couinaud segments)', 'supportsMultiLabel': True}
         self.tasks['liver_vessels'] = {'title': 'liver: vessels', 'supportsMultiLabel': True}
+        self.tasks['liver_lesions'] = {'title': 'liver: lesions', 'modalities': ['CT'], 'description': 'liver_lesions (trained on 842 subjects)', 'supportsMultiLabel': True}
+        self.tasks['liver_lesions_mr'] = {'title': 'liver: lesions (MR)', 'modalities': ['MR'], 'description': 'liver_lesions for MR images (trained on 750 subjects)', 'supportsMultiLabel': True}
 
         self.tasks['abdominal_muscles'] = {'title': 'abdominal muscles', 'modalities': ['CT'], 'description': 'pectoralis_major, rectus_abdominis, serratus_anterior, latissimus_dorsi, trapezius, external_oblique, internal_oblique, erector_spinae, transversospinalis, psoas_major, quadratus_lumborum (left/right)', 'supportsMultiLabel': True}
         self.tasks['trunk_cavities'] = {'title': 'trunk cavities', 'modalities': ['CT'], 'description': 'abdominal_cavity, thoracic_cavity, pericardium, mediastinum', 'supportsMultiLabel': True}

@@ -2763,6 +2763,24 @@
             "recommendedDisplayRGBValue": [220, 210, 230],
             "3dSlicerLabel": "mediastinum",
             "paired": "U"
+          },
+          {
+            "CodingSchemeDesignator": "SCT",
+            "CodeValue": "955009",
+            "CodeMeaning": "Bronchus",
+            "SNOMEDCTConceptID": "955009",
+            "recommendedDisplayRGBValue": [130, 190, 220],
+            "3dSlicerLabel": "airway wall",
+            "paired": "U"
+          },
+          {
+            "CodingSchemeDesignator": "SCT",
+            "CodeValue": "122972007",
+            "CodeMeaning": "Pulmonary vein",
+            "SNOMEDCTConceptID": "122972007",
+            "recommendedDisplayRGBValue": [195, 45, 25],
+            "3dSlicerLabel": "pulmonary vein",
+            "paired": "U"
           }
         ]
       },
@@ -2796,6 +2814,14 @@
             "SNOMEDCTConceptID": "128059003",
             "recommendedDisplayRGBValue": [255, 50, 50],
             "3dSlicerLabel": "brain aneurysm"
+          },
+          {
+            "CodingSchemeDesignator": "SCT",
+            "CodeValue": "52988006",
+            "CodeMeaning": "Lesion",
+            "SNOMEDCTConceptID": "52988006",
+            "recommendedDisplayRGBValue": [255, 200, 50],
+            "3dSlicerLabel": "liver lesion"
           }
         ]
       }
