@@ -847,7 +847,10 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         except ModuleNotFoundError as e:
             raise InstallError("This module requires SlicerNNUNet extension. Install it from the Extensions Manager.")
 
-        minimumNNUNetVersion = "2.3.1"  # match the requirements of TotalSegmentator v2.12.0.
+        if slicer.util.platform() == "macos":
+            minimumNNUNetVersion = "2.7.0"  # on macOS with Rosetta2, nnunetv2<2.7 did not work (pytorch incompatibility)
+        else:
+            minimumNNUNetVersion = "2.3.1"  # match the requirements of TotalSegmentator v2.12.0.
         nnunetlogic = SlicerNNUNetLib.InstallLogic(doAskConfirmation=False)
         nnunetlogic.getInstalledNNUnetVersion()
         from packaging.requirements import Requirement
