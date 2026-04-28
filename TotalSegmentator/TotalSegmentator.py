@@ -11,6 +11,9 @@ from slicer.i18n import translate
 from slicer.ScriptedLoadableModule import *
 from slicer.util import VTKObservationMixin
 
+# Disable mps, some convolution operators are not supported on MPS backend, which causes the segmentation to fail on macOS with Apple Silicon.
+# We may want to enable it in the future when we switch to native Apple Silicon builds and can upgrade to latest .
+ENABLE_MPS = False
 
 #
 # TotalSegmentator
@@ -839,6 +842,7 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
           raise InstallError("This module requires PyTorch extension. Install it from the Extensions Manager.")
 
         minimumTorchVersion = "2.1.2"  # match the requirements of TotalSegmentator v2.12.0.
+        minimumTorchVisionVersion = "0.16.2" # corresponds to minimumTorchVersion, see https://pytorch.org/get-started/previous-versions/
         torchLogic = PyTorchUtils.PyTorchUtilsLogic()
         if not torchLogic.torchInstalled():
             confirmPackagesToInstall.append("PyTorch")
@@ -849,8 +853,14 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
             raise InstallError("This module requires SlicerNNUNet extension. Install it from the Extensions Manager.")
 
         if sys.platform == "darwin":
-            # macOS with Rosetta2 requires nnunetv2 version 2.7.0 or higher
+            # macOS with Rosetta2 requires nnunetv2 version 2.7.0 or higher, see https://github.com/MIC-DKFZ/nnUNet/issues/2742
             minimumNNUNetVersion = "2.7.0"
+            # Pytorch 2.2 is the last version supporting macOS with Rosetta2, which requires numpy<2.
+            # Get numpy version without importing it, as importing may prevent updating without restarting Slicer.
+            numpyVersion = importlib.metadata.version("numpy")
+            from packaging import version
+            if version.parse(numpyVersion) >= version.parse("2.0.0"):
+                slicer.util.pip_install("numpy<2")
         else:
             # any other platform, match the requirements of TotalSegmentator v2.12.0.
             minimumNNUNetVersion = "2.3.1"
@@ -871,7 +881,7 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         # Install PyTorch
         if "PyTorch" in confirmPackagesToInstall:
             self.log(_('PyTorch Python package is required. Installing... (it may take several minutes)'))
-            torch = torchLogic.installTorch(askConfirmation=False, torchVersionRequirement = f">={minimumTorchVersion}")
+            torch = torchLogic.installTorch(askConfirmation=False, torchVersionRequirement = f">={minimumTorchVersion}", torchVisionVersionRequirement = f">={minimumTorchVisionVersion}")
             if torch is None:
                 raise InstallError("This module requires PyTorch extension. Install it from the Extensions Manager.")
         else:
@@ -1067,7 +1077,9 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         supportedQualityModes = self.getSupportedQualityModesForTask(task)
 
         cuda = torch.cuda if torch.backends.cuda.is_built() and torch.cuda.is_available() else None
-        mps = hasattr(torch.backends, 'mps') and torch.backends.mps.is_available()
+
+        mps = ENABLE_MPS and hasattr(torch.backends, 'mps') and torch.backends.mps.is_available()
+
         hasGPU = cuda is not None or mps
 
         if ("fast" in supportedQualityModes) and quality == 'normal' and not hasGPU and interactive:
@@ -1181,7 +1193,7 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
             import torch
             if torch.backends.cuda.is_built() and torch.cuda.is_available():
                 device = "gpu"
-            elif hasattr(torch.backends, 'mps') and torch.backends.mps.is_available():
+            elif ENABLE_MPS and hasattr(torch.backends, 'mps') and torch.backends.mps.is_available():
                 device = "mps"
         options.extend(["--device", device])
 
