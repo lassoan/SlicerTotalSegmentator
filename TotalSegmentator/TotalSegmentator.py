@@ -954,6 +954,7 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         # Wait for the process to end and forward output to the log
         output = ""
         from subprocess import CalledProcessError
+        killedAfterSaving = False
         while True:
             try:
                 line = proc.stdout.readline()
@@ -962,7 +963,13 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
                 if returnOutput:
                     output += line
                 self.log(line.rstrip())
-            except UnicodeDecodeError as e:
+                # On macOS, nnUNet worker cleanup hangs after saving, keeping stdout open.
+                # Kill the process as soon as saving is confirmed so readline() gets EOF.
+                if sys.platform == "darwin" and "Saved in " in line:
+                    proc.kill()
+                    killedAfterSaving = True
+                    break
+            except UnicodeDecodeError:
                 # Code page conversion happens because `universal_newlines=True` sets process output to text mode,
                 # and it fails because probably system locale is not UTF8. We just ignore the error and discard the string,
                 # as we only guarantee correct behavior if an UTF8 locale is used.
@@ -970,7 +977,7 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
 
         proc.wait()
         retcode = proc.returncode
-        if retcode != 0:
+        if retcode != 0 and not killedAfterSaving:
             raise CalledProcessError(retcode, proc.args, output=proc.stdout, stderr=proc.stderr)
         return output if returnOutput else None
 
