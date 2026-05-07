@@ -855,12 +855,6 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         if sys.platform == "darwin":
             # macOS with Rosetta2 requires nnunetv2 version 2.7.0 or higher, see https://github.com/MIC-DKFZ/nnUNet/issues/2742
             minimumNNUNetVersion = "2.7.0"
-            # Pytorch 2.2 is the last version supporting macOS with Rosetta2, which requires numpy<2.
-            # Get numpy version without importing it, as importing may prevent updating without restarting Slicer.
-            numpyVersion = importlib.metadata.version("numpy")
-            from packaging import version
-            if version.parse(numpyVersion) >= version.parse("2.0.0"):
-                slicer.util.pip_install("numpy<2")
         else:
             # any other platform, match the requirements of TotalSegmentator v2.12.0.
             minimumNNUNetVersion = "2.3.1"
@@ -904,6 +898,14 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
                 raise InstallError(f'nnUNetv2 version {installed_nnunet_version} is not compatible with this module.'
                                  + f' Minimum required version is {minimumNNUNetVersion}. You can use "nnUNet" module to install nnUNet'
                                  + f' with version requirement set to: >={minimumNNUNetVersion}')
+
+        if sys.platform == "darwin":
+            # Pytorch 2.2 is the last version supporting macOS with Rosetta2, which requires numpy<2.
+            # Get numpy version without importing it, as importing may prevent updating without restarting Slicer.
+            numpyVersion = importlib.metadata.version("numpy")
+            from packaging import version
+            if version.parse(numpyVersion) >= version.parse("2.0.0"):
+                slicer.util.pip_install("numpy<2")
 
         # Install TotalSegmentator with selected dependencies only
         # (it would replace Slicer's "requests")
