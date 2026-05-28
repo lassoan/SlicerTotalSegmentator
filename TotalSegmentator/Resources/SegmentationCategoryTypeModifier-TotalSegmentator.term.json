@@ -2430,7 +2430,7 @@
             "paired": "Y",
             "Modifier": [
               {
-                "recommendedDisplayRGBValue": [255, 255, 240],
+                "recommendedDisplayRGBValue": [31, 119, 180],
                 "CodeMeaning": "Right",
                 "CodingSchemeDesignator": "SCT",
                 "cid": "244",
@@ -2440,7 +2440,7 @@
                 "SNOMEDCTConceptID": "24028007"
               },
               {
-                "recommendedDisplayRGBValue": [255, 255, 240],
+                "recommendedDisplayRGBValue": [31, 119, 180],
                 "CodeMeaning": "Left",
                 "CodingSchemeDesignator": "SCT",
                 "cid": "244",
@@ -2459,7 +2459,7 @@
             "paired": "Y",
             "Modifier": [
               {
-                "recommendedDisplayRGBValue": [255, 250, 235],
+                "recommendedDisplayRGBValue": [255, 127, 14],
                 "CodeMeaning": "Right",
                 "CodingSchemeDesignator": "SCT",
                 "cid": "244",
@@ -2469,7 +2469,7 @@
                 "SNOMEDCTConceptID": "24028007"
               },
               {
-                "recommendedDisplayRGBValue": [255, 250, 235],
+                "recommendedDisplayRGBValue": [255, 127, 14],
                 "CodeMeaning": "Left",
                 "CodingSchemeDesignator": "SCT",
                 "cid": "244",
@@ -2488,7 +2488,7 @@
             "paired": "Y",
             "Modifier": [
               {
-                "recommendedDisplayRGBValue": [255, 245, 220],
+                "recommendedDisplayRGBValue": [44, 160, 44],
                 "CodeMeaning": "Right",
                 "CodingSchemeDesignator": "SCT",
                 "cid": "244",
@@ -2498,7 +2498,7 @@
                 "SNOMEDCTConceptID": "24028007"
               },
               {
-                "recommendedDisplayRGBValue": [255, 245, 220],
+                "recommendedDisplayRGBValue": [44, 160, 44],
                 "CodeMeaning": "Left",
                 "CodingSchemeDesignator": "SCT",
                 "cid": "244",
@@ -2517,7 +2517,7 @@
             "paired": "Y",
             "Modifier": [
               {
-                "recommendedDisplayRGBValue": [255, 240, 210],
+                "recommendedDisplayRGBValue": [214, 39, 40],
                 "CodeMeaning": "Right",
                 "CodingSchemeDesignator": "SCT",
                 "cid": "244",
@@ -2527,7 +2527,7 @@
                 "SNOMEDCTConceptID": "24028007"
               },
               {
-                "recommendedDisplayRGBValue": [255, 240, 210],
+                "recommendedDisplayRGBValue": [214, 39, 40],
                 "CodeMeaning": "Left",
                 "CodingSchemeDesignator": "SCT",
                 "cid": "244",
@@ -2546,7 +2546,7 @@
             "paired": "Y",
             "Modifier": [
               {
-                "recommendedDisplayRGBValue": [255, 235, 200],
+                "recommendedDisplayRGBValue": [148, 103, 189],
                 "CodeMeaning": "Right",
                 "CodingSchemeDesignator": "SCT",
                 "cid": "244",
@@ -2556,7 +2556,7 @@
                 "SNOMEDCTConceptID": "24028007"
               },
               {
-                "recommendedDisplayRGBValue": [255, 235, 200],
+                "recommendedDisplayRGBValue": [148, 103, 189],
                 "CodeMeaning": "Left",
                 "CodingSchemeDesignator": "SCT",
                 "cid": "244",
@@ -2575,7 +2575,7 @@
             "paired": "Y",
             "Modifier": [
               {
-                "recommendedDisplayRGBValue": [255, 230, 190],
+                "recommendedDisplayRGBValue": [140, 86, 75],
                 "CodeMeaning": "Right",
                 "CodingSchemeDesignator": "SCT",
                 "cid": "244",
@@ -2585,7 +2585,7 @@
                 "SNOMEDCTConceptID": "24028007"
               },
               {
-                "recommendedDisplayRGBValue": [255, 230, 190],
+                "recommendedDisplayRGBValue": [140, 86, 75],
                 "CodeMeaning": "Left",
                 "CodingSchemeDesignator": "SCT",
                 "cid": "244",
@@ -2604,7 +2604,7 @@
             "paired": "Y",
             "Modifier": [
               {
-                "recommendedDisplayRGBValue": [255, 225, 180],
+                "recommendedDisplayRGBValue": [227, 119, 194],
                 "CodeMeaning": "Right",
                 "CodingSchemeDesignator": "SCT",
                 "cid": "244",
@@ -2614,7 +2614,7 @@
                 "SNOMEDCTConceptID": "24028007"
               },
               {
-                "recommendedDisplayRGBValue": [255, 225, 180],
+                "recommendedDisplayRGBValue": [227, 119, 194],
                 "CodeMeaning": "Left",
                 "CodingSchemeDesignator": "SCT",
                 "cid": "244",
@@ -2633,7 +2633,7 @@
             "paired": "Y",
             "Modifier": [
               {
-                "recommendedDisplayRGBValue": [255, 220, 170],
+                "recommendedDisplayRGBValue": [127, 127, 127],
                 "CodeMeaning": "Right",
                 "CodingSchemeDesignator": "SCT",
                 "cid": "244",
@@ -2643,7 +2643,7 @@
                 "SNOMEDCTConceptID": "24028007"
               },
               {
-                "recommendedDisplayRGBValue": [255, 220, 170],
+                "recommendedDisplayRGBValue": [127, 127, 127],
                 "CodeMeaning": "Left",
                 "CodingSchemeDesignator": "SCT",
                 "cid": "244",
