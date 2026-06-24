@@ -1841,9 +1841,9 @@
                 "SNOMEDCTConceptID": "24028007",
                 "3dSlicerLabel": "right common carotid artery",
                 "recommendedDisplayRGBValue": [
-                  0,
-                  112,
-                  165
+                  216,
+                  101,
+                  79
                 ]
               },
               {
@@ -1856,9 +1856,9 @@
                 "SNOMEDCTConceptID": "7771000",
                 "3dSlicerLabel": "left common carotid artery",
                 "recommendedDisplayRGBValue": [
-                  10,
-                  105,
-                  155
+                  216,
+                  101,
+                  69
                 ]
               },
               {
@@ -2112,7 +2112,11 @@
             "CodeValue": "91609006",
             "CodeMeaning": "Mandible",
             "SNOMEDCTConceptID": "91609006",
-            "recommendedDisplayRGBValue": [255, 220, 180],
+            "recommendedDisplayRGBValue": [
+              255,
+              220,
+              180
+            ],
             "3dSlicerLabel": "mandible",
             "paired": "U"
           },
@@ -2121,7 +2125,11 @@
             "CodeValue": "22457002",
             "CodeMeaning": "Maxilla",
             "SNOMEDCTConceptID": "22457002",
-            "recommendedDisplayRGBValue": [255, 225, 190],
+            "recommendedDisplayRGBValue": [
+              255,
+              225,
+              190
+            ],
             "3dSlicerLabel": "upper jawbone",
             "paired": "U"
           },
@@ -2133,7 +2141,11 @@
             "paired": "Y",
             "Modifier": [
               {
-                "recommendedDisplayRGBValue": [180, 210, 230],
+                "recommendedDisplayRGBValue": [
+                  180,
+                  210,
+                  230
+                ],
                 "CodeMeaning": "Right",
                 "CodingSchemeDesignator": "SCT",
                 "cid": "244",
@@ -2143,7 +2155,11 @@
                 "SNOMEDCTConceptID": "24028007"
               },
               {
-                "recommendedDisplayRGBValue": [180, 210, 230],
+                "recommendedDisplayRGBValue": [
+                  180,
+                  210,
+                  230
+                ],
                 "CodeMeaning": "Left",
                 "CodingSchemeDesignator": "SCT",
                 "cid": "244",
@@ -2159,7 +2175,11 @@
             "CodeValue": "55060009",
             "CodeMeaning": "Frontal sinus",
             "SNOMEDCTConceptID": "55060009",
-            "recommendedDisplayRGBValue": [170, 200, 220],
+            "recommendedDisplayRGBValue": [
+              170,
+              200,
+              220
+            ],
             "3dSlicerLabel": "frontal sinus",
             "paired": "U"
           },
@@ -2168,7 +2188,11 @@
             "CodeValue": "69536005",
             "CodeMeaning": "Head",
             "SNOMEDCTConceptID": "69536005",
-            "recommendedDisplayRGBValue": [255, 218, 185],
+            "recommendedDisplayRGBValue": [
+              255,
+              218,
+              185
+            ],
             "3dSlicerLabel": "head",
             "paired": "U"
           },
@@ -2177,7 +2201,11 @@
             "CodeValue": "38199008",
             "CodeMeaning": "Lower teeth",
             "SNOMEDCTConceptID": "38199008",
-            "recommendedDisplayRGBValue": [255, 255, 210],
+            "recommendedDisplayRGBValue": [
+              255,
+              255,
+              210
+            ],
             "3dSlicerLabel": "lower teeth",
             "paired": "U"
           },
@@ -2186,7 +2214,11 @@
             "CodeValue": "38090009",
             "CodeMeaning": "Upper teeth",
             "SNOMEDCTConceptID": "38090009",
-            "recommendedDisplayRGBValue": [255, 250, 200],
+            "recommendedDisplayRGBValue": [
+              255,
+              250,
+              200
+            ],
             "3dSlicerLabel": "upper teeth",
             "paired": "U"
           },
@@ -2198,7 +2230,11 @@
             "paired": "Y",
             "Modifier": [
               {
-                "recommendedDisplayRGBValue": [200, 120, 100],
+                "recommendedDisplayRGBValue": [
+                  200,
+                  120,
+                  100
+                ],
                 "CodeMeaning": "Right",
                 "CodingSchemeDesignator": "SCT",
                 "cid": "244",
@@ -2208,7 +2244,11 @@
                 "SNOMEDCTConceptID": "24028007"
               },
               {
-                "recommendedDisplayRGBValue": [200, 120, 100],
+                "recommendedDisplayRGBValue": [
+                  200,
+                  120,
+                  100
+                ],
                 "CodeMeaning": "Left",
                 "CodingSchemeDesignator": "SCT",
                 "cid": "244",
@@ -2227,7 +2267,11 @@
             "paired": "Y",
             "Modifier": [
               {
-                "recommendedDisplayRGBValue": [180, 100, 90],
+                "recommendedDisplayRGBValue": [
+                  180,
+                  100,
+                  90
+                ],
                 "CodeMeaning": "Right",
                 "CodingSchemeDesignator": "SCT",
                 "cid": "244",
@@ -2237,7 +2281,11 @@
                 "SNOMEDCTConceptID": "24028007"
               },
               {
-                "recommendedDisplayRGBValue": [180, 100, 90],
+                "recommendedDisplayRGBValue": [
+                  180,
+                  100,
+                  90
+                ],
                 "CodeMeaning": "Left",
                 "CodingSchemeDesignator": "SCT",
                 "cid": "244",
@@ -2256,7 +2304,11 @@
             "paired": "Y",
             "Modifier": [
               {
-                "recommendedDisplayRGBValue": [175, 95, 85],
+                "recommendedDisplayRGBValue": [
+                  175,
+                  95,
+                  85
+                ],
                 "CodeMeaning": "Right",
                 "CodingSchemeDesignator": "SCT",
                 "cid": "244",
@@ -2266,7 +2318,11 @@
                 "SNOMEDCTConceptID": "24028007"
               },
               {
-                "recommendedDisplayRGBValue": [175, 95, 85],
+                "recommendedDisplayRGBValue": [
+                  175,
+                  95,
+                  85
+                ],
                 "CodeMeaning": "Left",
                 "CodingSchemeDesignator": "SCT",
                 "cid": "244",
@@ -2285,7 +2341,11 @@
             "paired": "Y",
             "Modifier": [
               {
-                "recommendedDisplayRGBValue": [170, 90, 80],
+                "recommendedDisplayRGBValue": [
+                  170,
+                  90,
+                  80
+                ],
                 "CodeMeaning": "Right",
                 "CodingSchemeDesignator": "SCT",
                 "cid": "244",
@@ -2295,7 +2355,11 @@
                 "SNOMEDCTConceptID": "24028007"
               },
               {
-                "recommendedDisplayRGBValue": [170, 90, 80],
+                "recommendedDisplayRGBValue": [
+                  170,
+                  90,
+                  80
+                ],
                 "CodeMeaning": "Left",
                 "CodingSchemeDesignator": "SCT",
                 "cid": "244",
@@ -2314,7 +2378,11 @@
             "paired": "Y",
             "Modifier": [
               {
-                "recommendedDisplayRGBValue": [165, 85, 75],
+                "recommendedDisplayRGBValue": [
+                  165,
+                  85,
+                  75
+                ],
                 "CodeMeaning": "Right",
                 "CodingSchemeDesignator": "SCT",
                 "cid": "244",
@@ -2324,7 +2392,11 @@
                 "SNOMEDCTConceptID": "24028007"
               },
               {
-                "recommendedDisplayRGBValue": [165, 85, 75],
+                "recommendedDisplayRGBValue": [
+                  165,
+                  85,
+                  75
+                ],
                 "CodeMeaning": "Left",
                 "CodingSchemeDesignator": "SCT",
                 "cid": "244",
@@ -2343,7 +2415,11 @@
             "paired": "Y",
             "Modifier": [
               {
-                "recommendedDisplayRGBValue": [160, 80, 70],
+                "recommendedDisplayRGBValue": [
+                  160,
+                  80,
+                  70
+                ],
                 "CodeMeaning": "Right",
                 "CodingSchemeDesignator": "SCT",
                 "cid": "244",
@@ -2353,7 +2429,11 @@
                 "SNOMEDCTConceptID": "24028007"
               },
               {
-                "recommendedDisplayRGBValue": [160, 80, 70],
+                "recommendedDisplayRGBValue": [
+                  160,
+                  80,
+                  70
+                ],
                 "CodeMeaning": "Left",
                 "CodingSchemeDesignator": "SCT",
                 "cid": "244",
@@ -2372,7 +2452,11 @@
             "paired": "Y",
             "Modifier": [
               {
-                "recommendedDisplayRGBValue": [192, 104, 88],
+                "recommendedDisplayRGBValue": [
+                  192,
+                  104,
+                  88
+                ],
                 "CodeMeaning": "Right",
                 "CodingSchemeDesignator": "SCT",
                 "cid": "244",
@@ -2382,7 +2466,11 @@
                 "SNOMEDCTConceptID": "24028007"
               },
               {
-                "recommendedDisplayRGBValue": [192, 104, 88],
+                "recommendedDisplayRGBValue": [
+                  192,
+                  104,
+                  88
+                ],
                 "CodeMeaning": "Left",
                 "CodingSchemeDesignator": "SCT",
                 "cid": "244",
@@ -2401,7 +2489,11 @@
             "paired": "Y",
             "Modifier": [
               {
-                "recommendedDisplayRGBValue": [155, 78, 65],
+                "recommendedDisplayRGBValue": [
+                  155,
+                  78,
+                  65
+                ],
                 "CodeMeaning": "Right",
                 "CodingSchemeDesignator": "SCT",
                 "cid": "244",
@@ -2411,7 +2503,11 @@
                 "SNOMEDCTConceptID": "24028007"
               },
               {
-                "recommendedDisplayRGBValue": [155, 78, 65],
+                "recommendedDisplayRGBValue": [
+                  155,
+                  78,
+                  65
+                ],
                 "CodeMeaning": "Left",
                 "CodingSchemeDesignator": "SCT",
                 "cid": "244",
@@ -2430,7 +2526,11 @@
             "paired": "Y",
             "Modifier": [
               {
-                "recommendedDisplayRGBValue": [31, 119, 180],
+                "recommendedDisplayRGBValue": [
+                  31,
+                  119,
+                  180
+                ],
                 "CodeMeaning": "Right",
                 "CodingSchemeDesignator": "SCT",
                 "cid": "244",
@@ -2440,7 +2540,11 @@
                 "SNOMEDCTConceptID": "24028007"
               },
               {
-                "recommendedDisplayRGBValue": [31, 119, 180],
+                "recommendedDisplayRGBValue": [
+                  31,
+                  119,
+                  180
+                ],
                 "CodeMeaning": "Left",
                 "CodingSchemeDesignator": "SCT",
                 "cid": "244",
@@ -2459,7 +2563,11 @@
             "paired": "Y",
             "Modifier": [
               {
-                "recommendedDisplayRGBValue": [255, 127, 14],
+                "recommendedDisplayRGBValue": [
+                  255,
+                  127,
+                  14
+                ],
                 "CodeMeaning": "Right",
                 "CodingSchemeDesignator": "SCT",
                 "cid": "244",
@@ -2469,7 +2577,11 @@
                 "SNOMEDCTConceptID": "24028007"
               },
               {
-                "recommendedDisplayRGBValue": [255, 127, 14],
+                "recommendedDisplayRGBValue": [
+                  255,
+                  127,
+                  14
+                ],
                 "CodeMeaning": "Left",
                 "CodingSchemeDesignator": "SCT",
                 "cid": "244",
@@ -2488,7 +2600,11 @@
             "paired": "Y",
             "Modifier": [
               {
-                "recommendedDisplayRGBValue": [44, 160, 44],
+                "recommendedDisplayRGBValue": [
+                  44,
+                  160,
+                  44
+                ],
                 "CodeMeaning": "Right",
                 "CodingSchemeDesignator": "SCT",
                 "cid": "244",
@@ -2498,7 +2614,11 @@
                 "SNOMEDCTConceptID": "24028007"
               },
               {
-                "recommendedDisplayRGBValue": [44, 160, 44],
+                "recommendedDisplayRGBValue": [
+                  44,
+                  160,
+                  44
+                ],
                 "CodeMeaning": "Left",
                 "CodingSchemeDesignator": "SCT",
                 "cid": "244",
@@ -2517,7 +2637,11 @@
             "paired": "Y",
             "Modifier": [
               {
-                "recommendedDisplayRGBValue": [214, 39, 40],
+                "recommendedDisplayRGBValue": [
+                  214,
+                  39,
+                  40
+                ],
                 "CodeMeaning": "Right",
                 "CodingSchemeDesignator": "SCT",
                 "cid": "244",
@@ -2527,7 +2651,11 @@
                 "SNOMEDCTConceptID": "24028007"
               },
               {
-                "recommendedDisplayRGBValue": [214, 39, 40],
+                "recommendedDisplayRGBValue": [
+                  214,
+                  39,
+                  40
+                ],
                 "CodeMeaning": "Left",
                 "CodingSchemeDesignator": "SCT",
                 "cid": "244",
@@ -2546,7 +2674,11 @@
             "paired": "Y",
             "Modifier": [
               {
-                "recommendedDisplayRGBValue": [148, 103, 189],
+                "recommendedDisplayRGBValue": [
+                  148,
+                  103,
+                  189
+                ],
                 "CodeMeaning": "Right",
                 "CodingSchemeDesignator": "SCT",
                 "cid": "244",
@@ -2556,7 +2688,11 @@
                 "SNOMEDCTConceptID": "24028007"
               },
               {
-                "recommendedDisplayRGBValue": [148, 103, 189],
+                "recommendedDisplayRGBValue": [
+                  148,
+                  103,
+                  189
+                ],
                 "CodeMeaning": "Left",
                 "CodingSchemeDesignator": "SCT",
                 "cid": "244",
@@ -2575,7 +2711,11 @@
             "paired": "Y",
             "Modifier": [
               {
-                "recommendedDisplayRGBValue": [140, 86, 75],
+                "recommendedDisplayRGBValue": [
+                  140,
+                  86,
+                  75
+                ],
                 "CodeMeaning": "Right",
                 "CodingSchemeDesignator": "SCT",
                 "cid": "244",
@@ -2585,7 +2725,11 @@
                 "SNOMEDCTConceptID": "24028007"
               },
               {
-                "recommendedDisplayRGBValue": [140, 86, 75],
+                "recommendedDisplayRGBValue": [
+                  140,
+                  86,
+                  75
+                ],
                 "CodeMeaning": "Left",
                 "CodingSchemeDesignator": "SCT",
                 "cid": "244",
@@ -2604,7 +2748,11 @@
             "paired": "Y",
             "Modifier": [
               {
-                "recommendedDisplayRGBValue": [227, 119, 194],
+                "recommendedDisplayRGBValue": [
+                  227,
+                  119,
+                  194
+                ],
                 "CodeMeaning": "Right",
                 "CodingSchemeDesignator": "SCT",
                 "cid": "244",
@@ -2614,7 +2762,11 @@
                 "SNOMEDCTConceptID": "24028007"
               },
               {
-                "recommendedDisplayRGBValue": [227, 119, 194],
+                "recommendedDisplayRGBValue": [
+                  227,
+                  119,
+                  194
+                ],
                 "CodeMeaning": "Left",
                 "CodingSchemeDesignator": "SCT",
                 "cid": "244",
@@ -2633,7 +2785,11 @@
             "paired": "Y",
             "Modifier": [
               {
-                "recommendedDisplayRGBValue": [127, 127, 127],
+                "recommendedDisplayRGBValue": [
+                  127,
+                  127,
+                  127
+                ],
                 "CodeMeaning": "Right",
                 "CodingSchemeDesignator": "SCT",
                 "cid": "244",
@@ -2643,7 +2799,11 @@
                 "SNOMEDCTConceptID": "24028007"
               },
               {
-                "recommendedDisplayRGBValue": [127, 127, 127],
+                "recommendedDisplayRGBValue": [
+                  127,
+                  127,
+                  127
+                ],
                 "CodeMeaning": "Left",
                 "CodingSchemeDesignator": "SCT",
                 "cid": "244",
@@ -2662,7 +2822,11 @@
             "paired": "Y",
             "Modifier": [
               {
-                "recommendedDisplayRGBValue": [200, 180, 160],
+                "recommendedDisplayRGBValue": [
+                  200,
+                  180,
+                  160
+                ],
                 "CodeMeaning": "Right",
                 "CodingSchemeDesignator": "SCT",
                 "cid": "244",
@@ -2672,7 +2836,11 @@
                 "SNOMEDCTConceptID": "24028007"
               },
               {
-                "recommendedDisplayRGBValue": [200, 180, 160],
+                "recommendedDisplayRGBValue": [
+                  200,
+                  180,
+                  160
+                ],
                 "CodeMeaning": "Left",
                 "CodingSchemeDesignator": "SCT",
                 "cid": "244",
@@ -2688,7 +2856,11 @@
             "CodeValue": "54066008",
             "CodeMeaning": "Pharynx",
             "SNOMEDCTConceptID": "54066008",
-            "recommendedDisplayRGBValue": [210, 180, 170],
+            "recommendedDisplayRGBValue": [
+              210,
+              180,
+              170
+            ],
             "3dSlicerLabel": "pharynx",
             "paired": "U"
           },
@@ -2697,7 +2869,11 @@
             "CodeValue": "272680005",
             "CodeMeaning": "Dental prosthesis",
             "SNOMEDCTConceptID": "272680005",
-            "recommendedDisplayRGBValue": [200, 200, 200],
+            "recommendedDisplayRGBValue": [
+              200,
+              200,
+              200
+            ],
             "3dSlicerLabel": "bridge",
             "paired": "U"
           },
@@ -2706,7 +2882,11 @@
             "CodeValue": "75142005",
             "CodeMeaning": "Dental crown",
             "SNOMEDCTConceptID": "75142005",
-            "recommendedDisplayRGBValue": [220, 220, 220],
+            "recommendedDisplayRGBValue": [
+              220,
+              220,
+              220
+            ],
             "3dSlicerLabel": "crown",
             "paired": "U"
           },
@@ -2715,7 +2895,11 @@
             "CodeValue": "245615006",
             "CodeMeaning": "Lingual canal",
             "SNOMEDCTConceptID": "245615006",
-            "recommendedDisplayRGBValue": [195, 175, 155],
+            "recommendedDisplayRGBValue": [
+              195,
+              175,
+              155
+            ],
             "3dSlicerLabel": "lingual canal",
             "paired": "U"
           },
@@ -2724,7 +2908,11 @@
             "CodeValue": "26671002",
             "CodeMeaning": "Dental pulp",
             "SNOMEDCTConceptID": "26671002",
-            "recommendedDisplayRGBValue": [220, 175, 175],
+            "recommendedDisplayRGBValue": [
+              220,
+              175,
+              175
+            ],
             "3dSlicerLabel": "dental pulp",
             "paired": "U"
           },
@@ -2733,7 +2921,11 @@
             "CodeValue": "52731004",
             "CodeMeaning": "Abdominal cavity",
             "SNOMEDCTConceptID": "52731004",
-            "recommendedDisplayRGBValue": [255, 228, 196],
+            "recommendedDisplayRGBValue": [
+              255,
+              228,
+              196
+            ],
             "3dSlicerLabel": "abdominal cavity",
             "paired": "U"
           },
@@ -2742,7 +2934,11 @@
             "CodeValue": "43799004",
             "CodeMeaning": "Thoracic cavity",
             "SNOMEDCTConceptID": "43799004",
-            "recommendedDisplayRGBValue": [200, 220, 240],
+            "recommendedDisplayRGBValue": [
+              200,
+              220,
+              240
+            ],
             "3dSlicerLabel": "thoracic cavity",
             "paired": "U"
           },
@@ -2751,7 +2947,11 @@
             "CodeValue": "76848001",
             "CodeMeaning": "Pericardium",
             "SNOMEDCTConceptID": "76848001",
-            "recommendedDisplayRGBValue": [255, 200, 200],
+            "recommendedDisplayRGBValue": [
+              255,
+              200,
+              200
+            ],
             "3dSlicerLabel": "pericardium",
             "paired": "U"
           },
@@ -2760,7 +2960,11 @@
             "CodeValue": "72410000",
             "CodeMeaning": "Mediastinum",
             "SNOMEDCTConceptID": "72410000",
-            "recommendedDisplayRGBValue": [220, 210, 230],
+            "recommendedDisplayRGBValue": [
+              220,
+              210,
+              230
+            ],
             "3dSlicerLabel": "mediastinum",
             "paired": "U"
           },
@@ -2769,7 +2973,11 @@
             "CodeValue": "955009",
             "CodeMeaning": "Bronchus",
             "SNOMEDCTConceptID": "955009",
-            "recommendedDisplayRGBValue": [130, 190, 220],
+            "recommendedDisplayRGBValue": [
+              130,
+              190,
+              220
+            ],
             "3dSlicerLabel": "airway wall",
             "paired": "U"
           },
@@ -2778,7 +2986,11 @@
             "CodeValue": "122972007",
             "CodeMeaning": "Pulmonary vein",
             "SNOMEDCTConceptID": "122972007",
-            "recommendedDisplayRGBValue": [195, 45, 25],
+            "recommendedDisplayRGBValue": [
+              195,
+              45,
+              25
+            ],
             "3dSlicerLabel": "pulmonary vein",
             "paired": "U"
           }
@@ -2812,7 +3024,11 @@
             "CodeValue": "128059003",
             "CodeMeaning": "Cerebral aneurysm",
             "SNOMEDCTConceptID": "128059003",
-            "recommendedDisplayRGBValue": [255, 50, 50],
+            "recommendedDisplayRGBValue": [
+              255,
+              50,
+              50
+            ],
             "3dSlicerLabel": "brain aneurysm"
           },
           {
@@ -2820,7 +3036,11 @@
             "CodeValue": "52988006",
             "CodeMeaning": "Lesion",
             "SNOMEDCTConceptID": "52988006",
-            "recommendedDisplayRGBValue": [255, 200, 50],
+            "recommendedDisplayRGBValue": [
+              255,
+              200,
+              50
+            ],
             "3dSlicerLabel": "liver lesion"
           }
         ]
