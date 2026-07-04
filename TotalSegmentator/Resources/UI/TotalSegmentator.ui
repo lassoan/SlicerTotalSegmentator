@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>305</width>
-    <height>611</height>
+    <width>303</width>
+    <height>576</height>
    </rect>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
@@ -292,17 +292,7 @@
         </property>
        </widget>
       </item>
-      <item row="6" column="1">
-       <widget class="QPushButton" name="setLicenseButton">
-        <property name="toolTip">
-         <string>Set or update TotalSegmentator license key to allow running tasks that require a license. The registration has to be done only once, the license information is stored persistently in the TotalSegmentation configuration.</string>
-        </property>
-        <property name="text">
-         <string>Set license key</string>
-        </property>
-       </widget>
-      </item>
-      <item row="7" column="0" colspan="2">
+      <item row="8" column="0" colspan="2">
        <widget class="QPushButton" name="packageInfoUpdateButton">
         <property name="toolTip">
          <string>Get metadata information for the TotalSegmentator package currently installed</string>
@@ -312,7 +302,7 @@
         </property>
        </widget>
       </item>
-      <item row="8" column="0" colspan="2">
+      <item row="9" column="0" colspan="2">
        <widget class="ctkFittedTextBrowser" name="packageInfoTextBrowser">
         <property name="collapsed">
          <bool>false</bool>
@@ -324,6 +314,39 @@
          <string/>
         </property>
        </widget>
+      </item>
+      <item row="6" column="1">
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <widget class="QPushButton" name="setLicenseButton">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="toolTip">
+           <string>Set or update TotalSegmentator license key to allow running tasks that require a license. The registration has to be done only once, the license information is stored persistently in the TotalSegmentation configuration.</string>
+          </property>
+          <property name="text">
+           <string>Set license key</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_4">
+          <property name="toolTip">
+           <string>A few segmentation tasks require a license. Visit this link to obtain a free academic license or a commercial license: https://backend.totalsegmentator.com/license-academic</string>
+          </property>
+          <property name="text">
+           <string>&lt;a href=&quot;https://backend.totalsegmentator.com/license-academic/&quot;&gt;Get license...&lt;/a&gt;</string>
+          </property>
+          <property name="openExternalLinks">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
      </layout>
     </widget>

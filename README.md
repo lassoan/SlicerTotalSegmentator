@@ -48,16 +48,19 @@ If you have a powerful GPU is available then a full-quality segmentation can be 
 
 - Inputs
   - Input volume: input CT image
-  - Segmentation task: instead of the default "total" segmentation, a more specialized segmentation model can be chosen
-  - Fast: performs segmentation faster, but at lower resolution
+  - Segmentation task: instead of the default "total" segmentation, a more specialized segmentation model can be chosen. Most of the tasks are freely usable without any restrictions; tasks that require a license are marked with "[license required]".
+  - Speed: `Normal` computes full-resolution output; `Fast` (3mm resolution) and `Faster` (6mm resolution, only available for a few tasks) trade accuracy for speed
 - Outputs
-  - Segmentation: it will contain a brain segment, which specifies the brain region
+  - Segmentation: this will store the segmentation result
   - Show 3D: show/hide segments in 3D views
 - Advanced:
   - Use standard segment names: use names defined in standard terminology files from [DCMQI](https://github.com/QIICR/dcmqi) (enabled by default). If disabled then TotalSegmentator identifiers will be used as segment names.
-  - Use latest development version: use latest development version from TotalSegmentator master branch during a forced reinstall. 
-  - Force reinstall: force reinstallation of the AI engine - TotalSegmentator Python package. This may be needed if other modules compromise the installation.
-  - Import weights: When using TotalSegmentator, weights are often downloaded automatically. You can import any specialized or licensed weights you receive from the developer so that TotalSegmentator can find and use them.  
+  - Force to use CPU: use the CPU, even if a GPU is available. Useful if the GPU does not have enough memory.
+  - Robust cropping: use the 3mm model for cropping instead of the default 6mm. More robust but slightly slower.
+  - Remove small blobs: remove small disconnected regions (less than 0.2 ml) from the final segmentations.
+  - Higher-order resampling: use higher order resampling for segmentations. Smoother results but more runtime and memory.
+  - TotalSegmentator Python package / Force reinstall: force reinstallation of the AI engine - TotalSegmentator Python package. This may be needed if other modules compromise the installation.
+  - TotalSegmentator license / Set license key: set or update the TotalSegmentator license key needed for tasks that require a license. Visit https://backend.totalsegmentator.com/license-academic to get a free academic license or get information on commercial licenses. 
   - Get TotalSegmentator package information: retrieve installed version of the AI engine - TotalSegmentator Python package.
 
 ## Troubleshooting
