@@ -59,6 +59,7 @@ If you have a powerful GPU is available then a full-quality segmentation can be 
   - Robust cropping: use the 3mm model for cropping instead of the default 6mm. More robust but slightly slower.
   - Remove small blobs: remove small disconnected regions (less than 0.2 ml) from the final segmentations.
   - Higher-order resampling: use higher order resampling for segmentations. Smoother results but more runtime and memory.
+  - Body crop: do an initial rough body segmentation and crop the image to the body region before processing. Saves GPU memory and reduces processing time.
   - TotalSegmentator Python package / Force reinstall: force reinstallation of the AI engine - TotalSegmentator Python package. This may be needed if other modules compromise the installation.
   - TotalSegmentator license / Set license key: set or update the TotalSegmentator license key needed for tasks that require a license. Visit https://backend.totalsegmentator.com/license-academic to get a free academic license or get information on commercial licenses. 
   - Get TotalSegmentator package information: retrieve installed version of the AI engine - TotalSegmentator Python package.

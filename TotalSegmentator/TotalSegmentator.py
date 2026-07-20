@@ -121,6 +121,7 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         self.ui.robustCropCheckBox.connect('toggled(bool)', self.updateParameterNodeFromGUI)
         self.ui.removeSmallBlobsCheckBox.connect('toggled(bool)', self.updateParameterNodeFromGUI)
         self.ui.higherOrderResamplingCheckBox.connect('toggled(bool)', self.updateParameterNodeFromGUI)
+        self.ui.bodyCropCheckBox.connect('toggled(bool)', self.updateParameterNodeFromGUI)
 
 
         self.ui.taskComboBox.currentTextChanged.connect(self.updateParameterNodeFromGUI)
@@ -243,6 +244,7 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         self.ui.robustCropCheckBox.checked = self._parameterNode.GetParameter("RobustCrop") == "true"
         self.ui.removeSmallBlobsCheckBox.checked = self._parameterNode.GetParameter("RemoveSmallBlobs") == "true"
         self.ui.higherOrderResamplingCheckBox.checked = self._parameterNode.GetParameter("HigherOrderResampling") == "true"
+        self.ui.bodyCropCheckBox.checked = self._parameterNode.GetParameter("BodyCrop") == "true"
         self.ui.outputSegmentationSelector.setCurrentNode(self._parameterNode.GetNodeReference("OutputSegmentation"))
 
         # Update buttons states and tooltips
@@ -291,6 +293,7 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         self._parameterNode.SetParameter("RobustCrop", "true" if self.ui.robustCropCheckBox.checked else "false")
         self._parameterNode.SetParameter("RemoveSmallBlobs", "true" if self.ui.removeSmallBlobsCheckBox.checked else "false")
         self._parameterNode.SetParameter("HigherOrderResampling", "true" if self.ui.higherOrderResamplingCheckBox.checked else "false")
+        self._parameterNode.SetParameter("BodyCrop", "true" if self.ui.bodyCropCheckBox.checked else "false")
         self._parameterNode.SetNodeReferenceID("OutputSegmentation", self.ui.outputSegmentationSelector.currentNodeID)
 
         self._parameterNode.EndModify(wasModified)
@@ -358,6 +361,7 @@ class TotalSegmentatorWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
             self.logic.robustCrop = self.ui.robustCropCheckBox.checked
             self.logic.removeSmallBlobs = self.ui.removeSmallBlobsCheckBox.checked
             self.logic.higherOrderResampling = self.ui.higherOrderResamplingCheckBox.checked
+            self.logic.bodyCrop = self.ui.bodyCropCheckBox.checked
 
             # Compute output
             self.logic.process(self.ui.inputVolumeSelector.currentNode(), self.ui.outputSegmentationSelector.currentNode(),
@@ -440,6 +444,7 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         self.robustCrop = False
         self.removeSmallBlobs = False
         self.higherOrderResampling = False
+        self.bodyCrop = False
         self.pullMaster = False
 
         # List of property type codes that are specified by in the TotalSegmentator terminology.
@@ -1241,6 +1246,8 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
             options.append("--remove_small_blobs")
         if self.higherOrderResampling:
             options.append("--higher_order_resampling")
+        if self.bodyCrop:
+            options.append("--body_seg")
         if subset:
             options.append("--roi_subset")
             # append each item of the subset
