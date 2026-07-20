@@ -1097,18 +1097,39 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
             import qt
             mbox = ctk.ctkMessageBox(slicer.util.mainWindow())
             mbox.text = _("No GPU is detected. Switch to 'fast' mode to get low-resolution result in a few minutes or compute full-resolution result which may take 5 to 50 minutes (depending on computer configuration)?")
-            mbox.addButton(_("Fast (~2 minutes)"), qt.QMessageBox.AcceptRole)
-            mbox.addButton(_("Full-resolution (~5 to 50 minutes)"), qt.QMessageBox.RejectRole)
+            fastButton = mbox.addButton(_("Fast (~2 minutes)"), qt.QMessageBox.AcceptRole)
+            mbox.addButton(_("Full-resolution (~5 to 50 minutes)"), qt.QMessageBox.ActionRole)
+            # RejectRole is automatically used as the escape button, so closing the dialog with the X button
+            # or Esc has the same effect as clicking Cancel (instead of silently continuing in full-resolution mode).
+            cancelButton = mbox.addButton(_("Cancel"), qt.QMessageBox.RejectRole)
+            mbox.exec_()
+            clickedButton = mbox.clickedButton()
             # Windows 10 peek feature in taskbar shows all hidden but not destroyed windows
             # (after creating and closing a messagebox, hovering over the mouse on Slicer icon, moving up the
             # mouse to the peek thumbnail would show it again).
             mbox.deleteLater()
-            if mbox.exec_() == qt.QMessageBox.AcceptRole:
+            if clickedButton == fastButton:
                 quality = 'fast'
+            elif clickedButton == cancelButton:
+                raise ValueError(_("Segmentation was cancelled."))
 
         if ("fast" in supportedQualityModes) and quality == 'normal' and cuda and cuda.get_device_properties(cuda.current_device()).total_memory < 7e9 and interactive:
-            if slicer.util.confirmYesNoDisplay(_("You have less than 7 GB of GPU memory available. Enable 'fast' mode to ensure segmentation can be completed successfully?")):
+            import ctk
+            import qt
+            mbox = ctk.ctkMessageBox(slicer.util.mainWindow())
+            mbox.text = _("You have less than 7 GB of GPU memory available. Enable 'fast' mode to ensure segmentation can be completed successfully?")
+            fastButton = mbox.addButton(_("Enable fast mode"), qt.QMessageBox.AcceptRole)
+            mbox.addButton(_("Continue with normal mode"), qt.QMessageBox.ActionRole)
+            # RejectRole is automatically used as the escape button, so closing the dialog with the X button
+            # or Esc has the same effect as clicking Cancel (instead of silently continuing in normal mode).
+            cancelButton = mbox.addButton(_("Cancel"), qt.QMessageBox.RejectRole)
+            mbox.exec_()
+            clickedButton = mbox.clickedButton()
+            mbox.deleteLater()
+            if clickedButton == fastButton:
                 quality = 'fast'
+            elif clickedButton == cancelButton:
+                raise ValueError(_("Segmentation was cancelled."))
 
         # Get TotalSegmentator launcher command
         # TotalSegmentator (.py file, without extension) is installed in Python Scripts folder
