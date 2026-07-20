@@ -269,13 +269,30 @@
        </widget>
       </item>
       <item row="5" column="0">
+       <widget class="QLabel" name="bodyCropLabel">
+        <property name="text">
+         <string>Body crop:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="1">
+       <widget class="QCheckBox" name="bodyCropCheckBox">
+        <property name="toolTip">
+         <string>Do initial rough body segmentation and crop image to body region before processing. Saves GPU memory and reduces processing time.</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="0">
        <widget class="QLabel" name="label_8">
         <property name="text">
          <string>TotalSegmentator Python package:</string>
         </property>
        </widget>
       </item>
-      <item row="5" column="1">
+      <item row="6" column="1">
        <widget class="QPushButton" name="packageUpgradeButton">
         <property name="toolTip">
          <string>Force upgrade of TotalSegmentator Python package to the version required by this module.</string>
@@ -285,7 +302,7 @@
         </property>
        </widget>
       </item>
-      <item row="6" column="0">
+      <item row="7" column="0">
        <widget class="QLabel" name="licenseLabel">
         <property name="text">
          <string>TotalSegmentator license: </string>
@@ -315,7 +332,7 @@
         </property>
        </widget>
       </item>
-      <item row="6" column="1">
+      <item row="7" column="1">
        <layout class="QHBoxLayout" name="horizontalLayout_2">
         <item>
          <widget class="QPushButton" name="setLicenseButton">
