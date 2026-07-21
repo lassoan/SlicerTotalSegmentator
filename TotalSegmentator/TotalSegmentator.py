@@ -430,7 +430,7 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
 
         ScriptedLoadableModuleLogic.__init__(self)
 
-        self.totalSegmentatorPythonPackageDownloadUrl = "https://github.com/wasserth/TotalSegmentator/archive/98d57a19400703dd87fa07483d15b8e85b4cf4ed.zip"  # v2.13.0
+        self.totalSegmentatorPythonPackageDownloadUrl = "https://github.com/wasserth/TotalSegmentator/archive/e7f3b8f0ab755bd51cf089b628d947a3d3b9d85a.zip"  # v2.14.0
 
         # Custom applications can set custom location for weights.
         # For example, it could be set to `sysconfig.get_path('scripts')` to have an independent copy of
