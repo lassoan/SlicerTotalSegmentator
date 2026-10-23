@@ -905,8 +905,9 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
                                  + f' Minimum required version is {minimumNNUNetVersion}. You can use "nnUNet" module to install nnUNet'
                                  + f' with version requirement set to: >={minimumNNUNetVersion}')
 
-        if sys.platform == "darwin":
+        if sys.platform == "darwin" and platform.machine() == "x86_64":
             # Pytorch 2.2 is the last version supporting macOS with Rosetta2, which requires numpy<2.
+            # Native Apple Silicon builds can use the latest PyTorch, which supports numpy 2.
             # Get numpy version without importing it, as importing may prevent updating without restarting Slicer.
             numpyVersion = importlib.metadata.version("numpy")
             from packaging import version
