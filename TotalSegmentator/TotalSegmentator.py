@@ -1,5 +1,6 @@
 import logging
 import os
+import platform
 import re
 import sys
 
@@ -11,9 +12,9 @@ from slicer.i18n import translate
 from slicer.ScriptedLoadableModule import *
 from slicer.util import VTKObservationMixin
 
-# Disable mps, some convolution operators are not supported on MPS backend, which causes the segmentation to fail on macOS with Apple Silicon.
-# We may want to enable it in the future when we switch to native Apple Silicon builds and can upgrade to latest .
-ENABLE_MPS = False
+# Enable MPS (Apple GPU) only in native Apple Silicon builds. Operators that are not supported by the MPS backend
+# fall back to CPU (PYTORCH_ENABLE_MPS_FALLBACK=1 is set for the TotalSegmentator process).
+ENABLE_MPS = sys.platform == "darwin" and platform.machine() == "arm64"
 
 #
 # TotalSegmentator
@@ -1261,7 +1262,8 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
 
         self.log(_('Creating segmentations with TotalSegmentator AI...'))
         self.log(_("Total Segmentator arguments: {options}").format(options=options))
-        proc = slicer.util.launchConsoleProcess(totalSegmentatorCommand + options)
+        updateEnvironment = {"PYTORCH_ENABLE_MPS_FALLBACK": "1"} if device == "mps" else None
+        proc = slicer.util.launchConsoleProcess(totalSegmentatorCommand + options, updateEnvironment=updateEnvironment)
         self.logProcessOutput(proc)
 
         # Load result
