@@ -881,7 +881,10 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
         # Install PyTorch
         if "PyTorch" in confirmPackagesToInstall:
             self.log(_('PyTorch Python package is required. Installing... (it may take several minutes)'))
-            torch = torchLogic.installTorch(askConfirmation=False, torchVersionRequirement = f">={minimumTorchVersion}", torchvisionVersionRequirement = f">={minimumTorchvisionVersion}")
+            # Do not specify a PyTorch version requirement, so that PyTorchUtils installs the PyTorch version required
+            # by torchvulkan when there is no CUDA device but a Vulkan driver is available. The installed version is
+            # checked below.
+            torch = torchLogic.installTorch(askConfirmation=False, torchvisionVersionRequirement = f">={minimumTorchvisionVersion}")
             if torch is None:
                 raise InstallError("This module requires PyTorch extension. Install it from the Extensions Manager.")
         else:
@@ -891,6 +894,15 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
                 raise InstallError(f'PyTorch version {torchLogic.torch.__version__} is not compatible with this module.'
                                  + f' Minimum required version is {minimumTorchVersion}. You can use "PyTorch Util" module to install PyTorch'
                                  + f' with version requirement set to: >={minimumTorchVersion}')
+
+        # Enable GPU computation through Vulkan when no CUDA device is available. Importing PyTorch registers the
+        # Vulkan device automatically, but after a fresh installation it has to be requested explicitly. torchvulkan
+        # is experimental and it is installed only if it is compatible with the installed PyTorch version; if it
+        # cannot be installed or used then computation continues on the CPU.
+        mpsAvailable = ENABLE_MPS and hasattr(torchLogic.torch.backends, 'mps') and torchLogic.torch.backends.mps.is_available()
+        if not torchLogic.cuda and not mpsAvailable:
+            if not torchLogic.enableVulkan():
+                logging.info('No Vulkan device is available for computation, therefore the CPU will be used')
 
         # Install nnUNet
         if "nnunetv2" in confirmPackagesToInstall:
@@ -1043,6 +1055,30 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
             raise ValueError('Restart was cancelled.')
 
 
+    @staticmethod
+    def vulkanDeviceAvailable():
+        """Return True if the Vulkan device of PyTorch is available.
+
+        Importing torchvulkan registers the 'vulkan' device in PyTorch. Nothing is installed or downloaded, this
+        only reports whether an already installed torchvulkan can use a Vulkan device.
+        """
+        try:
+            import torchvulkan
+            return torchvulkan.is_available()
+        except Exception:
+            return False
+
+    @staticmethod
+    def vulkanLauncherPath():
+        """Get the path of the script that runs TotalSegmentator with a Vulkan device.
+
+        TotalSegmentator accepts only the 'gpu', 'cpu', and 'mps' device names and it does not import torchvulkan,
+        therefore it cannot use the 'vulkan' device on its own. The launcher registers the device and then runs the
+        same command line interface, so the TotalSegmentator Python package does not have to be modified.
+        """
+        moduleDir = os.path.dirname(slicer.util.getModule('TotalSegmentator').path)
+        return os.path.join(moduleDir, 'Resources', 'TotalSegmentatorVulkanLauncher.py')
+
     def process(self, inputVolume, outputSegmentation, quality=None, cpu=False, task=None, subset=None, interactive=False, sequenceBrowserNode=None):
         """
         Run the processing algorithm on a volume or a sequence of volumes.
@@ -1096,7 +1132,11 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
 
         mps = ENABLE_MPS and hasattr(torch.backends, 'mps') and torch.backends.mps.is_available()
 
-        hasGPU = cuda is not None or mps
+        # The Vulkan device (torchvulkan) is used on AMD, Intel, and Apple GPUs when no CUDA device is available.
+        # This check does not install anything: torchvulkan is installed in setupPythonRequirements.
+        vulkan = (not cpu) and not cuda and not mps and TotalSegmentatorLogic.vulkanDeviceAvailable()
+
+        hasGPU = cuda is not None or mps or vulkan
 
         if ("fast" in supportedQualityModes) and quality == 'normal' and not hasGPU and interactive:
 
@@ -1232,6 +1272,12 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
                 device = "gpu"
             elif ENABLE_MPS and hasattr(torch.backends, 'mps') and torch.backends.mps.is_available():
                 device = "mps"
+            else:
+                # No CUDA or MPS device is available: use the Vulkan device (AMD, Intel, or Apple GPU) if PyTorch can
+                # use it. This installs torchvulkan if it is not installed yet.
+                import PyTorchUtils
+                if PyTorchUtils.PyTorchUtilsLogic().enableVulkan():
+                    device = "vulkan"
         options.extend(["--device", device])
 
         if multilabel:
@@ -1263,8 +1309,16 @@ class TotalSegmentatorLogic(ScriptedLoadableModuleLogic):
 
         self.log(_('Creating segmentations with TotalSegmentator AI...'))
         self.log(_("Total Segmentator arguments: {options}").format(options=options))
-        updateEnvironment = {"PYTORCH_ENABLE_MPS_FALLBACK": "1"} if device == "mps" else None
-        proc = slicer.util.launchConsoleProcess(totalSegmentatorCommand + options, updateEnvironment=updateEnvironment)
+        updateEnvironment = None
+        command = totalSegmentatorCommand
+        if device == "mps":
+            updateEnvironment = {"PYTORCH_ENABLE_MPS_FALLBACK": "1"}
+        elif device == "vulkan":
+            launcherPath = TotalSegmentatorLogic.vulkanLauncherPath()
+            if not os.path.isfile(launcherPath):
+                raise FileNotFoundError(f"Vulkan launcher was not found: {launcherPath}")
+            command = [totalSegmentatorCommand[0], launcherPath]
+        proc = slicer.util.launchConsoleProcess(command + options, updateEnvironment=updateEnvironment)
         self.logProcessOutput(proc)
 
         # Load result

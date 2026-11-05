@@ -17,12 +17,17 @@ If you have a powerful GPU is available then a full-quality segmentation can be 
 - If a strong GPU with 7GB or more memory is available:
   - On Windows:
     - If using NVIDIA GPU: Make sure CUDA is installed. [CUDA version must be one of those listed on pytorch website as "Compute platform" for your system](https://pytorch.org/get-started/locally/). You can download CUDA from [here](https://developer.nvidia.com/cuda-downloads).
-    - PyTorch does not officially support AMD GPUs for on Windows, therefore you need to use the CPU.
+    - If using AMD or Intel GPU: the GPU is used through Vulkan (see below), no CUDA installation is needed.
   - On Linux:
     - If using NVIDIA GPU: Make sure NVIDIA drivers are installed. If CUDA is installed then make sure [CUDA version is one of those listed on pytorch website as "Compute platform" for your system](https://pytorch.org/get-started/locally/). If CUDA is not installed then it will be set up automatically during installation (pytorch binary packages contain the appropriate CUDA version).
-    - If using AMD GPU: In theory, ROCm-compatible AMD GPUs should work, but this is not tested.
-  - On macOS: PyTorch does not officially support GPUs for macOS, therefore you need to use the CPU.
+    - If using AMD or Intel GPU: the GPU is used through Vulkan (see below), no ROCm installation is needed.
+  - On macOS: Apple Silicon GPUs are used through MPS. On Intel Macs the CPU is used.
 - If suitable GPU is not available: Graphics driver updates or CUDA installation is not necessary, everything will still work, it will just take more time.
+
+When no CUDA device is found, the GPU is used through Vulkan ([torchvulkan](https://github.com/zainsharief/torchvulkan)),
+which works on AMD, Intel, and Apple GPUs. torchvulkan is installed automatically by the
+[PyTorch extension](https://github.com/fepegar/SlicerPyTorch) when a Vulkan driver is available. It is experimental and
+it is available only for certain PyTorch versions; when that is the case, computation continues on the CPU.
 
 2. Install latest version of [3D Slicer](https://slicer.readthedocs.io/en/latest/user_guide/getting_started.html#installing-3d-slicer)
 
