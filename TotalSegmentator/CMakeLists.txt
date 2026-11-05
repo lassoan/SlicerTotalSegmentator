@@ -11,6 +11,7 @@ set(MODULE_PYTHON_RESOURCES
   Resources/Icons/${MODULE_NAME}.png
   Resources/UI/${MODULE_NAME}.ui
   Resources/totalsegmentator_snomed_mapping.csv
+  Resources/TotalSegmentatorVulkanLauncher.py
   )
 
 #-----------------------------------------------------------------------------
